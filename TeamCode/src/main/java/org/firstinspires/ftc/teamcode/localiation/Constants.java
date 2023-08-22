@@ -12,7 +12,10 @@ public class Constants {
     public static double angle=0;
     public static final float Max_velo=1;
     public static  double PERPENDICULAR_X=-172.475; //forward and back
-    public static long timed=0;
+    public static double timed=0;
+    public static double maxVelocty=5;
+    public static double yes=0;
+    public static double maxAcceleration=1;
     public static final double PERPENDICULAR_Y=0; //left to right
     public static final float X_OFFSET=0; //Offset of parallel wheels forward
     public static double LATERAL_DISTANCE=296.56; //Distance beween odometry wheels 151.425f*2f

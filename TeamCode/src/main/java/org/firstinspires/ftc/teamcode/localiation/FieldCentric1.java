@@ -38,9 +38,14 @@ public class FieldCentric1 extends LinearOpMode {
         double gly=0;
         double grx=0;
         long lastTime=0;
+        int counter=0;
+        double timeprev=0;
         //SampleMecanumDrive driver=new SampleMecanumDrive(hardwareMap);
         CustomLocalization customLocalization=new CustomLocalization(new Pose2d(0,0,0),hardwareMap);
+
         waitForStart();
+        timeprev=Constants.getTime()/1000000000;
+        double startTime=Constants.getTime()/(double)1000000000;
         while(opModeIsActive()&&!isStopRequested()){
             TelemetryPacket packet=new TelemetryPacket();
             //double y=(double)-1*gamepad1.left_stick_y;
@@ -64,8 +69,18 @@ public class FieldCentric1 extends LinearOpMode {
             packet.put("arcLength",trajectory.length);
             packet.put("X", Constants.robotPose.getX());
             packet.put("Y", Constants.robotPose.getY());
+            packet.put("velo",trajectory.getVelocityProfile((double)Constants.getTime()/(double)1000000000-startTime));
 //            packet.put("Heading", Constants.robotPose.getHeading());
             packet.put("loop time",(Constants.getTime()-lastTime)/1000000);
+            packet.put("time",Constants.timed);
+            packet.put("currentTime",(double)Constants.getTime()/(double)1000000000-startTime);
+            packet.put("arclengthsum",Constants.yes);
+
+            if(trajectory.tValues.size()>counter) {
+                packet.put("t_values", trajectory.tValues.get(counter));
+                packet.put("velocityx",trajectory.velocities(trajectory.tValues.get(counter)).getX());
+                packet.put("velocityy",trajectory.velocities(trajectory.tValues.get(counter)).getY());
+            }
 
             lastTime=Constants.getTime();
             DashboardUtil.drawRobot(packet.fieldOverlay(),new Pose2d(Constants.robotPose.getX()*.0394,Constants.robotPose.getY()*.0394,(Constants.robotPose.getHeading())));
@@ -75,6 +90,10 @@ public class FieldCentric1 extends LinearOpMode {
                 hub.clearBulkCache();
 
             }
+            if(Math.round(Constants.getTime()/100000000.0)!=Math.round(timeprev)) {
+                counter++;
+            }
+            timeprev=Constants.getTime()/100000000.0;
 
 
 
