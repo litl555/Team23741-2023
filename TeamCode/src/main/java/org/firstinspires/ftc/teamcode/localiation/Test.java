@@ -18,11 +18,14 @@ import org.firstinspires.ftc.robotcore.external.Const;
 public class Test extends LinearOpMode {
     public static double kv=.00075;
     public static double ka=.0001;
+    public static double kpxy=.003;
     public static double ks=.0001;
     public static double dist=700;
+    public static double kp=.002;
+    public static double kpa=1;
     @Override
     public void runOpMode() throws InterruptedException {
-        Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,800),new Pose2d(1010,330),new Pose2d(1000,700),new Pose2d(-390,264),new Pose2d(300,0));
+        Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,1000),new Pose2d(1150,2080),new Pose2d(1200,2600),new Pose2d(403,850),new Pose2d(-453,-110));
         //Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist));
         FtcDashboard ftcDashboard=FtcDashboard.getInstance();
         CustomLocalization l=new CustomLocalization(new Pose2d(0,0,0),hardwareMap);
@@ -32,11 +35,14 @@ public class Test extends LinearOpMode {
         Constants.lastPose=new Pose2d(0,0,0);
         waitForStart();
         double startTime=Constants.getTime()/100000000.0;
+        Constants.angle=0;
 
-        while(Constants.getTime()/100000000.0-50.0<startTime){
+        while(Constants.getTime()/100000000.0-100.0<startTime){
             TelemetryPacket packet=new TelemetryPacket();
             packet.put("velocityNormalized",0.0);
             packet.put("velocityReal",0.0);
+            packet.put("velocityXReal",0.0);
+            packet.put("velocityX",0.0);
             ftcDashboard.sendTelemetryPacket(packet);
 
         }
@@ -56,10 +62,13 @@ public class Test extends LinearOpMode {
             Pose2d acceleration=trajectory.accelerrations(trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime)));
             Pose2d velocityNormalized=trajectory.normalize(velocity).times(trajectory.getVelocityProfile(Constants.getTime()/1000000000.0-startTime/10.0).getX());
             Pose2d accelerationNormalized=trajectory.normalize(acceleration).times(trajectory.getVelocityProfile(Constants.getTime()/1000000000.0-startTime/10.0).getY());
+            Pose2d positions=trajectory.equation(trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime)));
 
-            l.setWeightedDrivePowers(new Pose2d(fx.calculate(0, velocityNormalized.getX(),accelerationNormalized.getX()),-1.0*fy.calculate(0,velocityNormalized.getY(),accelerationNormalized.getY()),0));
+            l.setWeightedDrivePowers(new Pose2d(kpxy*(positions.getX()+Constants.robotPose.getY())+(kp*(velocityNormalized.getX()+Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getY())+(fx.calculate(0, velocityNormalized.getX(),accelerationNormalized.getX()))),-1.0*(kpxy*(positions.getY()-Constants.robotPose.getX())+kp*(velocityNormalized.getY()-Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX())+fy.calculate(0,velocityNormalized.getY(),accelerationNormalized.getY())),kpa*Constants.angle));
             if(Constants.robotPose.minus(Constants.lastPose).div(loopTime/1000.0).getX()>-10) {
                 packet.put("velocityReal", Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX());
+                packet.put("velocityXReal",Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getY());
+
             }
             Constants.lastPose=Constants.robotPose;
             l.updateMethod();
@@ -68,6 +77,7 @@ public class Test extends LinearOpMode {
             packet.put("tvalue",trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime)));
             packet.put("position",trajectory.equation(trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime))));
             packet.put("velocity",trajectory.velocities(trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime))));
+            packet.put("velocityX",velocityNormalized.getX());
 
             packet.put("velocityNormalized",velocityNormalized.getY());
             ftcDashboard.sendTelemetryPacket(packet);
