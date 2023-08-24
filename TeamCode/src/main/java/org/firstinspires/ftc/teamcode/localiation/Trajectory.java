@@ -75,7 +75,7 @@ public class Trajectory {
     public Pose2d getVelocityProfile(double time){
         double totalTime=getTotalTime();
         Constants.timed=totalTime;
-        if(time<Constants.maxVelocty/Constants.maxVelocty){
+        if(time<Constants.maxVelocty/Constants.maxAcceleration){
             return(new Pose2d(time*Constants.maxAcceleration,Constants.maxAcceleration));
         }
         else if(time<totalTime- Constants.maxVelocty/Constants.maxAcceleration){
