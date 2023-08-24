@@ -55,31 +55,37 @@ public class Trajectory {
         return(integral);
     }
     private double getTValue(double time,double previousT){
-        double arcLengthVelo=1.0/2.0*((getVelocityProfile(time)-getVelocityProfile(time-deltaT))/(deltaT))*Math.pow(deltaT,2)+getVelocityProfile(time-deltaT)*deltaT;
+        double arcLengthVelo=1.0/2.0*((getVelocityProfile(time).getX()-getVelocityProfile(time-deltaT).getX())/(deltaT))*Math.pow(deltaT,2)+getVelocityProfile(time-deltaT).getX()*deltaT;
         Constants.yes+=arcLengthVelo;
-        double X=1;
+        double X=previousT+.01;
         for(int i=0;i<10;i++){
-            X=(-1.0*(calculateLength(previousT,X)-arcLengthVelo)+X*getSlope(X))/getSlope(X);
+            double len=calculateLength(previousT,X);
+            double slope=getSlope(X);
+            X=(-1.0*(len-arcLengthVelo)+X*slope)/slope;
         }
         return X;
     }
     private double getTotalTime(){
-        return((calculateLength(0.0,1.0)-1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)-(1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)))/Constants.maxVelocty+2.0*(Constants.maxVelocty/Constants.maxAcceleration));
+        return((length-1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)-(1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)))/Constants.maxVelocty+2.0*(Constants.maxVelocty/Constants.maxAcceleration));
     }
-    public double getVelocityProfile(double time){
+    public Pose2d normalize(Pose2d vec){
+        double len=Math.sqrt(Math.pow(vec.getX(),2)+Math.pow(vec.getY(),2));
+        return(vec.div(len));
+    }
+    public Pose2d getVelocityProfile(double time){
         double totalTime=getTotalTime();
         Constants.timed=totalTime;
         if(time<Constants.maxVelocty/Constants.maxVelocty){
-            return(time*Constants.maxAcceleration);
+            return(new Pose2d(time*Constants.maxAcceleration,Constants.maxAcceleration));
         }
         else if(time<totalTime- Constants.maxVelocty/Constants.maxAcceleration){
-            return(Constants.maxVelocty);
+            return(new Pose2d(Constants.maxVelocty,0));
         }
         else if(time<totalTime){
-            return(-1.0*Constants.maxAcceleration*((time-(totalTime-Constants.maxVelocty/Constants.maxAcceleration)))+Constants.maxVelocty);
+            return(new Pose2d(-1.0*Constants.maxAcceleration*((time-(totalTime-Constants.maxVelocty/Constants.maxAcceleration)))+Constants.maxVelocty,-Constants.maxAcceleration));
         }
         else{
-            return 0;
+            return new Pose2d(0,0);
 
         }    }
     private double getSlope(double t){
@@ -91,6 +97,11 @@ public class Trajectory {
     }
     public Pose2d velocities(double t){
         return(new Pose2d(5.0*((p5.getX()-5.0*p4.getX()+10.0*p3.getX()-10.0*p2.getX()+5.0*p1.getX()-p0.getX())*Math.pow(t,4)   +  4.0*(p4.getX()-4.0*(p3.getX()+p1.getX())+6.0*p2.getX()+p0.getX())*Math.pow(t,3)  +   6.0*(p3.getX()-3.0*p2.getX()+3.0*p1.getX()-p0.getX())*t*t+4.0*(p2.getX()-2.0*p1.getX()+p0.getX())*t+p1.getX()-p0.getX()),5.0*((p5.getY()-5.0*p4.getY()+10.0*p3.getY()-10.0*p2.getY()+5.0*p1.getY()-p0.getY())*Math.pow(t,4)   +  4.0*(p4.getY()-4.0*(p3.getY()+p1.getY())+6.0*p2.getY()+p0.getY())*Math.pow(t,3)  +   6.0*(p3.getY()-3.0*p2.getY()+3.0*p1.getY()-p0.getY())*t*t+4.0*(p2.getY()-2.0*p1.getY()+p0.getY())*t+p1.getY()-p0.getY())));
+    }
+    public Pose2d accelerrations(double t){
+        return(new Pose2d(20.0*(p5.getX()-5.0*p4.getX()+10*p3.getX()-10*p2.getX()+5*p1.getX()-p0.getX())*t*t*t    +    60.0*(p4.getX()-4.0*(p3.getX()+p1.getX())+6.0*p2.getX()+p0.getX())*t*t    +    60.0*(p3.getX()-3.0*p2.getX()+3.0*p1.getX()-p0.getX())*t    +    20.0*(p2.getX()-2.0*p1.getX()+p0.getX()),20.0*(p5.getY()-5.0*p4.getY()+10*p3.getY()-10*p2.getY()+5*p1.getY()-p0.getY())*t*t*t    +    60.0*(p4.getY()-4.0*(p3.getY()+p1.getY())+6.0*p2.getY()+p0.getY())*t*t    +    60.0*(p3.getY()-3.0*p2.getY()+3.0*p1.getY()-p0.getY())*t    +    20.0*(p2.getY()-2.0*p1.getY()+p0.getY())
+
+        ));
     }
 
 }

@@ -9,11 +9,12 @@ public class Constants {
     public OdometryModule rightPod=new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
     public OdometryModule leftPod=new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
     public OdometryModule backPod=new OdometryModule(hardwareMap.dcMotor.get("rightFront"));
+    public static Pose2d lastPose=new Pose2d(0,0,0);
     public static double angle=0;
     public static final float Max_velo=1;
     public static  double PERPENDICULAR_X=-172.475; //forward and back
     public static double timed=0;
-    public static double maxVelocty=5;
+    public static double maxVelocty=10;
     public static double yes=0;
     public static double maxAcceleration=1;
     public static final double PERPENDICULAR_Y=0; //left to right
