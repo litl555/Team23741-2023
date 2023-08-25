@@ -9,10 +9,13 @@ import java.util.Dictionary;
 import java.util.List;
 
 public class Trajectory {
-    Pose2d start,end,startVelo,endVelo,startAccel,endAccel,p0,p1,p2,p3,p4,p5;
-    public double length=0;
-    private double deltaT=.1;
+    Pose2d start, end, startVelo, endVelo, startAccel, endAccel, p0, p1, p2, p3, p4, p5;
+    public double length = 0;
+    private double deltaT = .1;
     public ArrayList<Double> tValues;
+    private double spaceRes = 1.0;
+    public ArrayList<Double> mp;
+    ArrayList<Double> velosSpaced, timeValues, amp;
 
     public Trajectory(Pose2d start, Pose2d end, Pose2d startVelo, Pose2d endVelo, Pose2d startAccel, Pose2d endAccel) {
         this.start = start;
@@ -21,14 +24,17 @@ public class Trajectory {
         this.endVelo = endVelo;
         this.startAccel = startAccel;
         this.endAccel = endAccel;
-        p0=start;
-        p5=end;
-        p1=new Pose2d(startVelo.getX()/5.0+p0.getX(),startVelo.getY()/5.0+p0.getY());
-        p2=new Pose2d(startAccel.getX()/20.0+2.0*p1.getX()-p0.getX(),startAccel.getY()/20.0+2.0*p1.getY()-p0.getY());
-        p4=new Pose2d(p5.getX()-endVelo.getX()/5.0,p5.getY()-endVelo.getY()/5.0);
-        p3=new Pose2d(endAccel.getX()/20.0+2.0*p4.getX()-p5.getX(),endAccel.getY()/20.0+2.0*p4.getY()-p5.getY());
-        length=calculateLength(0,1);
-        generateTValues();
+        p0 = start;
+        p5 = end;
+        p1 = new Pose2d(startVelo.getX() / 5.0 + p0.getX(), startVelo.getY() / 5.0 + p0.getY());
+        p2 = new Pose2d(startAccel.getX() / 20.0 + 2.0 * p1.getX() - p0.getX(), startAccel.getY() / 20.0 + 2.0 * p1.getY() - p0.getY());
+        p4 = new Pose2d(p5.getX() - endVelo.getX() / 5.0, p5.getY() - endVelo.getY() / 5.0);
+        p3 = new Pose2d(endAccel.getX() / 20.0 + 2.0 * p4.getX() - p5.getX(), endAccel.getY() / 20.0 + 2.0 * p4.getY() - p5.getY());
+        length = calculateLength(0, 1);
+        //generateTValues();
+        mp = generateMotionProfile();
+        getTimeValues();
+
     }
     private void generateTValues(){
         ArrayList<Double> values=new ArrayList<>();
@@ -55,26 +61,139 @@ public class Trajectory {
         return(integral);
     }
     private double getTValue(double time,double previousT){
-        double arcLengthVelo=1.0/2.0*((getVelocityProfile(time).getX()-getVelocityProfile(time-deltaT).getX())/(deltaT))*Math.pow(deltaT,2)+getVelocityProfile(time-deltaT).getX()*deltaT;
-        Constants.yes+=arcLengthVelo;
-        double X=previousT+.01;
-        for(int i=0;i<10;i++){
-            double len=calculateLength(previousT,X);
-            double slope=getSlope(X);
-            X=(-1.0*(len-arcLengthVelo)+X*slope)/slope;
+        double arcLengthVelo = 1.0 / 2.0 * ((getVelocityProfile(time).getX() - getVelocityProfile(time - deltaT).getX()) / (deltaT)) * Math.pow(deltaT, 2) + getVelocityProfile(time - deltaT).getX() * deltaT;
+        Constants.yes += arcLengthVelo;
+        double X = previousT + .01;
+        for (int i = 0; i < 10; i++) {
+            double len = calculateLength(previousT, X);
+            double slope = getSlope(X);
+            X = (-1.0 * (len - arcLengthVelo) + X * slope) / slope;
         }
         return X;
     }
-    private double getTotalTime(){
-        return((length-1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)-(1.0/2.0*Constants.maxAcceleration*Math.pow(Constants.maxVelocty/Constants.maxAcceleration,2)))/Constants.maxVelocty+2.0*(Constants.maxVelocty/Constants.maxAcceleration));
+
+    private void generateSpacedValues() {
+        double previousT = 0;
+        velosSpaced = new ArrayList<>();
+        for (int i = 0; i < length / spaceRes; i++) {
+
+            double X = previousT + .01;
+            for (int a = 0; a < 10; a++) {
+                double len = calculateLength(previousT, X);
+                double slope = getSlope(X);
+                X = (-1.0 * (len - spaceRes) + X * slope) / slope;
+
+            }
+            previousT = X;
+            velosSpaced.add(X);
+
+        }
+
     }
-    public Pose2d normalize(Pose2d vec){
-        double len=Math.sqrt(Math.pow(vec.getX(),2)+Math.pow(vec.getY(),2));
-        return(vec.div(len));
+
+    public ArrayList<Double> generateMotionProfile() {
+        generateSpacedValues();
+        int count = 1;
+        ArrayList<Double> profile = new ArrayList<>();
+
+        for (double i :
+                velosSpaced) {
+            if (count == 1) {
+                profile.add(0.0);
+                double xoption = 100000;
+                double yoption = 1000000;
+                double noOption = Constants.maxVelocty;
+                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getX(), 2) - Math.pow(normalize(velocities(i)).times(0.0).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                    xoption = Math.sqrt(2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+
+                }
+                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getY(), 2) - Math.pow(normalize(velocities(i)).times(0.0).getY(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                    yoption = Math.sqrt(2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+                }
+                profile.add(Math.min(Math.min(xoption, yoption), noOption));
+
+
+            } else if (count < velosSpaced.size()) {
+                double xoption = 1000000;
+                double yoption = 1000000;
+                double noOption = Constants.maxVelocty;
+                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getX(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                    xoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+
+                }
+                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getY(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getY(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                    yoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+                }
+                profile.add(Math.min(Math.min(xoption, yoption), noOption));
+
+            }
+            count++;
+        }
+        count = profile.size() - 2;
+        for (int i = profile.size() - 1; i > 0; i -= 1) {
+            double xoption = 1000000;
+            double yoption = 1000000;
+
+            if (i == profile.size() - 1) {
+                profile.set(i, 0.0);
+            }
+            if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(i)).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                xoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+            }
+            if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(i)).getY(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
+                yoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+            }
+            if (xoption != 1000000 || yoption != 1000000) {
+                profile.set(count, Math.min(xoption, yoption));
+
+            }
+            count--;
+        }
+        amp = new ArrayList<>();
+        count = 1;
+        for (double vel :
+                profile) {
+            if (count < profile.size()) {
+                amp.add((Math.pow(profile.get(count), 2) - Math.pow(vel, 2)) / (2.0 * spaceRes));
+            }
+            count++;
+        }
+        return profile;
     }
-    public Pose2d getVelocityProfile(double time){
-        double totalTime=getTotalTime();
-        Constants.timed=totalTime;
+
+    private void getTimeValues() {
+        double totalTime = 0;
+        double previousI = 0;
+        ArrayList<Double> timeValues = new ArrayList<>();
+        int count = 0;
+        for (double i :
+                mp) {
+            if (count > 0) {
+                timeValues.add(totalTime + 2.0 * spaceRes / (previousI + i));
+                totalTime += 2.0 * spaceRes / (previousI + i);
+                previousI = i;
+            } else {
+                timeValues.add(0.0);
+            }
+            count++;
+
+        }
+        this.timeValues = timeValues;
+
+    }
+
+    private double getTotalTime() {
+        return ((length - 1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2) - (1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2))) / Constants.maxVelocty + 2.0 * (Constants.maxVelocty / Constants.maxAcceleration));
+    }
+
+    public Pose2d normalize(Pose2d vec) {
+        double len = Math.sqrt(Math.pow(vec.getX(), 2) + Math.pow(vec.getY(), 2));
+        return (vec.div(len));
+    }
+
+    public Pose2d getVelocityProfile(double time) {
+        double totalTime = getTotalTime();
+        Constants.timed = totalTime;
         if(time<Constants.maxVelocty/Constants.maxAcceleration){
             return(new Pose2d(time*Constants.maxAcceleration,Constants.maxAcceleration));
         }
