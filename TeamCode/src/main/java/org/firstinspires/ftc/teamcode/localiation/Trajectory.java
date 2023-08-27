@@ -13,9 +13,10 @@ public class Trajectory {
     public double length = 0;
     private double deltaT = .1;
     public ArrayList<Double> tValues;
-    private double spaceRes = 1.0;
+    private double spaceRes = 10;
     public ArrayList<Double> mp;
-    ArrayList<Double> velosSpaced, timeValues, amp;
+    ArrayList<Double> velosSpaced, timeValues, amp, xAccels;
+
 
     public Trajectory(Pose2d start, Pose2d end, Pose2d startVelo, Pose2d endVelo, Pose2d startAccel, Pose2d endAccel) {
         this.start = start;
@@ -100,8 +101,8 @@ public class Trajectory {
                 velosSpaced) {
             if (count == 1) {
                 profile.add(0.0);
-                double xoption = 100000;
-                double yoption = 1000000;
+                double xoption = 1000000000;
+                double yoption = 1000000000;
                 double noOption = Constants.maxVelocty;
                 if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getX(), 2) - Math.pow(normalize(velocities(i)).times(0.0).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
                     xoption = Math.sqrt(2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
@@ -114,22 +115,316 @@ public class Trajectory {
 
 
             } else if (count < velosSpaced.size()) {
-                double xoption = 1000000;
-                double yoption = 1000000;
+                double xoption = Constants.maxVelocty;
+                double yoption = Constants.maxVelocty;
                 double noOption = Constants.maxVelocty;
-                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getX(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
-                    xoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+                double xCount = normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getX();
+                double xI = normalize(velocities(i)).times(profile.get(count - 1)).getX();
+                double xAccel = (Math.signum(xCount) * Math.pow(xCount, 2) - Math.signum(xI) * Math.pow(xI, 2)) / (2.0 * spaceRes);
+                double yCount = normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getY();
+                double yI = normalize(velocities(i)).times(profile.get(count - 1)).getY();
+                double yAccel = (Math.signum(yCount) * Math.pow(yCount, 2) - Math.signum(yI) * Math.pow(yI, 2)) / (2.0 * spaceRes);
+//                if ( xAccel> Constants.maxAcceleration) {
+//                    xoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+//
+//                }
+//                if ( yAccel> Constants.maxAcceleration) {
+//                    yoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes);
+//                }
+                if (xCount > xI) {
+                    if (xAccel > Constants.maxAcceleration) {
+                        if (xI < 0) {
+                            if ((xI * xI - 2.0 * Constants.maxAcceleration * spaceRes) < 0) {
+                                double X = Math.pow(xI, 2) / (2.0 * Constants.maxAcceleration);
 
+                                xoption = Math.abs(Math.sqrt(2.0 * Constants.maxAcceleration * (spaceRes - X)) / normalize(velocities(velosSpaced.get(count))).getX());///(normalize(velocities(velosSpaced.get(count))).getX())
+                            } else {
+                                xoption = Math.abs(Math.sqrt(Math.pow(xI, 2) - 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getX());///normalize(velocities(velosSpaced.get(count))).getX()
+                            }
+                        } else {
+                            xoption = Math.abs(Math.sqrt(Math.pow(xI, 2) + 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getX());
+                        }
+                    } else {
+                        xoption = Constants.maxVelocty;
+                    }
+                } else {
+                    xoption = Constants.maxVelocty;
                 }
-                if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(Constants.maxVelocty).getY(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getY(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
-                    yoption = Math.sqrt(Math.pow(normalize(velocities(i)).times(profile.get(count - 1)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+                if (yCount > yI) {
+                    if (yAccel > Constants.maxAcceleration) {
+                        if (yI < 0) {
+                            if ((yI * yI - 2.0 * Constants.maxAcceleration * spaceRes) < 0) {
+                                double X = Math.pow(yI, 2) / (2.0 * Constants.maxAcceleration);
+                                yoption = Math.abs(Math.sqrt(2.0 * Constants.maxAcceleration * (spaceRes - X)) / normalize(velocities(velosSpaced.get(count))).getY());///(normalize(velocities(velosSpaced.get(count))).getY())
+                            } else {
+                                yoption = Math.abs(1.0 * Math.sqrt(Math.pow(yI, 2) - 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getY());///normalize(velocities(velosSpaced.get(count))).getY()
+                            }
+                        } else {
+                            yoption = Math.abs(Math.sqrt(Math.pow(yI, 2) + 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getY());
+                        }
+                    } else {
+                        yoption = Constants.maxVelocty;
+                    }
+                } else {
+                    yoption = Constants.maxVelocty;
                 }
-                profile.add(Math.min(Math.min(xoption, yoption), noOption));
+
+                profile.add(Math.min(xoption, yoption));
+
+
+                //profile.add(Math.min(Math.min(xoption, yoption), noOption));
 
             }
             count++;
         }
+//        count = profile.size() - 2;
+//        for (int i = profile.size() - 1; i > 0; i -= 1) {
+//            double xoption = 1000000;
+//            double yoption = 1000000;
+//
+//            if (i == profile.size() - 1) {
+//                profile.set(i, 0.0);
+//            }
+//            double xCount=normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
+//            double xI=normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
+//            double xAccel=(Math.signum(xCount)*Math.pow(xCount, 2) - Math.signum(xI)*Math.pow(xI, 2)) / (2.0 * spaceRes);
+//            double yCount=normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY();
+//            double yI=normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY();
+//            double yAccel=(Math.signum(yCount)*Math.pow(yCount, 2) - Math.signum(yI)*Math.pow(yI, 2)) / (2.0 * spaceRes);
+////            if ( xAccel> Constants.maxAcceleration) {
+////                xoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+////            }
+////            if (yAccel> Constants.maxAcceleration) {
+////                yoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+////            }
+////            if(profile.get(count)>profile.get(i)) {
+////                if (Math.sqrt(Math.pow(xAccel, 2) + Math.pow(yAccel, 2)) > Constants.maxAcceleration) {
+////                    profile.set(count, Math.sqrt((Math.pow(xI, 2) + Math.pow(yI, 2)) + 2.0 * Constants.maxAcceleration * spaceRes));
+////                }
+////            }
+//            boolean yes=false;
+//            if(count==profile.size()-1679){
+//                yes=true;
+//            }
+//            if(xCount>xI){
+//
+//                if(xAccel>Constants.maxAcceleration){
+//                    if(xI<0){
+//                        if((xI*xI-2.0*Constants.maxAcceleration*spaceRes)<0){
+//                            double X = Math.pow(xI,2)/(2.0*Constants.maxAcceleration);
+//                            xoption=Math.abs(Math.sqrt(2.0*Constants.maxAcceleration*(spaceRes-X))/(normalize(velocities(velosSpaced.get(count))).getX()));///(normalize(velocities(velosSpaced.get(count))).getX())
+//
+//                        }
+//                        else{
+//                            xoption=Math.abs(Math.sqrt(Math.pow(xI,2)-2.0*Constants.maxAcceleration*spaceRes)/normalize(velocities(velosSpaced.get(count))).getX());///normalize(velocities(velosSpaced.get(count))).getX()
+//                        }
+//                    }
+//                    else{
+//
+//                        xoption=Math.abs(Math.sqrt(Math.pow(xI,2)+2.0*Constants.maxAcceleration*spaceRes)/normalize(velocities(velosSpaced.get(count))).getX());
+//
+//                    }
+//                }
+//                else{
+//                    xoption=1000000000;
+//                }
+//            }
+//            else{
+//                xoption=1000000000;
+//            }
+//            if(yCount>yI){
+//                if(yAccel>Constants.maxAcceleration){
+//                    if(yI<0){
+//                        if((Math.pow(yI,2)-2.0*Constants.maxAcceleration*spaceRes)<0){
+//                            double X = Math.pow(yI,2)/(2.0*Constants.maxAcceleration);
+//                            yoption=Math.abs(Math.sqrt(2.0*Constants.maxAcceleration*(spaceRes-X))/(normalize(velocities(velosSpaced.get(count))).getY()));///(normalize(velocities(velosSpaced.get(count))).getY())
+//                        }
+//                        else{
+//                            yoption=Math.abs(Math.sqrt(Math.pow(yI,2)-2.0*Constants.maxAcceleration*spaceRes)/(normalize(velocities(velosSpaced.get(count))).getY()));///normalize(velocities(velosSpaced.get(count))).getY()
+//                        }
+//                    }
+//                    else{
+//                        yoption=Math.abs(Math.sqrt(Math.pow(yI,2)+2.0*Constants.maxAcceleration*spaceRes)/(normalize(velocities(velosSpaced.get(count))).getY()));
+//                    }
+//                }
+//                else{
+//                    yoption=1000000000;
+//                }
+//            }
+//            else{
+//                yoption=1000000000;
+//            }
+//            if(xoption<1000000000||yoption<1000000000){
+//                if(xoption>Constants.maxVelocty/(Math.sqrt(2)/2.0)){
+//                    xoption=Constants.maxVelocty/(Math.sqrt(2)/2.0);
+//                }
+//                if(yoption>Constants.maxVelocty/(Math.sqrt(2)/2.0)){
+//                    yoption=Constants.maxVelocty/(Math.sqrt(2)/2.0);
+//                }
+//                profile.set(count,Math.min(xoption,yoption));
+//            }
+////            if (xoption != 1000000 || yoption != 1000000) {
+////                profile.set(count, Math.min(xoption, yoption));
+////
+////            }
+//            count--;
+//        }
+//        count = profile.size() - 2;
+//        xAccels=new ArrayList<>();
+//        for (int i = profile.size() - 1; i > 0; i -= 1) {
+//            double xoption = 1000000;
+//            double yoption = 1000000;
+//
+//            if (i == profile.size() - 1) {
+//                profile.set(i, 0.0);
+//            }
+//            double xCount=normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
+//            double xI=normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
+//            double xAccel=(Math.signum(xCount)*Math.pow(xCount, 2) - Math.signum(xI)*Math.pow(xI, 2)) / (2.0 * spaceRes);
+//
+//            double yCount=normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY();
+//            double yI=normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY();
+//            double yAccel=(Math.signum(yCount)*Math.pow(yCount, 2) - Math.signum(yI)*Math.pow(yI, 2)) / (2.0 * spaceRes);
+////            if ( xAccel> Constants.maxAcceleration) {
+////                xoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+////            }
+////            if (yAccel> Constants.maxAcceleration) {
+////                yoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+////            }
+////            if(profile.get(count)>profile.get(i)) {
+////                if (Math.sqrt(Math.pow(xAccel, 2) + Math.pow(yAccel, 2)) > Constants.maxAcceleration) {
+////                    profile.set(count, Math.sqrt((Math.pow(xI, 2) + Math.pow(yI, 2)) + 2.0 * Constants.maxAcceleration * spaceRes));
+////                }
+////            }
+//            boolean yes=false;
+//            if(count==profile.size()-1679){
+//                yes=true;
+//            }
+//            if(xCount>xI){
+//
+//                if(xAccel>Constants.maxAcceleration){
+//
+//                    if(xI<0){
+//                        if((xI*xI-2.0*Constants.maxAcceleration*spaceRes)<0){
+//                            double X = Math.pow(xI,2)/(2.0*Constants.maxAcceleration);
+//                            xoption=Math.abs(Math.sqrt(2.0*Constants.maxAcceleration*(spaceRes-X))/(normalize(velocities(velosSpaced.get(count))).getX()));///(normalize(velocities(velosSpaced.get(count))).getX())
+//
+//                        }
+//                        else{
+//                            xoption=Math.abs(Math.sqrt(Math.pow(xI,2)-2.0*Constants.maxAcceleration*spaceRes)/normalize(velocities(velosSpaced.get(count))).getX());///normalize(velocities(velosSpaced.get(count))).getX()
+//                        }
+//                    }
+//                    else{
+//
+//                        xoption=Math.abs(Math.sqrt(Math.pow(xI,2)+2.0*Constants.maxAcceleration*spaceRes)/normalize(velocities(velosSpaced.get(count))).getX());
+//
+//                    }
+//                }
+//                else{
+//                    xoption=1000000000;
+//                }
+//            }
+//            else{
+//                xoption=1000000000;
+//            }
+//            if(yCount>yI){
+//                if(yAccel>Constants.maxAcceleration){
+//                    if(yI<0){
+//                        if((Math.pow(yI,2)-2.0*Constants.maxAcceleration*spaceRes)<0){
+//                            double X = Math.pow(yI,2)/(2.0*Constants.maxAcceleration);
+//                            yoption=Math.abs(Math.sqrt(2.0*Constants.maxAcceleration*(spaceRes-X))/(normalize(velocities(velosSpaced.get(count))).getY()));///(normalize(velocities(velosSpaced.get(count))).getY())
+//                        }
+//                        else{
+//                            yoption=Math.abs(Math.sqrt(Math.pow(yI,2)-2.0*Constants.maxAcceleration*spaceRes)/(normalize(velocities(velosSpaced.get(count))).getY()));///normalize(velocities(velosSpaced.get(count))).getY()
+//                        }
+//                    }
+//                    else{
+//                        yoption=Math.abs(Math.sqrt(Math.pow(yI,2)+2.0*Constants.maxAcceleration*spaceRes)/(normalize(velocities(velosSpaced.get(count))).getY()));
+//                    }
+//                }
+//                else{
+//                    yoption=1000000000;
+//                }
+//            }
+//            else{
+//                yoption=1000000000;
+//            }
+//            if(xoption<1000000000||yoption<1000000000){
+//                profile.set(count,Math.min(xoption,yoption));
+//            }
+////            if (xoption != 1000000 || yoption != 1000000) {
+////                profile.set(count, Math.min(xoption, yoption));
+////
+////            }
+//            count--;
+//        }
+//        int counter=profile.size()-2;
+//        for(int s=profile.size()-1;s>0;s--){
+//            double xCounter=normalize(velocities(velosSpaced.get(counter))).times(profile.get(counter)).getX();
+//            double xS=normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getX();
+//            double xoption=10000000;
+//            double xAcceleration=(Math.signum(xCounter)*Math.pow(xCounter,2)-Math.signum(xS)*Math.pow(xS,2))/(2.0*spaceRes);
+//            if(xAcceleration>Constants.maxAcceleration) {
+//                if (xCounter > xS) {
+//                    if (xS < 0) {
+//                        if (Math.pow(xS, 2) - 2.0 * Constants.maxAcceleration * spaceRes < 0) {
+//                            double X = Math.pow(xS, 2) / (2.0 * Constants.maxAcceleration);
+//                            xoption = Math.abs(Math.sqrt(2 * spaceRes * Constants.maxAcceleration) / normalize(velocities(velosSpaced.get(counter))).getX());
+//                        } else {
+//                            xoption = Math.abs(Math.sqrt(Math.pow(xS, 2) - 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get((counter)))).getX());
+//                        }
+//                    } else {
+//                        xoption = Math.abs(Math.sqrt(Math.pow(xS, 2) + 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(counter))).getX());
+//                    }
+//                }
+//                if (xoption != 10000000) {
+//                    profile.set(counter, xoption);
+//                }
+//
+//            }
+//            counter--;
+//        }
+        int counter1 = profile.size() - 2;
+        for (int s = profile.size() - 1; s > 0; s--) {
+            double yCounter = normalize(velocities(velosSpaced.get(counter1))).times(profile.get(counter1)).getY();
+            double yS = normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getY();
+            double yoption = 10000000;
+            double yAcceleration = (Math.signum(yCounter) * Math.pow(yCounter, 2) - Math.signum(yS) * Math.pow(yS, 2)) / (2.0 * spaceRes);
+            if (yAcceleration > Constants.maxAcceleration) {
+                if (yCounter > yS) {
+                    if (yS < 0 && yCounter > 0) {
+                        profile.set(s, 0.0);
+                    }
+                }
+
+
+            }
+            counter1--;
+        }
+        counter1 = 1;
+        for (int s = 0; s < profile.size() - 1; s++) {
+            boolean yes = false;
+            double yCounter = normalize(velocities(velosSpaced.get(counter1))).times(profile.get(counter1)).getY();
+            double yS = normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getY();
+            if (yS == 0.0) {
+                yes = true;
+            }
+            double yoption = 10000000;
+            double yAcceleration = (Math.signum(yCounter) * Math.pow(yCounter, 2) - Math.signum(yS) * Math.pow(yS, 2)) / (2.0 * spaceRes);
+            if (Math.abs(yAcceleration) > Constants.maxAcceleration) {
+
+                if (yCounter < yS) {
+                    if (yCounter <= 0.0 && yS <= 0.0) {
+                        profile.set(counter1, Math.abs(Math.sqrt(Math.pow(yS, 2) + 2.0 * spaceRes * Constants.maxAcceleration) / normalize(velocities(velosSpaced.get(counter1))).getY()));
+                    }
+                }
+
+
+            }
+            counter1++;
+        }
         count = profile.size() - 2;
+        xAccels = new ArrayList<>();
         for (int i = profile.size() - 1; i > 0; i -= 1) {
             double xoption = 1000000;
             double yoption = 1000000;
@@ -137,16 +432,76 @@ public class Trajectory {
             if (i == profile.size() - 1) {
                 profile.set(i, 0.0);
             }
-            if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(i)).getX(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
-                xoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
-            }
-            if ((Math.pow(normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY(), 2) - Math.pow(normalize(velocities(i)).times(profile.get(i)).getY(), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
-                yoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
-            }
-            if (xoption != 1000000 || yoption != 1000000) {
-                profile.set(count, Math.min(xoption, yoption));
+            double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
+            double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
+            double xAccel = (Math.signum(xCount) * Math.pow(xCount, 2) - Math.signum(xI) * Math.pow(xI, 2)) / (2.0 * spaceRes);
 
+            double yCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY();
+            double yI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY();
+            double yAccel = (Math.signum(yCount) * Math.pow(yCount, 2) - Math.signum(yI) * Math.pow(yI, 2)) / (2.0 * spaceRes);
+//            if ( xAccel> Constants.maxAcceleration) {
+//                xoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getX());
+//            }
+//            if (yAccel> Constants.maxAcceleration) {
+//                yoption = Math.sqrt(Math.pow(normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY(), 2) + 2.0 * Constants.maxAcceleration * spaceRes) / Math.abs(normalize(velocities(velosSpaced.get(count))).getY());
+//            }
+//            if(profile.get(count)>profile.get(i)) {
+//                if (Math.sqrt(Math.pow(xAccel, 2) + Math.pow(yAccel, 2)) > Constants.maxAcceleration) {
+//                    profile.set(count, Math.sqrt((Math.pow(xI, 2) + Math.pow(yI, 2)) + 2.0 * Constants.maxAcceleration * spaceRes));
+//                }
+//            }
+            boolean yes = false;
+            if (count == profile.size() - 1679) {
+                yes = true;
             }
+            if (xCount > xI) {
+
+                if (xAccel > Constants.maxAcceleration) {
+
+                    if (xI < 0) {
+                        if ((xI * xI - 2.0 * Constants.maxAcceleration * spaceRes) < 0) {
+                            double X = Math.pow(xI, 2) / (2.0 * Constants.maxAcceleration);
+                            xoption = Math.abs(Math.sqrt(2.0 * Constants.maxAcceleration * (spaceRes - X)) / (normalize(velocities(velosSpaced.get(count))).getX()));///(normalize(velocities(velosSpaced.get(count))).getX())
+
+                        } else {
+                            xoption = Math.abs(Math.sqrt(Math.pow(xI, 2) - 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getX());///normalize(velocities(velosSpaced.get(count))).getX()
+                        }
+                    } else {
+
+                        xoption = Math.abs(Math.sqrt(Math.pow(xI, 2) + 2.0 * Constants.maxAcceleration * spaceRes) / normalize(velocities(velosSpaced.get(count))).getX());
+
+                    }
+                } else {
+                    xoption = 1000000000;
+                }
+            } else {
+                xoption = 1000000000;
+            }
+            if (yCount > yI) {
+                if (yAccel > Constants.maxAcceleration) {
+                    if (yI < 0) {
+                        if ((Math.pow(yI, 2) - 2.0 * Constants.maxAcceleration * spaceRes) < 0) {
+                            double X = Math.pow(yI, 2) / (2.0 * Constants.maxAcceleration);
+                            yoption = Math.abs(Math.sqrt(2.0 * Constants.maxAcceleration * (spaceRes - X)) / (normalize(velocities(velosSpaced.get(count))).getY()));///(normalize(velocities(velosSpaced.get(count))).getY())
+                        } else {
+                            yoption = Math.abs(Math.sqrt(Math.pow(yI, 2) - 2.0 * Constants.maxAcceleration * spaceRes) / (normalize(velocities(velosSpaced.get(count))).getY()));///normalize(velocities(velosSpaced.get(count))).getY()
+                        }
+                    } else {
+                        yoption = Math.abs(Math.sqrt(Math.pow(yI, 2) + 2.0 * Constants.maxAcceleration * spaceRes) / (normalize(velocities(velosSpaced.get(count))).getY()));
+                    }
+                } else {
+                    yoption = 1000000000;
+                }
+            } else {
+                yoption = 1000000000;
+            }
+            if (xoption < 1000000000 || yoption < 1000000000) {
+                profile.set(count, Math.min(xoption, yoption));
+            }
+//            if (xoption != 1000000 || yoption != 1000000) {
+//                profile.set(count, Math.min(xoption, yoption));
+//
+//            }
             count--;
         }
         amp = new ArrayList<>();

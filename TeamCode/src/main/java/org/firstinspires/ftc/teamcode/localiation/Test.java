@@ -20,29 +20,30 @@ public class Test extends LinearOpMode {
     public static double ka=.0001;
     public static double kpxy=.003;
     public static double ks=.0001;
-    public static double dist=700;
-    public static double kp=.002;
-    public static double kpa=1;
+    public static double dist = 700;
+    public static double kp = .001;
+    public static double kpa = 1;
     @Override
     public void runOpMode() throws InterruptedException {
-        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(3000, 4330), new Pose2d(10, 2745), new Pose2d(3110, 1950), new Pose2d(-1000, -600));
+        //Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(395, -560), new Pose2d(330, -1170), new Pose2d(1480, 1800), new Pose2d(3110, 1950), new Pose2d(-1280, -1250));
+        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1560, 2610), new Pose2d(580, 2885), new Pose2d(3110, 1950), new Pose2d(-1280, -1250));
         //Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist));
-        FtcDashboard ftcDashboard=FtcDashboard.getInstance();
-        CustomLocalization l=new CustomLocalization(new Pose2d(0,0,0),hardwareMap);
-        BasicFeedforward fx=new BasicFeedforward(new FeedforwardCoefficients(kv,ka,ks));
-        BasicFeedforward fy=new BasicFeedforward(new FeedforwardCoefficients(kv,ka,ks));
-        double lastTime=0;
-        Constants.lastPose=new Pose2d(0,0,0);
+        FtcDashboard ftcDashboard = FtcDashboard.getInstance();
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
+        BasicFeedforward fy = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
+        double lastTime = 0;
+        Constants.lastPose = new Pose2d(0, 0, 0);
         waitForStart();
-        double startTime=Constants.getTime()/100000000.0;
-        Constants.angle=0;
+        double startTime = Constants.getTime() / 100000000.0;
+        Constants.angle = 0;
 
         while(Constants.getTime()/100000000.0-100.0<startTime){
             TelemetryPacket packet=new TelemetryPacket();
             packet.put("velocityNormalized",0.0);
             packet.put("velocityReal",0.0);
-            packet.put("velocityXReal",0.0);
-            packet.put("velocityX",0.0);
+            packet.put("velocityX", 0.0);
+            packet.put("velocityY", 0.0);
             ftcDashboard.sendTelemetryPacket(packet);
 
         }
@@ -53,11 +54,11 @@ public class Test extends LinearOpMode {
 
             TelemetryPacket packet = new TelemetryPacket();
             double loopTime = Constants.getTime() / 1000000.0 - lastTime;
-            packet.put("loop Time", loopTime);
+            //packet.put("loop Time", loopTime);
             lastTime = Constants.getTime() / 1000000.0;
 
             int masterIndex = 0;
-            packet.put("times", trajectory.timeValues);
+            //packet.put("times", trajectory.timeValues);
             for (double time :
                     trajectory.timeValues) {
                 if (Constants.getTime() / 1000000000.0 - startTime / 10.0 < time) {
@@ -70,7 +71,7 @@ public class Test extends LinearOpMode {
             if (masterIndex > 0) {
                 masterIndex--;
             }
-            packet.put("time", masterIndex);
+            //packet.put("time", masterIndex);
             Pose2d velocity = trajectory.velocities(trajectory.velosSpaced.get(masterIndex));
 
             Pose2d acceleration = trajectory.accelerrations(trajectory.velosSpaced.get(masterIndex));
@@ -80,10 +81,12 @@ public class Test extends LinearOpMode {
 
             l.setWeightedDrivePowers(new Pose2d(kpxy * (positions.getX() + Constants.robotPose.getY()) + (kp * (velocityNormalized.getX() + Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getY()) + (fx.calculate(0, velocityNormalized.getX(), accelerationNormalized.getX()))), -1.0 * (kpxy * (positions.getY() - Constants.robotPose.getX()) + kp * (velocityNormalized.getY() - Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX()) + fy.calculate(0, velocityNormalized.getY(), accelerationNormalized.getY())), kpa * Constants.angle));
             if (Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX() > -10) {
-                packet.put("velocityReal", Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX());
-                packet.put("velocityXReal", Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getY());
+                //packet.put("velocityReal", Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getX());
+                //packet.put("velocityXReal", Constants.robotPose.minus(Constants.lastPose).div(loopTime / 1000.0).getY());
 
             }
+            packet.put("velocityY", velocityNormalized.getY());
+            packet.put("velocityX", velocityNormalized.getX());
             Constants.lastPose = Constants.robotPose;
             l.updateMethod();
 //            packet.put("time",(int)Math.round(Constants.getTime()/100000000.0-startTime));

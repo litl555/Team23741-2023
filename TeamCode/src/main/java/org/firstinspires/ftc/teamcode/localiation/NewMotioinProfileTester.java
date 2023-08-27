@@ -14,7 +14,8 @@ public class NewMotioinProfileTester extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         int counter = 0;
-        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1150, 2080), new Pose2d(1200, 2600), new Pose2d(403, 850), new Pose2d(-453, -110));
+        //Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1150, 2080), new Pose2d(1200, 2600), new Pose2d(403, 850), new Pose2d(-453, -110));
+        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(3000, 4330), new Pose2d(10, 2745), new Pose2d(3110, 1950), new Pose2d(-1000, -600));
 
         FtcDashboard dash = FtcDashboard.getInstance();
         waitForStart();
@@ -25,8 +26,9 @@ public class NewMotioinProfileTester extends LinearOpMode {
         ArrayList<Double> mp = trajectory.generateMotionProfile();
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket p = new TelemetryPacket();
-            p.put("mp", trajectory.amp);
-            p.put("mp1", mp);
+//            p.put("mp", trajectory.amp);
+//            p.put("mp1", mp);
+            p.put("xAccels", trajectory.xAccels);
 
 
             dash.sendTelemetryPacket(p);
