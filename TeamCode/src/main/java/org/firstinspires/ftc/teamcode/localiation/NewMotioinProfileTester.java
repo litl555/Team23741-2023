@@ -27,7 +27,7 @@ public class NewMotioinProfileTester extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             TelemetryPacket p = new TelemetryPacket();
 //            p.put("mp", trajectory.amp);
-//            p.put("mp1", mp);
+            p.put("mp1", mp);
             p.put("xAccels", trajectory.xAccels);
 
 

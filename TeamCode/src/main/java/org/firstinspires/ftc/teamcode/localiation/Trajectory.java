@@ -15,6 +15,7 @@ public class Trajectory {
     public ArrayList<Double> tValues;
     private double spaceRes = 10;
     public ArrayList<Double> mp;
+    double totalTime = 0;
     ArrayList<Double> velosSpaced, timeValues, amp, xAccels;
 
 
@@ -35,18 +36,25 @@ public class Trajectory {
         //generateTValues();
         mp = generateMotionProfile();
         getTimeValues();
+        getTotalTimeSum();
+
 
     }
-    private void generateTValues(){
-        ArrayList<Double> values=new ArrayList<>();
-        double previous=0;
-        for(int i=1;i<getTotalTime()/deltaT;i++){
-            values.add(getTValue(i*deltaT,previous));
-            previous=values.get(values.size()-1);
+
+    private void getTotalTimeSum() {
+        totalTime = timeValues.get(timeValues.size() - 2);
+    }
+
+    private void generateTValues() {
+        ArrayList<Double> values = new ArrayList<>();
+        double previous = 0;
+        for (int i = 1; i < getTotalTime() / deltaT; i++) {
+            values.add(getTValue(i * deltaT, previous));
+            previous = values.get(values.size() - 1);
 
         }
-        int counter=0;
-        for(double i:values){
+        int counter = 0;
+        for (double i : values) {
             values.set(counter,values.get(counter)/values.get(values.size()-1));
             counter++;
         }
@@ -190,7 +198,7 @@ public class Trajectory {
             counter1--;
         }
         counter1 = 1;
-        for (int s = 0; s < profile.size() - 1; s++) {
+        for (int s = 0; s < profile.size() - 2; s++) {
             boolean yes = false;
             double yCounter = normalize(velocities(velosSpaced.get(counter1))).times(profile.get(counter1)).getY();
             double yS = normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getY();
@@ -211,6 +219,45 @@ public class Trajectory {
             }
             counter1++;
         }
+        counter1 = profile.size() - 2;
+        for (int s = profile.size() - 1; s > 0; s--) {
+            double xCounter = normalize(velocities(velosSpaced.get(counter1))).times(profile.get(counter1)).getX();
+            double xS = normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getX();
+            double xoption = 10000000;
+            double xAcceleration = (Math.signum(xCounter) * Math.pow(xCounter, 2) - Math.signum(xS) * Math.pow(xS, 2)) / (2.0 * spaceRes);
+            if (xAcceleration > Constants.maxAcceleration) {
+                if (xCounter > xS) {
+                    if (xS < 0 && xCounter > 0) {
+                        profile.set(counter1, 0.0);
+                    }
+                }
+
+
+            }
+            counter1--;
+        }
+        counter1 = 1;
+        for (int s = 0; s < profile.size() - 2; s++) {
+            boolean yes = false;
+            double xCounter = normalize(velocities(velosSpaced.get(counter1))).times(profile.get(counter1)).getX();
+            double xS = normalize(velocities(velosSpaced.get(s))).times(profile.get(s)).getX();
+            if (xS == 0.0) {
+                yes = true;
+            }
+            double xoption = 10000000;
+            double xAcceleration = (Math.signum(xCounter) * Math.pow(xCounter, 2) - Math.signum(xS) * Math.pow(xS, 2)) / (2.0 * spaceRes);
+            if (Math.abs(xAcceleration) > Constants.maxAcceleration) {
+
+                if (xCounter < xS) {
+                    if (xCounter <= 0.0 && xS <= 0.0) {
+                        profile.set(counter1, Math.abs(Math.sqrt(Math.pow(xS, 2) + 2.0 * spaceRes * Constants.maxAcceleration) / normalize(velocities(velosSpaced.get(counter1))).getX()));
+                    }
+                }
+
+
+            }
+            counter1++;
+        }
         count = profile.size() - 2;
         xAccels = new ArrayList<>();
         for (int i = profile.size() - 1; i > 0; i -= 1) {
@@ -218,7 +265,7 @@ public class Trajectory {
             double yoption = 1000000;
 
             if (i == profile.size() - 1) {
-                profile.set(i, 0.0);
+                profile.set(counter1, 0.0);
             }
             double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
             double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
