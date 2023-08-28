@@ -16,11 +16,11 @@ public class Constants {
     public static double timed = 0;
     public static double maxVelocty = 1000;
     public static double yes = 0;
-    public static double maxAcceleration = 600;
+    public static double maxAcceleration = 400;
     public static final double PERPENDICULAR_Y = 0; //left to right
-    public static final float X_OFFSET=0; //Offset of parallel wheels forward
-    public static double LATERAL_DISTANCE=296.56; //Distance beween odometry wheels 151.425f*2f
-    public static final float ODO_WHEEL_RADIUS=17.5f;
+    public static final float X_OFFSET = 0; //Offset of parallel wheels forward
+    public static double LATERAL_DISTANCE = 299; //Distance beween odometry wheels 151.425f*2f
+    public static final float ODO_WHEEL_RADIUS = 17.5f;
     public static final float PPR = 8192f;
     public static final Pose2d startPose = new Pose2d(0, 0, 0);
 

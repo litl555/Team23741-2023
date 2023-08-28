@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.localiation;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+
 public class OdometryModule {
     private DcMotor encoder;
     private int ticks;

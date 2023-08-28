@@ -1,10 +1,13 @@
-package org.firstinspires.ftc.teamcode.localiation;
+package org.firstinspires.ftc.teamcode.localiation.TuningOpModes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.localiation.Constants;
+import org.firstinspires.ftc.teamcode.localiation.Trajectory;
 
 import java.util.ArrayList;
 
@@ -28,7 +31,7 @@ public class NewMotioinProfileTester extends LinearOpMode {
             TelemetryPacket p = new TelemetryPacket();
 //            p.put("mp", trajectory.amp);
             p.put("mp1", mp);
-            p.put("xAccels", trajectory.xAccels);
+            //p.put("xAccels", trajectory.xAccels);
 
 
             dash.sendTelemetryPacket(p);
