@@ -1,18 +1,14 @@
 package org.firstinspires.ftc.teamcode.localiation;
 
 import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.FeedforwardController;
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.FeedforwardEx;
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 @Config
@@ -116,7 +112,7 @@ public class Test extends LinearOpMode {
 //            packet.put("accelX",accelerationNormalized.getX());
 //            packet.put("accelY",accelerationNormalized.getY());
             Constants.lastPose = Constants.robotPose;
-            l.updateMethod();
+            l.update();
 //            packet.put("time",(int)Math.round(Constants.getTime()/100000000.0-startTime));
 //            packet.put("length",trajectory.length);
 //            packet.put("tvalue",trajectory.tValues.get((int)Math.round(Constants.getTime()/100000000.0-startTime)));

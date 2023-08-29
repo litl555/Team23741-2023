@@ -81,7 +81,7 @@ public class FieldCentric1 extends LinearOpMode {
             }
 
 
-            customLocalization.updateMethod();
+            customLocalization.update();
             //driver.update();
             packet.put("arcLength",trajectory.length);
             packet.put("X", Constants.robotPose.getX());

@@ -14,9 +14,9 @@ import java.util.ArrayList;
  */
 public class LoggerTool {
     private TelemetryPacket p = new TelemetryPacket();
-    private FtcDashboard dash = FtcDashboard.getInstance();
-    private ArrayList<Double> xPosVals = new ArrayList<>();
-    private ArrayList<Double> yPosVals = new ArrayList<>();
+    private final FtcDashboard dash = FtcDashboard.getInstance();
+    private final ArrayList<Double> xPosVals = new ArrayList<>();
+    private final ArrayList<Double> yPosVals = new ArrayList<>();
     private double[] xvals;
     private double[] yvals;
 

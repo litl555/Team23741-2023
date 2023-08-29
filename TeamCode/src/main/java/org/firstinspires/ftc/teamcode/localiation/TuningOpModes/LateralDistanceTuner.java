@@ -28,9 +28,9 @@ public class LateralDistanceTuner extends LinearOpMode {
                 if(gamepad1.y){
                     stop=true;
                 }
-                localizer.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x,gamepad1.left_stick_y,gamepad1.right_stick_x));
-                localizer.updateMethod();
-                DashboardUtil.drawRobot(packet.fieldOverlay(),new Pose2d(Constants.robotPose.getX()*.0394,Constants.robotPose.getY()*.0394,(Constants.robotPose.getHeading())));
+                localizer.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
+                localizer.update();
+                DashboardUtil.drawRobot(packet.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
                 dashboard.sendTelemetryPacket(packet);
             }
             localizer.setMotorPowers(0,0,0,0);
