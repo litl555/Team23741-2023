@@ -18,6 +18,7 @@ public class CustomLocalization {
 
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
         Constants.angle = 0;
+
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
@@ -27,6 +28,7 @@ public class CustomLocalization {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pose = startPose;
+        Constants.robotPose = startPose;
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
         rightPod.reverse();

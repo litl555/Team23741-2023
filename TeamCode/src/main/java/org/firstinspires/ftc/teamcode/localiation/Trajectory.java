@@ -189,6 +189,30 @@ public class Trajectory {
             }
             count++;
         }
+        count = profile.size() - 2;
+        for (int i = profile.size() - 1; i > 0; i -= 1) {
+            double xoption, yoption;
+
+            if (i == profile.size() - 1) {
+                profile.set(i, 0.0);
+            }
+            double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
+            double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
+            double xAccel = (Math.signum(xCount) * Math.pow(xCount, 2) - Math.signum(xI) * Math.pow(xI, 2)) / (2.0 * spaceRes);
+
+            double yCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getY();
+            double yI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getY();
+            double yAccel = (Math.signum(yCount) * Math.pow(yCount, 2) - Math.signum(yI) * Math.pow(yI, 2)) / (2.0 * spaceRes);
+
+
+            xoption = backPassCheck(xAccel, xCount, xI, count, normalize(velocities(velosSpaced.get(count))).getX());
+            yoption = backPassCheck(yAccel, yCount, yI, count, normalize(velocities(velosSpaced.get(count))).getY());
+
+            if (xoption < 1000000000 || yoption < 1000000000) {
+                profile.set(count, Math.min(xoption, yoption));
+            }
+            count--;
+        }
         //EDGE CASE PASS
         int counter1 = profile.size() - 2;
         for (int s = profile.size() - 1; s > 0; s--) {
@@ -230,7 +254,7 @@ public class Trajectory {
             }
             counter1++;
         }
-        count = profile.size() - 2;
+
         xAccels = new ArrayList<>();
         //BACKWARDS PASS
 
@@ -256,11 +280,12 @@ public class Trajectory {
             }
             counter3--;
         }
+        count = profile.size() - 2;
         for (int i = profile.size() - 1; i > 0; i -= 1) {
             double xoption, yoption;
 
             if (i == profile.size() - 1) {
-                profile.set(counter1, 0.0);
+                profile.set(i, 0.0);
             }
             double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
             double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
@@ -279,6 +304,7 @@ public class Trajectory {
             }
             count--;
         }
+
         amp = new ArrayList<>();
         count = 1;
         for (double vel : profile) {
@@ -369,7 +395,7 @@ public class Trajectory {
 
     public Pose2d accelerrations(double t) {
         return (new Pose2d(20.0 * (p5.getX() - 5.0 * p4.getX() + 10 * p3.getX() - 10 * p2.getX() + 5 * p1.getX() - p0.getX()) * t * t * t + 60.0 * (p4.getX() - 4.0 * (p3.getX() + p1.getX()) + 6.0 * p2.getX() + p0.getX()) * t * t + 60.0 * (p3.getX() - 3.0 * p2.getX() + 3.0 * p1.getX() - p0.getX()) * t + 20.0 * (p2.getX() - 2.0 * p1.getX() + p0.getX()), 20.0 * (p5.getY() - 5.0 * p4.getY() + 10 * p3.getY() - 10 * p2.getY() + 5 * p1.getY() - p0.getY()) * t * t * t + 60.0 * (p4.getY() - 4.0 * (p3.getY() + p1.getY()) + 6.0 * p2.getY() + p0.getY()) * t * t + 60.0 * (p3.getY() - 3.0 * p2.getY() + 3.0 * p1.getY() - p0.getY()) * t + 20.0 * (p2.getY() - 2.0 * p1.getY() + p0.getY())
-
+//:))
         ));
     }
 

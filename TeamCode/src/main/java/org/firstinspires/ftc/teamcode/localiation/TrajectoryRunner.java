@@ -49,7 +49,7 @@ public class TrajectoryRunner {
 
     public TrajectoryRunner(HardwareMap hardwareMap, CustomLocalization l, Trajectory trajectory, double angle, HeadingType headingType, LoggerTool telemetry) {
         battery = hardwareMap.voltageSensor.iterator().next();
-        telemetry.setCurrentTrajectory(trajectory);
+
         loggerTool = telemetry;
         t = trajectory;
         this.headingType = headingType;
@@ -59,7 +59,7 @@ public class TrajectoryRunner {
     }
 
     public void start() {
-
+        loggerTool.setCurrentTrajectory(t);
         currentState = State.RUNNING;
         startTime = toSec(getTime());
         lastTime = startTime;
@@ -90,6 +90,7 @@ public class TrajectoryRunner {
 
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
         Constants.lastPose = Constants.robotPose;
+        loggerTool.add("totaltime", t.totalTime);
         if (getElapsedTime() > t.totalTime) {
             currentState = State.CORRECTING;
         }
@@ -97,11 +98,14 @@ public class TrajectoryRunner {
 
     private void correctMode() {
         Pose2d positions = t.equation(1.0);
-        double x = kpxy * (positions.getX() + robotPose.getY());
-        double y = -1.0 * kpxy * (positions.getY() - robotPose.getX());
+        double x = .007 * (positions.getX() + robotPose.getY());
+        double y = -1.0 * .007 * (positions.getY() - robotPose.getX());
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
         Constants.lastPose = Constants.robotPose;
-        if (Math.sqrt(Math.pow(robotPose.getX() - positions.getY(), 2) + Math.pow(robotPose.getY() - positions.getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
+        loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.p5.getY(), 2) + Math.pow(robotPose.getY() - this.t.p5.getX(), 2)));
+        loggerTool.add("end", this.t.p5);
+        loggerTool.add("pos", robotPose);
+        if (Math.sqrt(Math.pow(robotPose.getX() - t.p5.getY(), 2) + Math.pow(-robotPose.getY() - t.p5.getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
             currentState = State.FINISHED;
             l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
             loggerTool.setCurrentTrajectoryNull();

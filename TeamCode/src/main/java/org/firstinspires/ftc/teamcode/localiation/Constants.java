@@ -22,7 +22,7 @@ public class Constants {
     public static double LATERAL_DISTANCE = 299; //Distance beween odometry wheels 151.425f*2f
     public static final float ODO_WHEEL_RADIUS = 17.5f;
     public static final float PPR = 8192f;
-    public static final Pose2d startPose = new Pose2d(0, 0, 0);
+    public static final Pose2d startPose = new Pose2d(0, 250, 0);
 
     public static Pose2d robotPose = new Pose2d(0, 0, 0);
 

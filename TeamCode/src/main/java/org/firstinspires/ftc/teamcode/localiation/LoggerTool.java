@@ -33,13 +33,14 @@ public class LoggerTool {
     }
 
     public void setCurrentTrajectory(Trajectory trajectory) {
-        xvals = new double[101];
-        yvals = new double[101];
+        xvals = new double[100];
+        yvals = new double[100];
         for (int i = 0; i < 100; i++) {
             Pose2d pos = trajectory.equation((double) i / 100.0);
             yvals[i] = -(pos.getX() / 25.4);
             xvals[i] = (pos.getY() / 25.4);
         }
+
     }
 
     private void drawRobot() {
@@ -71,11 +72,11 @@ public class LoggerTool {
     private void updatePreviousPoseValsList() {
         Pose2d rp = new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading()));
         xPosVals.add(0, (double) rp.getX());
-        if (xPosVals.size() > 500) {
+        if (xPosVals.size() > 50000) {
             xPosVals.remove(xPosVals.size() - 1);
         }
         yPosVals.add(0, (double) rp.getY());
-        if (yPosVals.size() > 500) {
+        if (yPosVals.size() > 50000) {
             yPosVals.remove(yPosVals.size() - 1);
         }
     }
