@@ -13,7 +13,7 @@ public class CustomLocalization {
     OdometryModule leftPod, rightPod, backPod;
     DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
-    double X_MULTIPLIER = 1;
+    double X_MULTIPLIER = .994;
     double Y_MULTIPLER = (double) 1;
 
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
