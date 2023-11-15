@@ -1,15 +1,14 @@
-package org.firstinspires.ftc.teamcode.localiation.Autonomous;
+package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.localiation.Constants;
-import org.firstinspires.ftc.teamcode.localiation.CustomLocalization;
-import org.firstinspires.ftc.teamcode.localiation.LoggerTool;
-import org.firstinspires.ftc.teamcode.localiation.MultipleTrajectoryRunner;
-import org.firstinspires.ftc.teamcode.localiation.Trajectory;
-import org.firstinspires.ftc.teamcode.localiation.TrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultipleTrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 
 import java.util.ArrayList;
 

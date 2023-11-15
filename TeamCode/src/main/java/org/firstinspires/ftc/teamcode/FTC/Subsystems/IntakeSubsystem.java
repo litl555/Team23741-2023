@@ -1,10 +1,12 @@
-package org.firstinspires.ftc.teamcode.localiation;
+package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,9 +15,12 @@ public class IntakeSubsystem extends SubsystemBase {
     HardwareMap hardwareMap;
     List<Pixel> pixelsLoaded = new ArrayList<>();
     ColorSensor colorSensorTop, colorSensorBottom;
+    public int pixelPassCount = 0;
+    public boolean seePixel = false;
     DcMotor intakeMotor;
     double intakePower = 1;
     double outtakePower = -1;
+    Robot robot;
 
     public enum IntakePosition {
         UP,
@@ -32,12 +37,8 @@ public class IntakeSubsystem extends SubsystemBase {
     public double intakeUpPosition = 0.0;
     public double intakeDownPosition = 1.0;
 
-    public IntakeSubsystem(HardwareMap hardwareMap) {
-        this.hardwareMap = hardwareMap;
-        intake = hardwareMap.servo.get("intake");
-        intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
-        colorSensorBottom = hardwareMap.colorSensor.get("c1");
-        colorSensorTop = hardwareMap.colorSensor.get("c2");
+    public IntakeSubsystem(Robot robot) {
+        this.robot = robot;
     }
 
     public void getPixelsInIntake() {
@@ -48,21 +49,33 @@ public class IntakeSubsystem extends SubsystemBase {
     public void update(IntakePowerSetting power) {
         switch (power) {
             case INTAKE:
-                intakeMotor.setPower(intakePower);
+                setPower(intakePower);
             case IDLE:
-                intakeMotor.setPower(0.0);
+                setPower(0.0);
             case OUTTAKE:
-                intakeMotor.setPower(outtakePower);
+                setPower(outtakePower);
 
         }
+    }
+
+    public void setPower(double power) {
+        robot.intakeMotor.setPower(power);
+    }
+
+    public void resetPixel() {
+        pixelPassCount = 0;
+    }
+
+    public double getDistance() {
+        return (robot.distance.getDistance(DistanceUnit.MM));
     }
 
     public void setIntakePosition(IntakePosition pos) {
         switch (pos) {
             case UP:
-                intake.setPosition(intakeUpPosition);
+                robot.intake.setPosition(intakeUpPosition);
             case DOWN:
-                intake.setPosition(intakeDownPosition);
+                robot.intake.setPosition(intakeDownPosition);
         }
     }
 

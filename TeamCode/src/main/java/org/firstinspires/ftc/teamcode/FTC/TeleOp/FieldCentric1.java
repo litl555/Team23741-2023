@@ -1,8 +1,6 @@
-package org.firstinspires.ftc.teamcode.localiation.TeleOp;
+package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.FeedforwardEx;
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -10,14 +8,11 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Const;
-import org.firstinspires.ftc.teamcode.localiation.Constants;
-import org.firstinspires.ftc.teamcode.localiation.CustomLocalization;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-import org.firstinspires.ftc.teamcode.localiation.Trajectory;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

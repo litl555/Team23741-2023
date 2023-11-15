@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.localiation;
+package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
@@ -7,8 +7,11 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 
-import static org.firstinspires.ftc.teamcode.localiation.Constants.*;
-import static org.firstinspires.ftc.teamcode.localiation.FollowerConstants.*;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.*;
+import static org.firstinspires.ftc.teamcode.FTC.PathFollowing.FollowerConstants.*;
 
 public class LineRunner {
     public VoltageSensor battery;

@@ -1,13 +1,13 @@
-package org.firstinspires.ftc.teamcode.localiation.TeleOp;
+package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.localiation.Constants;
-import org.firstinspires.ftc.teamcode.localiation.CustomLocalization;
-import org.firstinspires.ftc.teamcode.localiation.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 
 @Config
 @TeleOp

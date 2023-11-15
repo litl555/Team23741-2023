@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.localiation;
+package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
@@ -7,10 +7,14 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
-import static org.firstinspires.ftc.teamcode.localiation.Constants.getTime;
-import static org.firstinspires.ftc.teamcode.localiation.Constants.robotPose;
-import static org.firstinspires.ftc.teamcode.localiation.Constants.toSec;
-import static org.firstinspires.ftc.teamcode.localiation.FollowerConstants.*;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.toSec;
+import static org.firstinspires.ftc.teamcode.FTC.PathFollowing.FollowerConstants.*;
 
 
 @Config

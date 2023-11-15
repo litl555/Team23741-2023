@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.localiation;
+package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
@@ -9,6 +9,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 @Config
