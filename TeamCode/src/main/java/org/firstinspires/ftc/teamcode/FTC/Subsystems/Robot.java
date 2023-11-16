@@ -6,9 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Robot {
-    public DcMotor motor1, motor2, intakeMotor;
-    public Servo claw1, claw2, intake;
-    public DistanceSensor distance;
+    public static DcMotor motor1, motor2, intakeMotor;
+    public static Servo claw1, claw2, intake, wrist1, wrist2, arm1, arm2;
+    public static DistanceSensor distance;
+    public static boolean pastTruss = false;
 
     public Robot(HardwareMap hardwareMap) {
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");

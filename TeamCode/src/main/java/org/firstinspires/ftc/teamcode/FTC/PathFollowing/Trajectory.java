@@ -18,15 +18,18 @@ public class Trajectory {
     public ArrayList<Double> velosSpaced, timeValues, amp, xAccels;
     Pose2d start, end, startVelo, endVelo, startAccel, endAccel, p0, p1, p2, p3, p4, p5;
     public double totalTime = 0;
+    boolean startStopped, endStopped;
 
 
-    public Trajectory(Pose2d start, Pose2d end, Pose2d startVelo, Pose2d endVelo, Pose2d startAccel, Pose2d endAccel) {
+    public Trajectory(Pose2d start, Pose2d end, Pose2d startVelo, Pose2d endVelo, Pose2d startAccel, Pose2d endAccel, boolean startStopped, boolean endStopped) {
         this.start = start;
         this.end = end;
         this.startVelo = startVelo;
         this.endVelo = endVelo;
         this.startAccel = startAccel;
         this.endAccel = endAccel;
+        this.startStopped = startStopped;
+        this.endStopped = endStopped;
         p0 = start;
         p5 = end;
         p1 = new Pose2d(startVelo.getX() / 5.0 + p0.getX(), startVelo.getY() / 5.0 + p0.getY());
@@ -120,7 +123,11 @@ public class Trajectory {
         //FORWARD PASS
         for (double i : velosSpaced) {
             if (count == 1) {
-                profile.add(0.0);
+                if (startStopped) {
+                    profile.add(0.0);
+                } else {
+                    profile.add(Constants.maxVelocty);
+                }
                 double xoption = 1000000000;
                 double yoption = 1000000000;
                 double noOption = Constants.maxVelocty;
@@ -196,7 +203,9 @@ public class Trajectory {
             double xoption, yoption;
 
             if (i == profile.size() - 1) {
-                profile.set(i, 0.0);
+                if (endStopped) {
+                    profile.set(i, 0.0);
+                }
             }
             double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
             double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();
@@ -287,7 +296,9 @@ public class Trajectory {
             double xoption, yoption;
 
             if (i == profile.size() - 1) {
-                profile.set(i, 0.0);
+                if (endStopped) {
+                    profile.set(i, 0.0);
+                }
             }
             double xCount = normalize(velocities(velosSpaced.get(count))).times(profile.get(count)).getX();
             double xI = normalize(velocities(velosSpaced.get(i))).times(profile.get(i)).getX();

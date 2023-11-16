@@ -24,10 +24,10 @@ public class TrajectoryTester extends LinearOpMode {
 //        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(1, 1000), new Pose2d(-800, 4800), new Pose2d(-1600, 1800), new Pose2d(-1530, 4120), new Pose2d(0, -200));
 //        Trajectory trajectory = new Trajectory(new Pose2d(-100, 0), new Pose2d(100, 000), new Pose2d(00, 3000), new Pose2d(0, -3000), new Pose2d(-500, 0), new Pose2d(500, 0));
         //Trajectory trajectory = new Trajectory(new Pose2d(-250, 0), new Pose2d(0, 1000), new Pose2d(00, 5000), new Pose2d(0, 3726), new Pose2d(-2236, 2854), new Pose2d(135, 1440));
-        Trajectory trajectory = new Trajectory(new Pose2d(-250, 0), new Pose2d(290, 1760), new Pose2d(0, 5000), new Pose2d(1810, -3090), new Pose2d(-2236, 2854), new Pose2d(135, 1440));
+        Trajectory trajectory = new Trajectory(new Pose2d(-250, 0), new Pose2d(290, 1760), new Pose2d(0, 5000), new Pose2d(1810, -3090), new Pose2d(-2236, 2854), new Pose2d(135, 1440), true, false);
 
-        Trajectory trajectory1 = new Trajectory(new Pose2d(300, 0), new Pose2d(900, 1750), new Pose2d(670, 1580), new Pose2d(160, 2900), new Pose2d(6330, -4220), new Pose2d(4600, -3400));
-        Trajectory trajectory2 = new Trajectory(new Pose2d(00, -200), new Pose2d(-100, 00), new Pose2d(-630, -380), new Pose2d(0, 200), new Pose2d(-1560, 1560), new Pose2d(-940, -1280));
+        Trajectory trajectory1 = new Trajectory(new Pose2d(300, 0), new Pose2d(900, 1750), new Pose2d(670, 1580), new Pose2d(160, 2900), new Pose2d(6330, -4220), new Pose2d(4600, -3400), false, false);
+        Trajectory trajectory2 = new Trajectory(new Pose2d(00, -200), new Pose2d(-100, 00), new Pose2d(-630, -380), new Pose2d(0, 200), new Pose2d(-1560, 1560), new Pose2d(-940, -1280), false, true);
         TrajectoryRunner tr = new TrajectoryRunner(hardwareMap, localization, trajectory, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry);
 
         TrajectoryRunner tr1 = new TrajectoryRunner(hardwareMap, localization, trajectory1, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry);

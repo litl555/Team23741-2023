@@ -12,7 +12,6 @@ import java.util.List;
 public class LiftSubsystem extends SubsystemBase {
     HardwareMap hardwareMap;
 
-    Robot robot;
     public List<Double> rowHeights = Arrays.asList(0.0, 1.0, 2.0, 3.0, 4.0);
     double P = 0.0;
     double I = 0.0;
@@ -21,13 +20,17 @@ public class LiftSubsystem extends SubsystemBase {
     double targetPos = 0;
     BasicPID controller = new BasicPID(new PIDCoefficients(P, I, D));
 
-    public LiftSubsystem(Robot robot) {
-        this.robot = robot;
+    public LiftSubsystem() {
+
     }
 
     public void updateRow(int index) {
         targetPos = rowHeights.get(index);
 
+    }
+
+    public void setTargetPos(double height) {
+        targetPos = height;
     }
 
     public void loop() {
@@ -37,12 +40,12 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
     public void setPower(double power) {
-        robot.motor1.setPower(power);
-        robot.motor2.setPower(-power);
+        Robot.motor1.setPower(power);
+        Robot.motor2.setPower(-power);
     }
 
     public double read() {
-        return (robot.motor2.getCurrentPosition());
+        return (Robot.motor2.getCurrentPosition());
     }
 
 }

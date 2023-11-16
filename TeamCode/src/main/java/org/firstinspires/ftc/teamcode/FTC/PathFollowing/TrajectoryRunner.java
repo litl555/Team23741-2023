@@ -96,7 +96,11 @@ public class TrajectoryRunner {
         Constants.lastPose = Constants.robotPose;
         loggerTool.add("totaltime", t.totalTime);
         if (getElapsedTime() > t.totalTime) {
-            currentState = State.CORRECTING;
+            if (t.endStopped) {
+                currentState = State.CORRECTING;
+            } else {
+                currentState = State.FINISHED;
+            }
         }
     }
 

@@ -20,7 +20,7 @@ public class IntakeSubsystem extends SubsystemBase {
     DcMotor intakeMotor;
     double intakePower = 1;
     double outtakePower = -1;
-    Robot robot;
+
 
     public enum IntakePosition {
         UP,
@@ -38,7 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public double intakeDownPosition = 1.0;
 
     public IntakeSubsystem(Robot robot) {
-        this.robot = robot;
+
     }
 
     public void getPixelsInIntake() {
@@ -59,7 +59,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void setPower(double power) {
-        robot.intakeMotor.setPower(power);
+        Robot.intakeMotor.setPower(power);
     }
 
     public void resetPixel() {
@@ -67,15 +67,15 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public double getDistance() {
-        return (robot.distance.getDistance(DistanceUnit.MM));
+        return (Robot.distance.getDistance(DistanceUnit.MM));
     }
 
     public void setIntakePosition(IntakePosition pos) {
         switch (pos) {
             case UP:
-                robot.intake.setPosition(intakeUpPosition);
+                Robot.intake.setPosition(intakeUpPosition);
             case DOWN:
-                robot.intake.setPosition(intakeDownPosition);
+                Robot.intake.setPosition(intakeDownPosition);
         }
     }
 
