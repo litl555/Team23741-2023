@@ -10,13 +10,19 @@ public class Robot {
     public static Servo claw1, claw2, intake, wrist1, wrist2, arm1, arm2;
     public static DistanceSensor distance;
     public static boolean pastTruss = false;
+    public static HardwareMap hardwareMap;
 
     public Robot(HardwareMap hardwareMap) {
+        Robot.hardwareMap = hardwareMap;
         intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
         intake = hardwareMap.servo.get("intake");
         motor1 = hardwareMap.dcMotor.get("liftMotor1");
         motor2 = hardwareMap.dcMotor.get("liftMotor2");
         distance = hardwareMap.get(DistanceSensor.class, "distance");
 
+    }
+
+    public static boolean isPastTruss() {
+        return (pastTruss);
     }
 }

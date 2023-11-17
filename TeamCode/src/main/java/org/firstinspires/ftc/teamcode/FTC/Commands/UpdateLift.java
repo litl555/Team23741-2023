@@ -5,9 +5,9 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 
 public class UpdateLift extends InstantCommand {
-    public UpdateLift(LiftSubsystem lift, double height) {
+    public UpdateLift(LiftSubsystem lift, int height) {
         super(
-                () -> lift.setTargetPos(height)
+                () -> lift.updateRow(height)
         );
     }
 }

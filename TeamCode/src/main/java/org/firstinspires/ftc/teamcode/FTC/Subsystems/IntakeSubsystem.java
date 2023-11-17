@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,15 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem(Robot robot) {
 
+    }
+
+    @Override
+    public void periodic() {
+        if (Constants.robotPose.getY() > 100) {
+            Robot.pastTruss = true;
+        } else {
+            Robot.pastTruss = false;
+        }
     }
 
     public void getPixelsInIntake() {

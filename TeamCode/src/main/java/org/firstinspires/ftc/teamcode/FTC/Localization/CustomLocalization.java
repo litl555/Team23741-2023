@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.FTC.Localization;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import java.util.List;
 
 /**
  * Handles the calculations of odometry and drivetrain commands
  */
 public class CustomLocalization {
+
     Pose2d pose = new Pose2d(0, 0, 0);
 
     OdometryModule leftPod, rightPod, backPod;
@@ -18,7 +22,11 @@ public class CustomLocalization {
 
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
         Constants.angle = 0;
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
 
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.OFF);
+        }
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");

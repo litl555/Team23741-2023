@@ -33,10 +33,10 @@ public class LiftSubsystem extends SubsystemBase {
         targetPos = height;
     }
 
-    public void loop() {
+    @Override
+    public void periodic() {
         double controllerPower = controller.calculate(targetPos, read());
         setPower(Range.clip(controllerPower + F, -1, 1));
-
     }
 
     public void setPower(double power) {

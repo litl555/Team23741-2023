@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ClawSubsystem extends SubsystemBase {
 
     public enum ClawState {
@@ -11,6 +15,8 @@ public class ClawSubsystem extends SubsystemBase {
         HALFCLOSE
     }
 
+    public List<Double> rowWrist = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    public List<Double> rowArm = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
     private double closedPos1 = 0.0;
     private double closedPos2 = 0.0;
     private double halfPos = .5;
@@ -39,6 +45,14 @@ public class ClawSubsystem extends SubsystemBase {
                 Robot.claw1.setPosition(halfPos);
         }
 
+    }
+
+    public void updateArmRow(int index) {
+        setArm(rowArm.get(index));
+    }
+
+    public void updateWristRow(int index) {
+        setWrist(rowWrist.get(index));
     }
 
     public void setWrist(double angle) {

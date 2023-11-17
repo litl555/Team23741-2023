@@ -4,13 +4,10 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 
-/**
- * Reset number of pixels in intake
- */
-public class ResetPixels extends InstantCommand {
-    public ResetPixels(IntakeSubsystem intake) {
+public class UpdateIntake extends InstantCommand {
+    public UpdateIntake(IntakeSubsystem intake, IntakeSubsystem.IntakePowerSetting power) {
         super(
-                () -> intake.resetPixel()
+                () -> intake.update(power)
         );
     }
 }
