@@ -49,7 +49,7 @@ public class Trajectory {
     private void getTotalTimeSum() {
         totalTime = timeValues.get(timeValues.size() - 2);
     }
-
+/*
     //Old Version
     private void generateTValues() {
         ArrayList<Double> values = new ArrayList<>();
@@ -66,7 +66,7 @@ public class Trajectory {
         }
         tValues = values;
     }
-
+*/
     private double calculateLength(double a, double b) {
         double integral = 0;
         for (int i = 0; i < 100; i++) {
@@ -75,7 +75,7 @@ public class Trajectory {
         }
         return (integral);
     }
-
+/*
     private double getTValue(double time, double previousT) {
         double arcLengthVelo = 1.0 / 2.0 * ((getVelocityProfile(time).getX() - getVelocityProfile(time - deltaT).getX()) / (deltaT)) * Math.pow(deltaT, 2) + getVelocityProfile(time - deltaT).getX() * deltaT;
         Constants.yes += arcLengthVelo;
@@ -87,7 +87,7 @@ public class Trajectory {
         }
         return X;
     }
-
+*/
     /**
      * Generates equally spaced t values for spline
      */
@@ -378,21 +378,22 @@ public class Trajectory {
         return (vec.div(len));
     }
 
-    public Pose2d getVelocityProfile(double time) {
-        double totalTime = getTotalTime();
-        Constants.timed = totalTime;
-        if (time < Constants.maxVelocty / Constants.maxAcceleration) {
-            return (new Pose2d(time * Constants.maxAcceleration, Constants.maxAcceleration));
-        } else if (time < totalTime - Constants.maxVelocty / Constants.maxAcceleration) {
-            return (new Pose2d(Constants.maxVelocty, 0));
-        } else if (time < totalTime) {
-            return (new Pose2d(-1.0 * Constants.maxAcceleration * ((time - (totalTime - Constants.maxVelocty / Constants.maxAcceleration))) + Constants.maxVelocty, -Constants.maxAcceleration));
-        } else {
-            return new Pose2d(0, 0);
+    /*
+        public Pose2d getVelocityProfile(double time) {
+            double totalTime = getTotalTime();
+            Constants.timed = totalTime;
+            if (time < Constants.maxVelocty / Constants.maxAcceleration) {
+                return (new Pose2d(time * Constants.maxAcceleration, Constants.maxAcceleration));
+            } else if (time < totalTime - Constants.maxVelocty / Constants.maxAcceleration) {
+                return (new Pose2d(Constants.maxVelocty, 0));
+            } else if (time < totalTime) {
+                return (new Pose2d(-1.0 * Constants.maxAcceleration * ((time - (totalTime - Constants.maxVelocty / Constants.maxAcceleration))) + Constants.maxVelocty, -Constants.maxAcceleration));
+            } else {
+                return new Pose2d(0, 0);
 
+            }
         }
-    }
-
+    */
     private double getSlope(double t) {
         Pose2d velocities = velocities(t);
         return (Math.sqrt(Math.pow(velocities.getX(), 2) + Math.pow(velocities.getY(), 2)));

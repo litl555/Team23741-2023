@@ -21,7 +21,7 @@ import java.util.List;
 public class FieldCentric1 extends LinearOpMode {
     private FtcDashboard dashboard = FtcDashboard.getInstance();
     //Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,-8),new Pose2d(10,44),new Pose2d(0,45),new Pose2d(549,-60),new Pose2d(540,60));
-    Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1560, 2610), new Pose2d(580, 2885), new Pose2d(3110, 1950), new Pose2d(-1280, -1250));
+    Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1560, 2610), new Pose2d(580, 2885), new Pose2d(3110, 1950), new Pose2d(-1280, -1250), true, true);
 
     @Override
     public void runOpMode() throws InterruptedException {
