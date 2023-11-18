@@ -96,7 +96,7 @@ public class Trajectory {
         velosSpaced = new ArrayList<>();
         for (int i = 0; i < length / spaceRes; i++) {
 
-            double X = previousT + .01;
+            double X = previousT + .000;
             for (int a = 0; a < 10; a++) {
                 double len = calculateLength(previousT, X);
                 double slope = getSlope(X);

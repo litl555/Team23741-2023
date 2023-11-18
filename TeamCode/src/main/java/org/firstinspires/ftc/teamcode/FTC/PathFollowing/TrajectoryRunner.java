@@ -95,6 +95,7 @@ public class TrajectoryRunner {
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
         Constants.lastPose = Constants.robotPose;
         loggerTool.add("totaltime", t.totalTime);
+
         if (getElapsedTime() > t.totalTime) {
             if (t.endStopped) {
                 currentState = State.CORRECTING;

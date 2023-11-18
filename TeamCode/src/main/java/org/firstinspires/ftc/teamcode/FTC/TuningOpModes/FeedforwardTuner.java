@@ -30,8 +30,8 @@ public class FeedforwardTuner extends LinearOpMode {
         Mode mode = Mode.AUTO;
         LoggerTool telemetry = new LoggerTool();
         CustomLocalization localization = new CustomLocalization(Constants.startPose, hardwareMap);
-        Line trajectory = new Line(new Pose2d(0, 0), new Pose2d(1, dist));
-        Line trajectory1 = new Line(new Pose2d(1, dist), new Pose2d(0, 0));
+        Line trajectory = new Line(new Pose2d(0, 0), new Pose2d(1, dist), true, true);
+        Line trajectory1 = new Line(new Pose2d(1, dist), new Pose2d(0, 0), true, true);
         LineRunner tr = new LineRunner(hardwareMap, localization, trajectory, 0, LineRunner.HeadingType.ConstantHeadingVelo);
         LineRunner tr1 = new LineRunner(hardwareMap, localization, trajectory1, 0, LineRunner.HeadingType.ConstantHeadingVelo);
         LineRunner trCurrent = tr;

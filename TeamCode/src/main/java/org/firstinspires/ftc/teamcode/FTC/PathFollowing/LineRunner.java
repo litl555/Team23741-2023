@@ -86,7 +86,11 @@ public class LineRunner {
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
         Constants.lastPose = Constants.robotPose;
         if (getElapsedTime() > t.getTotalTime()) {
-            currentState = TrajectoryRunner.State.CORRECTING;
+            if (t.endStopped) {
+                currentState = TrajectoryRunner.State.CORRECTING;
+            } else {
+                currentState = TrajectoryRunner.State.FINISHED;
+            }
         }
     }
 
@@ -145,6 +149,7 @@ public class LineRunner {
         if (masterIndex > 0) {
             masterIndex--;
         }
+
         return masterIndex;
     }
 }

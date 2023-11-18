@@ -12,14 +12,19 @@ public class Line {
     public ArrayList<Double> velosSpaced;
     ArrayList<Double> timeValues = new ArrayList<>();
     public ArrayList<Double> mp = new ArrayList<>();
+    boolean startStopped;
+    boolean endStopped;
 
-    public Line(Pose2d start, Pose2d end) {
+    public Line(Pose2d start, Pose2d end, boolean startStopped, boolean endStopped) {
+        this.startStopped = startStopped;
+        this.endStopped = endStopped;
         this.start = start;
         this.end = end;
         velosSpaced = generateVelosSpaced();
         mp = generateLineMP();
 
         timeValues = generateTimeValues();
+
     }
 
     private ArrayList<Double> generateTimeValues() {
@@ -38,7 +43,11 @@ public class Line {
 
         for (int i = 0; i < velosSpaced.size() - 1; i++) {
             if (i == 0) {
-                mp1.add(0.0);
+                if (startStopped) {
+                    mp1.add(0.0);
+                } else {
+                    mp1.add(Constants.maxVelocty);
+                }
 
             }
 
@@ -53,7 +62,11 @@ public class Line {
         int counter1 = mp1.size() - 2;
         for (int i = mp1.size() - 1; i > 1; i--) {
             if (i == mp1.size() - 1) {
-                mp1.set(i, 0.0);
+                if (endStopped) {
+                    mp1.set(i, 0.0);
+                } else {
+                    mp1.set(i, Constants.maxVelocty);
+                }
             }
 
             if ((Math.pow(mp1.get(i - 1), 2) - Math.pow(mp1.get(i), 2)) / (2.0 * spaceRes) > Constants.maxAcceleration) {
@@ -63,6 +76,7 @@ public class Line {
 
             counter1--;
         }
+        mp1.remove(mp1.size() - 1);
         return mp1;
     }
 

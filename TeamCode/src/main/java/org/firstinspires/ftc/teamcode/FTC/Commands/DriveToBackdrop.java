@@ -17,8 +17,9 @@ import java.util.ArrayList;
 ///Drives to central position of backdrop
 public class DriveToBackdrop extends CommandBase {
     private boolean isFinished = false;
-    Trajectory tr = new Trajectory(new Pose2d(Constants.robotPose.getX(), Constants.robotPose.getY()), new Pose2d(900, 600), new Pose2d(0, 800), new Pose2d(0, 500), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
-    Trajectory tr1 = new Trajectory(new Pose2d(900, 600), new Pose2d(900, 600), new Pose2d(0, 800), new Pose2d(0, 500), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
+    Trajectory tr = new Trajectory(new Pose2d(Constants.robotPose.getX(), Constants.robotPose.getY()), new Pose2d(900, -900), new Pose2d(0, 00), new Pose2d(0, 1000), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
+//    Trajectory tr1 = new Trajectory(new Pose2d(900, 600), new Pose2d(900, 600), new Pose2d(0, 800), new Pose2d(0, 500), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
+
     MultipleTrajectoryRunner mtr;
     Pose2d backdropPos = new Pose2d(2700, 2400);
     Trajectory tr2 = new Trajectory(new Pose2d(900, 1750), backdropPos, new Pose2d(1490, 950), new Pose2d(950, 1350), new Pose2d(-160, 270), new Pose2d(0, 0), false, true);
@@ -30,14 +31,14 @@ public class DriveToBackdrop extends CommandBase {
     public DriveToBackdrop() {
 
 
-        ArrayList<TrajectoryRunner> trajectoryRunners = new ArrayList<>();
+//        ArrayList<TrajectoryRunner> trajectoryRunners = new ArrayList<>();
 
 
-        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
+//        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
 
-        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr1, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
-        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr2, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
-        mtr = new MultipleTrajectoryRunner(trajectoryRunners);
+//        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr1, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
+//        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr2, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
+//        mtr = new MultipleTrajectoryRunner(trajectoryRunners);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class DriveToBackdrop extends CommandBase {
     //Execute will be called each loop until isFinished=true
     @Override
     public void execute() {
-        mtr.update();
+        
 
         telemetry.update();
         if (mtr.finished) {

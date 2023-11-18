@@ -9,6 +9,8 @@ public class MultipleTrajectoryRunner {
 
     public MultipleTrajectoryRunner(ArrayList<TrajectoryRunner> trajectoryRunners) {
         this.trajectoryRunners = trajectoryRunners;
+
+
     }
 
     public void start() {
