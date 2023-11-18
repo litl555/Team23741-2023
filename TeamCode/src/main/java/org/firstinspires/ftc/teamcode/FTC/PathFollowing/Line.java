@@ -6,8 +6,9 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 
 import java.util.ArrayList;
 
-public class Line {
+public class Line implements TrajectoryInterface {
     private double spaceRes = 10.0;
+    ArrayList<Double> amp;
     private Pose2d start, end;
     public ArrayList<Double> velosSpaced;
     ArrayList<Double> timeValues = new ArrayList<>();
@@ -76,16 +77,56 @@ public class Line {
 
             counter1--;
         }
-        mp1.remove(mp1.size() - 1);
+        amp = new ArrayList<>();
+        int count = 1;
+        for (double vel : mp1) {
+            if (count < mp1.size()) {
+                amp.add((Math.pow(mp1.get(count), 2) - Math.pow(vel, 2)) / (2.0 * spaceRes));
+            }
+            count++;
+        }
+
         return mp1;
     }
 
     public Pose2d equation(double x) {
-        if (velocity().getX() < 0 && velocity().getY() < 0) {
+        //the 0 is arbitrary to satisfy the interface requirements
+        if (velocities(0).getX() < 0 && velocities(0).getY() < 0) {
             return (new Pose2d(start.getX() - x, start.getY() - getSlope() * x));
         } else {
             return (new Pose2d(x + start.getX(), getSlope() * x + start.getY()));
         }
+    }
+
+
+    public ArrayList<Double> getVelosSpaced() {
+        return velosSpaced;
+    }
+
+
+    public ArrayList<Double> getMp() {
+        return mp;
+    }
+
+
+    public ArrayList<Double> getAmp() {
+        return amp;
+    }
+
+
+    public boolean getEndStopped() {
+        return endStopped;
+    }
+
+
+    public ArrayList<Double> getTimeValuesVar() {
+        return timeValues;
+    }
+
+
+    @Override
+    public Pose2d accelerrations(double t) {
+        return new Pose2d(0, 0);
     }
 
     private double xEven() {
@@ -114,12 +155,12 @@ public class Line {
         return (Math.sqrt(Math.pow(end.getX() - start.getX(), 2) + Math.pow(end.getY() - start.getY(), 2)));
     }
 
-    public Pose2d velocity() {
+    public Pose2d velocities(double t) {
         return (normalize(new Pose2d(end.getX() - start.getX(), end.getY() - start.getY())));
     }
 
     private double getSlope() {
-        return (velocity().getY() / velocity().getX());
+        return (velocities(0).getY() / velocities(0).getX());
     }
 
     public Pose2d normalize(Pose2d vec) {
@@ -129,6 +170,11 @@ public class Line {
 
     public double getTotalTime() {
         return (timeValues.get(timeValues.size() - 1));
+    }
+
+
+    public Pose2d getEnd() {
+        return end;
     }
 
 }

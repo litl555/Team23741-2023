@@ -67,11 +67,11 @@ public class TrajectoryTester extends LinearOpMode {
             if (tr.currentState != TrajectoryRunner.State.FINISHED) {
                 tr.update();
             }
-            double velocityY = tr.t.normalize(tr.t.velocities(tr.t.velosSpaced.get(tr.ind))).times(tr.t.mp.get(tr.ind)).getY();
-            double velocityX = tr.t.normalize(tr.t.velocities(tr.t.velosSpaced.get(tr.ind))).times(tr.t.mp.get(tr.ind)).getX();
+            double velocityY = tr.t.normalize(tr.t.velocities(tr.t.getVelosSpaced().get(tr.ind))).times(tr.t.getMp().get(tr.ind)).getY();
+            double velocityX = tr.t.normalize(tr.t.velocities(tr.t.getVelosSpaced().get(tr.ind))).times(tr.t.getMp().get(tr.ind)).getX();
 
-            telemetry.add("velocityx", tr.t.normalize(tr.t.velocities(tr.t.velosSpaced.get(tr.ind))).times(tr.t.mp.get(tr.ind)).getX());
-            telemetry.add("velocityy", tr.t.normalize(tr.t.velocities(tr.t.velosSpaced.get(tr.ind))).times(tr.t.mp.get(tr.ind)).getY());
+            telemetry.add("velocityx", tr.t.normalize(tr.t.velocities(tr.t.getVelosSpaced().get(tr.ind))).times(tr.t.getMp().get(tr.ind)).getX());
+            telemetry.add("velocityy", tr.t.normalize(tr.t.velocities(tr.t.getVelosSpaced().get(tr.ind))).times(tr.t.getMp().get(tr.ind)).getY());
             telemetry.add("velocity", Math.sqrt(Math.pow(velocityY, 2) + Math.pow(velocityX, 2)));
 
             telemetry.add("loopTime", toSec(getTime()) - lastTime);

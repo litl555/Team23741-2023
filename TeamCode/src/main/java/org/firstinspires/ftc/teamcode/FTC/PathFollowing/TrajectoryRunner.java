@@ -45,13 +45,13 @@ public class TrajectoryRunner {
     private double lastTime = 0;
     BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
     BasicFeedforward fy = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
-    public Trajectory t;
+    public TrajectoryInterface t;
     private double startTime;
     private final CustomLocalization l;
     HeadingType headingType;
     LoggerTool loggerTool;
 
-    public TrajectoryRunner(HardwareMap hardwareMap, CustomLocalization l, Trajectory trajectory, double angle, HeadingType headingType, LoggerTool telemetry) {
+    public TrajectoryRunner(HardwareMap hardwareMap, CustomLocalization l, TrajectoryInterface trajectory, double angle, HeadingType headingType, LoggerTool telemetry) {
         battery = hardwareMap.voltageSensor.iterator().next();
 
         loggerTool = telemetry;
@@ -79,12 +79,12 @@ public class TrajectoryRunner {
 
     private void runningMode() {
         ind = getIndex();
-        double tv = t.velosSpaced.get(ind);
+        double tv = t.getVelosSpaced().get(ind);
         Pose2d velocity = t.velocities(tv);
 
         Pose2d acceleration = t.accelerrations(tv);
-        Pose2d velocityNormalized = t.normalize(velocity).times(t.mp.get(ind)).times(12.0 / battery.getVoltage());
-        Pose2d accelerationNormalized = t.normalize(acceleration).times(t.amp.get(ind)).times(12.0 / battery.getVoltage());
+        Pose2d velocityNormalized = t.normalize(velocity).times(t.getMp().get(ind)).times(12.0 / battery.getVoltage());
+        Pose2d accelerationNormalized = t.normalize(acceleration).times(t.getAmp().get(ind)).times(12.0 / battery.getVoltage());
         Pose2d positions = t.equation(tv);
         double loopTime = getLoopTime();
         double x = kpxy * (positions.getX() + Constants.robotPose.getY()) + (kp * (velocityNormalized.getX() + Constants.robotPose.minus(Constants.lastPose).div(loopTime).getY()) + (fx.calculate(0, velocityNormalized.getX(), accelerationNormalized.getX())));
@@ -94,10 +94,10 @@ public class TrajectoryRunner {
 
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
         Constants.lastPose = Constants.robotPose;
-        loggerTool.add("totaltime", t.totalTime);
+        loggerTool.add("totaltime", t.getTotalTime());
 
-        if (getElapsedTime() > t.totalTime) {
-            if (t.endStopped) {
+        if (getElapsedTime() > t.getTotalTime()) {
+            if (t.getEndStopped()) {
                 currentState = State.CORRECTING;
             } else {
                 currentState = State.FINISHED;
@@ -111,10 +111,10 @@ public class TrajectoryRunner {
         double y = -1.0 * .007 * (positions.getY() - robotPose.getX());
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
         Constants.lastPose = Constants.robotPose;
-        loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.p5.getY(), 2) + Math.pow(robotPose.getY() - this.t.p5.getX(), 2)));
-        loggerTool.add("end", this.t.p5);
+        loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
+        loggerTool.add("end", this.t.getEnd());
         loggerTool.add("pos", robotPose);
-        if (Math.sqrt(Math.pow(robotPose.getX() - t.p5.getY(), 2) + Math.pow(-robotPose.getY() - t.p5.getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
+        if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
             currentState = State.FINISHED;
             l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
             loggerTool.setCurrentTrajectoryNull();
@@ -124,9 +124,9 @@ public class TrajectoryRunner {
 
     private double getAngleValue(Pose2d velocityNormalized) {
         double angleVal = 0;
-        if (getElapsedTime() / t.totalTime < 1) {
+        if (getElapsedTime() / t.getTotalTime() < 1) {
             if (headingType == HeadingType.ConstantHeadingVelo) {
-                angleVal = kpa * (-Constants.angle - getElapsedTime() / t.totalTime * Math.toRadians(angleDes));
+                angleVal = kpa * (-Constants.angle - getElapsedTime() / t.getTotalTime() * Math.toRadians(angleDes));
             }
             if (headingType == HeadingType.TangentHeading) {
                 if (velocityNormalized.getX() < 0 && velocityNormalized.getY() < 0) {
@@ -155,9 +155,9 @@ public class TrajectoryRunner {
     private int getIndex() {
         int masterIndex = 0;
         for (double time :
-                t.timeValues) {
+                t.getTimeValuesVar()) {
             if (getElapsedTime() < time) {
-                masterIndex = t.timeValues.indexOf(time);
+                masterIndex = t.getTimeValuesVar().indexOf(time);
                 break;
             }
         }

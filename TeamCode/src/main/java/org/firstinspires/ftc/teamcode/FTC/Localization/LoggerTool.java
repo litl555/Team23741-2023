@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryInterface;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class LoggerTool {
         p = new TelemetryPacket();
     }
 
-    public void setCurrentTrajectory(Trajectory trajectory) {
+    public void setCurrentTrajectory(TrajectoryInterface trajectory) {
         xvals = new double[100];
         yvals = new double[100];
         for (int i = 0; i < 100; i++) {

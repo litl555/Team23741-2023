@@ -12,7 +12,9 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.*;
 import static org.firstinspires.ftc.teamcode.FTC.PathFollowing.FollowerConstants.*;
-
+/**
+ * THIS CLASS SHOULD NOT BE USED! USE TRAJECTORY RUNNER FOR ALL LINES AND TRAJECTORIES!!!
+ **/
 public class LineRunner {
     public VoltageSensor battery;
 
@@ -71,7 +73,7 @@ public class LineRunner {
     private void runningMode() {
         ind = getIndex();
         double tv = t.velosSpaced.get(ind);
-        Pose2d velocity = t.velocity();
+        Pose2d velocity = t.velocities(0);
 
 //        Pose2d acceleration = t.accelerrations(tv);
         Pose2d velocityNormalized = t.normalize(velocity).times(t.mp.get(ind)).times(12.0 / battery.getVoltage());

@@ -4,12 +4,13 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
  * Defines a quintic spline trajectory and generates its motion profile
  */
-public class Trajectory {
+public class Trajectory implements TrajectoryInterface {
     private final double deltaT = .1;
     private final double spaceRes = 10;
     public double length = 0;
@@ -45,28 +46,32 @@ public class Trajectory {
 
     }
 
+    public boolean getEndStopped() {
+        return (endStopped);
+    }
 
     private void getTotalTimeSum() {
         totalTime = timeValues.get(timeValues.size() - 2);
     }
-/*
-    //Old Version
-    private void generateTValues() {
-        ArrayList<Double> values = new ArrayList<>();
-        double previous = 0;
-        for (int i = 1; i < getTotalTime() / deltaT; i++) {
-            values.add(getTValue(i * deltaT, previous));
-            previous = values.get(values.size() - 1);
 
+    /*
+        //Old Version
+        private void generateTValues() {
+            ArrayList<Double> values = new ArrayList<>();
+            double previous = 0;
+            for (int i = 1; i < getTotalTime() / deltaT; i++) {
+                values.add(getTValue(i * deltaT, previous));
+                previous = values.get(values.size() - 1);
+
+            }
+            int counter = 0;
+            for (double i : values) {
+                values.set(counter, values.get(counter) / values.get(values.size() - 1));
+                counter++;
+            }
+            tValues = values;
         }
-        int counter = 0;
-        for (double i : values) {
-            values.set(counter, values.get(counter) / values.get(values.size() - 1));
-            counter++;
-        }
-        tValues = values;
-    }
-*/
+    */
     private double calculateLength(double a, double b) {
         double integral = 0;
         for (int i = 0; i < 100; i++) {
@@ -329,6 +334,22 @@ public class Trajectory {
         return profile;
     }
 
+    public Pose2d getEnd() {
+        return (p5);
+    }
+
+    public ArrayList<Double> getMp() {
+        return mp;
+    }
+
+    public ArrayList<Double> getAmp() {
+        return amp;
+    }
+
+    public ArrayList<Double> getTimeValuesVar() {
+        return (timeValues);
+    }
+
     private double backPassCheck(double xAccel, double xCount, double xI, int count, double div) {
         double xoption;
 
@@ -369,8 +390,15 @@ public class Trajectory {
 
     }
 
-    private double getTotalTime() {
-        return ((length - 1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2) - (1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2))) / Constants.maxVelocty + 2.0 * (Constants.maxVelocty / Constants.maxAcceleration));
+    //    public double getTotalTime() {
+//        return ((length - 1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2) - (1.0 / 2.0 * Constants.maxAcceleration * Math.pow(Constants.maxVelocty / Constants.maxAcceleration, 2))) / Constants.maxVelocty + 2.0 * (Constants.maxVelocty / Constants.maxAcceleration));
+//    }
+    public ArrayList<Double> getVelosSpaced() {
+        return (velosSpaced);
+    }
+
+    public double getTotalTime() {
+        return totalTime;
     }
 
     public Pose2d normalize(Pose2d vec) {
