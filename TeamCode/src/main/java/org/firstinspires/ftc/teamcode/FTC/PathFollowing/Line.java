@@ -124,7 +124,7 @@ public class Line implements TrajectoryInterface {
     }
 
 
-    @Override
+
     public Pose2d accelerrations(double t) {
         return new Pose2d(0, 0);
     }
@@ -147,7 +147,7 @@ public class Line implements TrajectoryInterface {
             X += xEven();
 
         }
-        vals.add(end.getX());
+        vals.add(end.getY() - start.getY());
         return vals;
     }
 

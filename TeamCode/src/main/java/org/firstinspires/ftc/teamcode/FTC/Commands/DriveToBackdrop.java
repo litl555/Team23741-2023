@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Line;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultipleTrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 import java.util.ArrayList;
@@ -18,19 +19,19 @@ import java.util.ArrayList;
 ///Drives to central position of backdrop
 public class DriveToBackdrop extends CommandBase {
     private boolean isFinished = false;
-    Trajectory tr = new Trajectory(new Pose2d(Constants.robotPose.getX(), Constants.robotPose.getY()), new Pose2d(900, -900), new Pose2d(0, 00), new Pose2d(0, 1000), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
+    Trajectory tr = new Trajectory(new Pose2d(-Constants.robotPose.getY(), Constants.robotPose.getX()), new Pose2d(900, -900), new Pose2d(0, 00), new Pose2d(0, 1000), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
     //    Trajectory tr1 = new Trajectory(new Pose2d(900, 600), new Pose2d(900, 600), new Pose2d(0, 800), new Pose2d(0, 500), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
-    Line line = new Line(new Pose2d(Constants.robotPose.getX(), Constants.robotPose.getY()), new Pose2d(900, 600), false, true);
+    Line line = new Line(new Pose2d(900, -900), new Pose2d(901, 600), false, true);
     MultipleTrajectoryRunner mtr;
     Pose2d backdropPos = new Pose2d(2700, 2400);
 //    Trajectory tr2 = new Trajectory(new Pose2d(900, 1750), backdropPos, new Pose2d(1490, 950), new Pose2d(950, 1350), new Pose2d(-160, 270), new Pose2d(0, 0), false, true);
 
     HardwareMap hardwareMap = Robot.hardwareMap;
     LoggerTool telemetry = new LoggerTool();
-    CustomLocalization l = new CustomLocalization(new Pose2d(0, -300, 0), hardwareMap);
+    CustomLocalization l;
 
-    public DriveToBackdrop() {
-
+    public DriveToBackdrop(DriveSubsystem robot) {
+        this.l = robot.l;
 
         ArrayList<TrajectoryRunner> trajectoryRunners = new ArrayList<>();
 
@@ -51,6 +52,7 @@ public class DriveToBackdrop extends CommandBase {
     @Override
     public void execute() {
 
+
         mtr.update();
         telemetry.update();
         if (mtr.finished) {
@@ -58,8 +60,13 @@ public class DriveToBackdrop extends CommandBase {
         }
     }
 
+    public void end() {
+        Robot.isBusy = false;
+    }
+
     @Override
     public boolean isFinished() {
         return (isFinished);
+
     }
 }

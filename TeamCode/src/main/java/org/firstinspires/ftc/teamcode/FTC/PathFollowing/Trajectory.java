@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 public class Trajectory implements TrajectoryInterface {
     private final double deltaT = .1;
-    private final double spaceRes = 10;
+    private final double spaceRes = 60.0;
     public double length = 0;
     public ArrayList<Double> tValues;
     public ArrayList<Double> mp;
@@ -73,7 +73,7 @@ public class Trajectory implements TrajectoryInterface {
         }
     */
     private double calculateLength(double a, double b) {
-        double integral = 0;
+        double integral = 0.0;
         for (int i = 0; i < 100; i++) {
             Pose2d velocity = velocities((double) i * (b - a) / 100.0 + a);
             integral += 1.0 * (b - a) / 100.0 * (Math.sqrt(Math.pow(velocity.getX(), 2) + Math.pow(velocity.getY(), 2)));
@@ -97,12 +97,12 @@ public class Trajectory implements TrajectoryInterface {
      * Generates equally spaced t values for spline
      */
     private void generateSpacedValues() {
-        double previousT = 0;
+        double previousT = 0.0;
         velosSpaced = new ArrayList<>();
         for (int i = 0; i < length / spaceRes; i++) {
 
-            double X = previousT + .000;
-            for (int a = 0; a < 10; a++) {
+            double X = previousT + .001;
+            for (int a = 0; a < 100; a++) {
                 double len = calculateLength(previousT, X);
                 double slope = getSlope(X);
                 X = (-1.0 * (len - spaceRes) + X * slope) / slope;

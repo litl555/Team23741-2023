@@ -67,17 +67,19 @@ public class CustomLocalization {
         leftPod.update();
         backPod.update();
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
-        if (dT == 0) {
-            dT = (double) .0000000000001;
-        }
         Constants.angle += dT;
         double T = Constants.robotPose.getHeading();
         dF = (R + L) / (double) 2;
         dS = (B - Constants.PERPENDICULAR_X * dT);
-        r0 = dF / dT;
-        r1 = dS / dT;
-        dX = r0 * Math.sin(dT) - r1 * ((double) 1 - Math.cos(dT));
-        dY = r1 * Math.sin(dT) + r0 * ((double) 1 - Math.cos(dT));
+        if (dT == 0.0) {
+            dX = dF;
+            dY = dS;
+        } else {
+            r0 = dF / dT;
+            r1 = dS / dT;
+            dX = r0 * Math.sin(dT) - r1 * ((double) 1 - Math.cos(dT));
+            dY = r1 * Math.sin(dT) + r0 * ((double) 1 - Math.cos(dT));
+        }
         fx = (double) (dX * Math.cos(T) - dY * Math.sin(T));
         fy = (double) (dY * Math.cos(T) + dX * Math.sin(T));
 

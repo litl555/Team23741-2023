@@ -11,14 +11,14 @@ public class Robot {
     public static DistanceSensor distance;
     public static boolean pastTruss = false;
     public static HardwareMap hardwareMap;
-
+    public static boolean isBusy = false;
     public Robot(HardwareMap hardwareMap) {
         Robot.hardwareMap = hardwareMap;
-        intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
-        intake = hardwareMap.servo.get("intake");
-        motor1 = hardwareMap.dcMotor.get("liftMotor1");
-        motor2 = hardwareMap.dcMotor.get("liftMotor2");
-        distance = hardwareMap.get(DistanceSensor.class, "distance");
+        //intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
+        //intake = hardwareMap.servo.get("intake");
+        //motor1 = hardwareMap.dcMotor.get("liftMotor1");
+        //motor2 = hardwareMap.dcMotor.get("liftMotor2");
+        //distance = hardwareMap.get(DistanceSensor.class, "distance");
 
     }
 

@@ -7,10 +7,12 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackdrop;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 import java.util.logging.Logger;
 
@@ -20,17 +22,19 @@ public class CommandTest extends CommandOpMode {
     LoggerTool telemetry;
     DriveSubsystem driveSubsystem;
     GamepadEx gamepadEx1;
+    Robot robot;
 
     @Override
     public void initialize() {
+        robot = new Robot(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
         CommandScheduler.getInstance().reset();
-        l = new CustomLocalization(new Pose2d(-1500, 300, 0), hardwareMap);
+        l = new CustomLocalization(new Pose2d(-1500, -300, 0), hardwareMap);
         telemetry = new LoggerTool();
-        driveSubsystem = new DriveSubsystem(l);
+        driveSubsystem = new DriveSubsystem(l, telemetry);
         register(driveSubsystem);
-        gamepadEx1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(() -> schedule(new DriveToBackdrop()));
-
+        gamepadEx1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(() -> schedule(new DriveToBackdrop(driveSubsystem)));
+        driveSubsystem.setDefaultCommand(new Drive(driveSubsystem, gamepad1));
     }
 
 }

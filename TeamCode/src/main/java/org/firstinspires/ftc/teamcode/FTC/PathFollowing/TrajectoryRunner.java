@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
@@ -67,6 +68,9 @@ public class TrajectoryRunner {
         currentState = State.RUNNING;
         startTime = toSec(getTime());
         lastTime = startTime;
+        loggerTool.add("HELLO", t.getTotalTime());
+        loggerTool.add("start", startTime);
+
     }
 
     public void update() {
@@ -81,10 +85,16 @@ public class TrajectoryRunner {
         ind = getIndex();
         double tv = t.getVelosSpaced().get(ind);
         Pose2d velocity = t.velocities(tv);
-
+        loggerTool.add("ind", ind);
         Pose2d acceleration = t.accelerrations(tv);
         Pose2d velocityNormalized = t.normalize(velocity).times(t.getMp().get(ind)).times(12.0 / battery.getVoltage());
-        Pose2d accelerationNormalized = t.normalize(acceleration).times(t.getAmp().get(ind)).times(12.0 / battery.getVoltage());
+        Pose2d accelerationNormalized;
+        if (acceleration.getX() == 0 && acceleration.getY() == 0) {
+            accelerationNormalized = new Pose2d(0, 0);
+        } else {
+
+            accelerationNormalized = t.normalize(acceleration).times(t.getAmp().get(ind)).times(12.0 / battery.getVoltage());
+        }
         Pose2d positions = t.equation(tv);
         double loopTime = getLoopTime();
         double x = kpxy * (positions.getX() + Constants.robotPose.getY()) + (kp * (velocityNormalized.getX() + Constants.robotPose.minus(Constants.lastPose).div(loopTime).getY()) + (fx.calculate(0, velocityNormalized.getX(), accelerationNormalized.getX())));
@@ -95,12 +105,15 @@ public class TrajectoryRunner {
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
         Constants.lastPose = Constants.robotPose;
         loggerTool.add("totaltime", t.getTotalTime());
+        loggerTool.add("looptime", getLoopTime());
 
         if (getElapsedTime() > t.getTotalTime()) {
             if (t.getEndStopped()) {
                 currentState = State.CORRECTING;
             } else {
                 currentState = State.FINISHED;
+                loggerTool.add("endElapsed", getElapsedTime());
+                loggerTool.add("end", Constants.toSec(Constants.getTime()));
             }
         }
     }
@@ -111,9 +124,11 @@ public class TrajectoryRunner {
         double y = -1.0 * .007 * (positions.getY() - robotPose.getX());
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
         Constants.lastPose = Constants.robotPose;
+
         loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
         loggerTool.add("end", this.t.getEnd());
         loggerTool.add("pos", robotPose);
+
         if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
             currentState = State.FINISHED;
             l.setWeightedDrivePowers(new Pose2d(0, 0, 0));

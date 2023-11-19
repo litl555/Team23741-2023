@@ -42,10 +42,10 @@ public class FeedforwardTuner extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             if (mode == Mode.AUTO) {
                 telemetry.add("mp", tr.t.mp);
-                telemetry.add("velocityx", trCurrent.t.normalize(trCurrent.t.velocity()).times(12.0 / trCurrent.battery.getVoltage()).times(trCurrent.t.mp.get(trCurrent.ind)).getX());
+                telemetry.add("velocityx", trCurrent.t.normalize(trCurrent.t.velocities(0)).times(12.0 / trCurrent.battery.getVoltage()).times(trCurrent.t.mp.get(trCurrent.ind)).getX());
                 telemetry.add("velocityxReal", Constants.robotPose.minus(Constants.lastPose).div(toSec(getTime()) - lastTime).getX());
                 telemetry.add("velocityyReal", Constants.robotPose.minus(Constants.lastPose).div(toSec(getTime()) - lastTime).getY());
-                telemetry.add("velocityy", trCurrent.t.normalize(trCurrent.t.velocity()).times(12.0 / trCurrent.battery.getVoltage()).times(trCurrent.t.mp.get(trCurrent.ind)).getY());
+                telemetry.add("velocityy", trCurrent.t.normalize(trCurrent.t.velocities(0)).times(12.0 / trCurrent.battery.getVoltage()).times(trCurrent.t.mp.get(trCurrent.ind)).getY());
                 telemetry.add("loopTime", toSec(getTime()) - lastTime);
                 telemetry.add("equation", trCurrent.t.equation(tr.t.velosSpaced.get(tr.ind)));
                 telemetry.add("totaltime", trCurrent.t.getTotalTime());
