@@ -15,6 +15,8 @@ public interface TrajectoryInterface {
 
     ArrayList<Double> getMp();
 
+    double getClosestTValue(Pose2d point);
+
     ArrayList<Double> getAmp();
 
     boolean getEndStopped();

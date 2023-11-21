@@ -41,7 +41,7 @@ public class CustomLocalization {
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
         rightPod.reverse();
         backPod = new OdometryModule(hardwareMap.dcMotor.get("rightFront"));
-        backPod.reverse();
+
         backPod.reset();
         rightPod.reset();
         leftPod.reset();

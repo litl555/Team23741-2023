@@ -9,9 +9,13 @@ public class Robot {
     public static DcMotor motor1, motor2, intakeMotor;
     public static Servo claw1, claw2, intake, wrist1, wrist2, arm1, arm2;
     public static DistanceSensor distance;
+    public static DistanceSensor distance1;
+    public static DistanceSensor distance2;//this is left of robot
     public static boolean pastTruss = false;
     public static HardwareMap hardwareMap;
+    public static double distanceBetween = 100;
     public static boolean isBusy = false;
+
     public Robot(HardwareMap hardwareMap) {
         Robot.hardwareMap = hardwareMap;
         //intakeMotor = hardwareMap.dcMotor.get("intakeMotor");

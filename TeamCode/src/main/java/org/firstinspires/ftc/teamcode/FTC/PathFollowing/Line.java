@@ -38,6 +38,12 @@ public class Line implements TrajectoryInterface {
         return tv;
     }
 
+    public double getClosestTValue(Pose2d point) {
+        double slope = getSlope();
+        return ((-1.0 * point.getX() / slope - point.getY() - slope * start.getX() + start.getY()) / (-1 / slope - slope));
+
+    }
+
     private ArrayList<Double> generateLineMP() {
         ArrayList<Double> mp1 = new ArrayList<>();
 

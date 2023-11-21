@@ -30,6 +30,8 @@ public class PlacePixel extends SequentialCommandGroup {
                         new GoToHeight(new LiftSubsystem(), new ClawSubsystem(), row1),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(driveToBackdrop::isFinished),
+                                //Snap a pic and correct
+
                                 new PIDToPose(leftColumn.plus(new Pose2d(column1, 0, 0)), l)
                         )
                 ),

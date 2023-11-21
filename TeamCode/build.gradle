@@ -22,7 +22,9 @@ android {
         jniLibs.useLegacyPackaging true
     }
 }
-
+repositories {
+    maven { url = 'https://jitpack.io' }
+}
 dependencies {
     //implementation 'com.github.Eeshwar-Krishnan:PhotonFTC:v2.0.4'
     implementation project(':FtcRobotController')

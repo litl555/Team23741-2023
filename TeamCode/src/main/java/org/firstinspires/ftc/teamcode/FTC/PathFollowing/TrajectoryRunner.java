@@ -4,6 +4,7 @@ import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforwa
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
@@ -38,7 +39,8 @@ public class TrajectoryRunner {
     }
 
     public int ind;
-
+    public double kvCorrect = 0;
+    public double kvFollow = 0;
     public static double angleDes = 90;
     public State currentState = State.PRESTART;
 
@@ -82,40 +84,49 @@ public class TrajectoryRunner {
     }
 
     private void runningMode() {
-        ind = getIndex();
-        double tv = t.getVelosSpaced().get(ind);
-        Pose2d velocity = t.velocities(tv);
-        loggerTool.add("ind", ind);
-        Pose2d acceleration = t.accelerrations(tv);
-        Pose2d velocityNormalized = t.normalize(velocity).times(t.getMp().get(ind)).times(12.0 / battery.getVoltage());
-        Pose2d accelerationNormalized;
-        if (acceleration.getX() == 0 && acceleration.getY() == 0) {
-            accelerationNormalized = new Pose2d(0, 0);
-        } else {
-
-            accelerationNormalized = t.normalize(acceleration).times(t.getAmp().get(ind)).times(12.0 / battery.getVoltage());
-        }
-        Pose2d positions = t.equation(tv);
-        double loopTime = getLoopTime();
-        double x = kpxy * (positions.getX() + Constants.robotPose.getY()) + (kp * (velocityNormalized.getX() + Constants.robotPose.minus(Constants.lastPose).div(loopTime).getY()) + (fx.calculate(0, velocityNormalized.getX(), accelerationNormalized.getX())));
-        double y = -1.0 * (kpxy * (positions.getY() - Constants.robotPose.getX()) + kp * (velocityNormalized.getY() - Constants.robotPose.minus(Constants.lastPose).div(loopTime).getX()) + fy.calculate(0, velocityNormalized.getY(), accelerationNormalized.getY()));
-
-        double angleVal = getAngleValue(velocityNormalized);
-
-        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
-        Constants.lastPose = Constants.robotPose;
-        loggerTool.add("totaltime", t.getTotalTime());
-        loggerTool.add("looptime", getLoopTime());
-
-        if (getElapsedTime() > t.getTotalTime()) {
-            if (t.getEndStopped()) {
-                currentState = State.CORRECTING;
-            } else {
-                currentState = State.FINISHED;
-                loggerTool.add("endElapsed", getElapsedTime());
-                loggerTool.add("end", Constants.toSec(Constants.getTime()));
-            }
-        }
+        double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
+        Pose2d derivative = t.velocities(closestT);
+        Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * derivative.getY());
+        Pose2d point = t.equation(closestT);
+        Vector2d correctionalVector = new Vector2d(kvCorrect * point.getX() + robotPose.getY(), kvCorrect * point.getY() - robotPose.getX());
+        Vector2d sum = pathVector.plus(correctionalVector);
+        sum = sum.div(Math.sqrt(sum.dot(sum)));
+        l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
+        getLoopTime();
+//        ind = getIndex();
+//        double tv = t.getVelosSpaced().get(ind);
+//        Pose2d velocity = t.velocities(tv);
+//        loggerTool.add("ind", ind);
+//        Pose2d acceleration = t.accelerrations(tv);
+//        Pose2d velocityNormalized = t.normalize(velocity).times(t.getMp().get(ind)).times(12.0 / battery.getVoltage());
+//        Pose2d accelerationNormalized;
+//        if (acceleration.getX() == 0 && acceleration.getY() == 0) {
+//            accelerationNormalized = new Pose2d(0, 0);
+//        } else {
+//
+//            accelerationNormalized = t.normalize(acceleration).times(t.getAmp().get(ind)).times(12.0 / battery.getVoltage());
+//        }
+//        Pose2d positions = t.equation(tv);
+//        double loopTime = getLoopTime();
+//        double x = kpxy * (positions.getX() + Constants.robotPose.getY()) + (kp * (velocityNormalized.getX() + Constants.robotPose.minus(Constants.lastPose).div(loopTime).getY()) + (fx.calculate(0, velocityNormalized.getX(), accelerationNormalized.getX())));
+//        double y = -1.0 * (kpxy * (positions.getY() - Constants.robotPose.getX()) + kp * (velocityNormalized.getY() - Constants.robotPose.minus(Constants.lastPose).div(loopTime).getX()) + fy.calculate(0, velocityNormalized.getY(), accelerationNormalized.getY()));
+//
+//        double angleVal = getAngleValue(velocityNormalized);
+//
+//        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
+//        Constants.lastPose = Constants.robotPose;
+//        loggerTool.add("totaltime", t.getTotalTime());
+//        loggerTool.add("looptime", getLoopTime());
+//
+//        if (getElapsedTime() > t.getTotalTime()) {
+//            if (t.getEndStopped()) {
+//                currentState = State.CORRECTING;
+//            } else {
+//                currentState = State.FINISHED;
+//                loggerTool.add("endElapsed", getElapsedTime());
+//                loggerTool.add("end", Constants.toSec(Constants.getTime()));
+//            }
+//        }
     }
 
     private void correctMode() {

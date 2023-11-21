@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 
@@ -397,8 +398,61 @@ public class Trajectory implements TrajectoryInterface {
         return (velosSpaced);
     }
 
+
     public double getTotalTime() {
         return totalTime;
+    }
+
+    public double getRadiusOfCurvature(double t) {
+        Pose2d velocity = velocities(t);
+        Pose2d acc = accelerrations(t);
+        double numerator = Math.pow((Math.pow(velocity.getX(), 2) + Math.pow(velocity.getY(), 2)), 3.0 / 2.0);
+        double denominator = (velocity.getX() * acc.getY() - velocity.getY() * acc.getX());
+        return (Math.abs(numerator / denominator));
+    }
+
+    public Vector2d getRadiusVectorNormalized(double t) {
+        Vector2d point1 = new Vector2d(velocities(t).getY(), -velocities(t).getX());
+        point1 = point1.div(Math.sqrt(point1.dot(point1)));
+        Vector2d point2 = new Vector2d(-velocities(t).getY(), velocities(t).getX());
+        point2 = point2.div(Math.sqrt(point2.dot(point2)));
+        Vector2d point = new Vector2d(0, 0);
+        if (equation(t + .01).vec().distTo(point1.times(getRadiusOfCurvature(t))) > equation(t + .01).vec().distTo(point2.times(getRadiusOfCurvature(t)))) {
+            point = point2;
+        } else {
+            point = point1;
+        }
+        return (point);
+    }
+
+    public double getClosestTValue(Pose2d point) {
+        double t = 0;
+        for (int o = 0; o < 20; o++) {
+            if (getDistance((double) o * 1.0 / 20.0, point) < 0 && getDistanceDerivative((double) o * 1.0 / 20.0, point) > 0) {
+                t = (double) o * 1.0 / 20.0;
+            }
+        }
+        for (int i = 0; i < 20; i++) {
+            double slope = getDistanceDerivative(t, point);
+            t = -getDistance(t, point) / slope + t;
+        }
+        return (t);
+    }
+
+    public double getDistance(double t, Pose2d point) {
+        return (Math.sqrt(Math.pow(equation(t).getX() - point.getX(), 2) + Math.pow(equation(t).getY() - point.getY(), 2)));
+    }
+
+    public double getDistanceDerivative(double t, Pose2d point) {
+        Pose2d velocity = velocities(t);
+        return (2.0 * (equation(t).getX() - point.getX()) * velocity.getX() + 2.0 * (equation(t).getY() - point.getY()) * velocity.getY());
+    }
+
+    public double getDistanceSecondDerivative(double t, Pose2d point) {
+        Pose2d velocity = velocities(t);
+        Pose2d acc = accelerrations(t);
+        return (2.0 * acc.getX() * (equation(t).getX() - point.getX()) + Math.pow(velocity.getX(), 2) + 2.0 * acc.getY() * (velocity.getY() - point.getY()) + velocity.getY() * velocity.getY());
+
     }
 
     public Pose2d normalize(Pose2d vec) {
@@ -432,7 +486,11 @@ public class Trajectory implements TrajectoryInterface {
     }
 
     public Pose2d velocities(double t) {
-        return (new Pose2d(5.0 * ((p5.getX() - 5.0 * p4.getX() + 10.0 * p3.getX() - 10.0 * p2.getX() + 5.0 * p1.getX() - p0.getX()) * Math.pow(t, 4) + 4.0 * (p4.getX() - 4.0 * (p3.getX() + p1.getX()) + 6.0 * p2.getX() + p0.getX()) * Math.pow(t, 3) + 6.0 * (p3.getX() - 3.0 * p2.getX() + 3.0 * p1.getX() - p0.getX()) * t * t + 4.0 * (p2.getX() - 2.0 * p1.getX() + p0.getX()) * t + p1.getX() - p0.getX()), 5.0 * ((p5.getY() - 5.0 * p4.getY() + 10.0 * p3.getY() - 10.0 * p2.getY() + 5.0 * p1.getY() - p0.getY()) * Math.pow(t, 4) + 4.0 * (p4.getY() - 4.0 * (p3.getY() + p1.getY()) + 6.0 * p2.getY() + p0.getY()) * Math.pow(t, 3) + 6.0 * (p3.getY() - 3.0 * p2.getY() + 3.0 * p1.getY() - p0.getY()) * t * t + 4.0 * (p2.getY() - 2.0 * p1.getY() + p0.getY()) * t + p1.getY() - p0.getY())));
+        double x = 5.0 * ((p5.getX() - 5.0 * p4.getX() + 10.0 * p3.getX() - 10.0 * p2.getX() + 5.0 * p1.getX() - p0.getX()) * Math.pow(t, 4) + (4.0 * p4.getX() - 16.0 * p3.getX() + 24.0 * p2.getX() - 16.0 * p1.getX() + 4.0 * p0.getX()) * Math.pow(t, 3) + (6.0 * p3.getX() - 18.0 * p2.getX() + 18.0 * p1.getX() - 6.0 * p0.getX()) * t * t + (4.0 * p2.getX() - 8.0 * p1.getX() + 4.0 * p0.getX()) * t + p1.getX() - p0.getX());
+        double y = 5.0 * ((p5.getY() - 5.0 * p4.getY() + 10.0 * p3.getY() - 10.0 * p2.getY() + 5.0 * p1.getY() - p0.getY()) * Math.pow(t, 4) + (4.0 * p4.getY() - 16.0 * p3.getY() + 24.0 * p2.getY() - 16.0 * p1.getY() + 4.0 * p0.getY()) * Math.pow(t, 3) + (6.0 * p3.getY() - 18.0 * p2.getY() + 18.0 * p1.getY() - 6.0 * p0.getY()) * t * t + (4.0 * p2.getY() - 8.0 * p1.getY() + 4.0 * p0.getY()) * t + p1.getY() - p0.getY());
+
+        return (new Pose2d(x, y));
+//        return (new Pose2d(5.0 * ((p5.getX() - 5.0 * p4.getX() + 10.0 * p3.getX() - 10.0 * p2.getX() + 5.0 * p1.getX() - p0.getX()) * Math.pow(t, 4) + 4.0 * (p4.getX() - 4.0 * (p3.getX() + p1.getX()) + 6.0 * p2.getX() + p0.getX()) * Math.pow(t, 3) + 6.0 * (p3.getX() - 3.0 * p2.getX() + 3.0 * p1.getX() - p0.getX()) * t * t + 4.0 * (p2.getX() - 2.0 * p1.getX() + p0.getX()) * t + p1.getX() - p0.getX()), 5.0 * ((p5.getY() - 5.0 * p4.getY() + 10.0 * p3.getY() - 10.0 * p2.getY() + 5.0 * p1.getY() - p0.getY()) * Math.pow(t, 4) + 4.0 * (p4.getY() - 4.0 * (p3.getY() + p1.getY()) + 6.0 * p2.getY() + p0.getY()) * Math.pow(t, 3) + 6.0 * (p3.getY() - 3.0 * p2.getY() + 3.0 * p1.getY() - p0.getY()) * t * t + 4.0 * (p2.getY() - 2.0 * p1.getY() + p0.getY()) * t + p1.getY() - p0.getY())));
     }
 
     public Pose2d accelerrations(double t) {

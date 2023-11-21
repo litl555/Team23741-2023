@@ -26,6 +26,7 @@ public class CommandTest extends CommandOpMode {
 
     @Override
     public void initialize() {
+
         robot = new Robot(hardwareMap);
         gamepadEx1 = new GamepadEx(gamepad1);
         CommandScheduler.getInstance().reset();
@@ -33,7 +34,7 @@ public class CommandTest extends CommandOpMode {
         telemetry = new LoggerTool();
         driveSubsystem = new DriveSubsystem(l, telemetry);
         register(driveSubsystem);
-        gamepadEx1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(() -> schedule(new DriveToBackdrop(driveSubsystem)));
+        gamepadEx1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(() -> schedule(new DriveToBackdrop(driveSubsystem).interruptOn(() -> gamepad1.b)));
         driveSubsystem.setDefaultCommand(new Drive(driveSubsystem, gamepad1));
     }
 
