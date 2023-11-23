@@ -1,0 +1,471 @@
+package org.firstinspires.ftc.teamcode.FTC.Pixels;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.CameraIntrinsics;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.BoardConstants;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.PixelConstants;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Hex;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.PixelColor;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
+import org.opencv.calib3d.Calib3d;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.MatOfPoint3f;
+import org.opencv.core.Point;
+import org.opencv.core.Point3;
+import org.opencv.core.Scalar;
+import org.opencv.imgproc.Imgproc;
+import org.opencv.imgproc.Moments;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.apriltag.AprilTagDetectorJNI;
+import org.openftc.apriltag.AprilTagPose;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
+import org.openftc.easyopencv.OpenCvPipeline;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Map;
+
+public class BoardDetectionPipeline extends OpenCvPipeline {
+    private static final double RVEC_ERROR_THRESHOLD = 0.05;
+    private long detectorPtr;
+    private Mat camMatrix, sharpenKernel, openKernel, closeKernel;
+    private MatOfDouble distCoeff;
+    private ArrayList<AprilTagDetection> detections = new ArrayList<>();
+    private LoggerTool telemetry;
+    private pipelineStatus status = pipelineStatus.initializing;
+    private boolean hasDetectedTags, hasDetectedBoard, shouldGetBoard;
+    private MatOfPoint3f world = new MatOfPoint3f();
+    private Map<Hex, PixelColor> detectedBoard = new Hashtable<>();
+    private Pose tagPose;
+    private OpenCvCamera camera;
+
+    public boolean hasReadTags() { return hasDetectedTags; }
+    public boolean hasReadBoard() { return hasDetectedBoard; }
+    public boolean hasInitialized() { return status != pipelineStatus.initializing; }
+    public Pose getTag() { return tagPose; }
+    public Map<Hex, PixelColor> getBoard() { return detectedBoard; }
+    public boolean requestDetection(boolean shouldGetBoard) { // returns if it succeed in starting or not
+        if (status != pipelineStatus.idle) {
+            telemetry.add("ERROR", "Pipeline is not available to run.");
+            telemetry.update();
+            return false;
+        }
+
+        status = pipelineStatus.toStart;
+        this.shouldGetBoard = shouldGetBoard;
+        return true;
+    }
+
+    public BoardDetectionPipeline(OpenCvCamera camera) {
+        /*
+         * we dont have access to HardwareMap (doesnt extend LinearOpMode) so you have to pass that in
+         * everything else is done here though
+         * OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
+         * BoardDetectionPipeline pipeline = new BoardDetectionPipeline(cam);
+         */
+        this.camera = camera;
+        this.camera.setPipeline(this);
+
+        // TODO: adjust decimation based upon distance to board
+        detectorPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, 1.5f, 3);
+
+        camMatrix = new Mat(3, 3, CvType.CV_32FC1);
+        camMatrix.put(0, 0,
+                CameraIntrinsics.fx, 0, CameraIntrinsics.cx,
+                0, CameraIntrinsics.fy, CameraIntrinsics.cy,
+                0, 0, 1);
+
+        distCoeff = new MatOfDouble();
+        distCoeff.fromArray(CameraIntrinsics.dist);
+
+        telemetry = new LoggerTool();
+
+        // pre generate board from offset coordinates
+        ArrayList<Point3> worldBuffer = new ArrayList<>();
+        for (int row = 0; row < 11; row++) {
+            for (int col = 0; col < (row % 2 == 0 ? 6 : 7); col++) {
+                int q = col - (row - (row % 2)) / 2;
+                int r = row;
+
+                Hex h = new Hex(q, r);
+                detectedBoard.put(h, PixelColor.empty);
+
+                worldBuffer.add(h.irl);
+            }
+        }
+
+        world = new MatOfPoint3f();
+        world.fromList(worldBuffer); // java opencv
+
+        sharpenKernel = new Mat(3, 3, CvType.CV_32SC1);
+        sharpenKernel.put(0, 0,
+                0, -1, 0,
+                -1, 5, -1,
+                0, -1, 0);
+
+        openKernel = new Mat(2, 2, CvType.CV_32SC1);
+        openKernel.put(0, 0,
+                1, 1,
+                1, 1);
+
+        closeKernel = new Mat(3, 3, CvType.CV_32SC1);
+        closeKernel.put(0, 0,
+                1, 1, 1,
+                1, 1, 1,
+                1, 1, 1);
+
+        // TODO: consider only opening camera when we call?
+        this.camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
+            @Override public void onOpened() {
+                camera.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
+                status = pipelineStatus.idle;
+            }
+            @Override public void onError(int errorCode) {}
+        });
+
+        // enable it for debugging
+        this.camera.pauseViewport();
+    }
+
+    @Override
+    public Mat processFrame(Mat input) {
+        if (status == pipelineStatus.idle || status == pipelineStatus.initializing) return input;
+        if (status == pipelineStatus.running) {
+            telemetry.add("ERROR", "Pipeline is already running. Aborting.");
+            telemetry.update();
+            return input;
+        }
+        assert status == pipelineStatus.toStart;
+        status = pipelineStatus.running;
+        hasDetectedBoard = false;
+        hasDetectedTags = false;
+
+        telemetry.add("Status", "Processing new frame");
+
+        // possible optimization: cull mat by half and only look at bottom half
+        // maybe pre allocate these?
+        Mat processedTag = new Mat();
+        Imgproc.cvtColor(input, processedTag, Imgproc.COLOR_RGBA2GRAY);
+        Imgproc.threshold(processedTag, processedTag, 160, 255, Imgproc.THRESH_BINARY);
+
+        detections = AprilTagDetectorJNI.runAprilTagDetectorSimple(detectorPtr, processedTag,
+                BoardConstants.tagSize,
+                CameraIntrinsics.fx, CameraIntrinsics.fy, CameraIntrinsics.cx, CameraIntrinsics.cy);
+
+        if (detections.size() == 0) {
+            telemetry.add("Status", "No tags detected");
+            telemetry.update();
+
+            processedTag.release();
+            return input;
+        }
+
+        tagPose = getPoseFromTag(detections);
+        hasDetectedTags = true;
+
+        if (!shouldGetBoard) {
+            processedTag.release();
+            status = pipelineStatus.idle;
+            return input;
+        }
+
+        // now get where the pixels are
+        Mat processedHex = new Mat();
+        Imgproc.filter2D(input, processedHex, -1, sharpenKernel);
+        Imgproc.cvtColor(processedHex, processedHex, Imgproc.COLOR_RGB2HSV);
+        Map<PixelColor, ArrayList<Point>> hexCenters = new Hashtable<>();
+        Mat mask = new Mat(input.rows(), input.cols(), CvType.CV_8U, new Scalar(0)); // 8 bit unsigned
+        hexCenters.put(PixelColor.white, getHexCenters(BoardConstants.hsv.white.upper, BoardConstants.hsv.white.lower, processedHex, mask));
+        hexCenters.put(PixelColor.yellow, getHexCenters(BoardConstants.hsv.yellow.upper, BoardConstants.hsv.yellow.lower, processedHex, mask));
+        hexCenters.put(PixelColor.green, getHexCenters(BoardConstants.hsv.green.upper, BoardConstants.hsv.green.lower, processedHex, mask));
+        hexCenters.put(PixelColor.purple, getHexCenters(BoardConstants.hsv.purple.upper, BoardConstants.hsv.purple.lower, processedHex, mask));
+
+        // iterate over every expected center and pull each point to the nearest one. start from the bottom
+        // TODO: do we need distCoeff?
+        MatOfPoint2f screen = new MatOfPoint2f();
+        MatOfDouble _distCoeff = new MatOfDouble();
+        Calib3d.projectPoints(world, tagPose.rvec, tagPose.tvec, camMatrix, _distCoeff, screen); // assumes that we have center tag
+        Point[] screenPoints = screen.toArray();
+
+        // dilate mask to close gaps between differing colors
+        Imgproc.dilate(mask, mask, closeKernel);
+
+        // world is saved in this order (bottom to top)
+        int index = 0;
+        for (int row = 0; row < 11; row++) {
+            for (int col = 0; col < (row % 2 == 0 ? 6 : 7); col++) {
+                if (index >= screenPoints.length) continue;
+
+                // currently,camera distortion is such that all the points are below where they should be
+                // which means that they will always on a pixel, just maybe not the right one
+                // hence use mask to filter out- if they are not on mask, dont bother checking them
+                Point p = screenPoints[index];
+                double[] pBuffer = mask.get((int) p.y, (int) p.x);
+                if (pBuffer != null && pBuffer[0] == 255) {
+                    // loop through every hexCenter and find the closest
+                    PixelColor closestColor = PixelColor.empty;
+                    double bestDist = 1_000_000;
+                    Point truePos = new Point();
+                    int pixelIndex = -1;
+
+                    for (PixelColor color : hexCenters.keySet()) {
+                        ArrayList<Point> centers = hexCenters.get(color);
+                        for (int i = 0; i < centers.size(); i++) {
+                            Point center = centers.get(i);
+                            double dist = Math.sqrt((p.y - center.y) * (p.y - center.y) + (p.x - center.x) * (p.x - center.x));
+
+                            if (dist < bestDist) {
+                                bestDist = dist;
+                                closestColor = color;
+                                pixelIndex = i;
+                                truePos = center;
+                            }
+                        }
+                    }
+
+                    if (closestColor == PixelColor.empty) {
+                        // TODO
+                        // one potential fix is to have mask be colored, then set the point to whatever color it is currently over
+                        // as the fill (mask) will probably encompass the point
+                        telemetry.add("WARNING", "More points in mask than actually detected, most likely failed to detect some pixels");
+                        continue;
+                    }
+
+                    // remove the closest center from being considered again
+                    hexCenters.get(closestColor).remove(pixelIndex);
+
+                    // Scalar c = PixelConstants.colorToRgb.get(closestColor);
+                    // Imgproc.circle(input, truePos, 8, c, -1);
+
+                    int q = col - (row - (row % 2)) / 2;
+                    int r = row;
+
+                    detectedBoard.put(new Hex(q, r), closestColor);
+                }
+
+                index++;
+            }
+        }
+
+        hasDetectedBoard = true;
+
+        processedHex.release();
+        processedTag.release();
+        mask.release();
+        screen.release();
+        _distCoeff.release();
+
+        telemetry.update();
+
+        status = pipelineStatus.idle;
+
+        return input;
+    }
+
+    private ArrayList<Point> getHexCenters(Scalar upper, Scalar lower, Mat sharp, Mat outMask) {
+        // note that this alg works better from far away (reduces distortion due to angle)
+        // now for each of these segments get their contour
+        // remove noise, then close holes
+        Mat segment = new Mat();
+        Core.inRange(sharp, lower, upper, segment);
+        Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_OPEN, openKernel);
+        Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_CLOSE, closeKernel);
+
+        ArrayList<MatOfPoint> cnts = new ArrayList<>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(segment, cnts, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
+
+        // now go over each contour. if the area is too small, remove them
+        MatOfPoint2f curve = new MatOfPoint2f();
+        ArrayList<Point> valid = new ArrayList<>();
+        ArrayList<MatOfPoint> maskBuffer = new ArrayList<>(); maskBuffer.add(new MatOfPoint());
+        for (int i = 0; i < cnts.size(); i++) {
+            MatOfPoint cnt = cnts.get(i);
+            double parent = hierarchy.get(0, i)[3];
+
+            cnt.convertTo(curve, CvType.CV_32FC2);
+
+            double perimeter = Imgproc.arcLength(curve, true);
+            Imgproc.approxPolyDP(curve, curve, perimeter * 0.04, true);
+            double area = Imgproc.contourArea(curve);
+
+            if (area < 10 * 10) {
+                cnt.release();
+                continue; // this should vary with distance- or calc it with pose estimate?
+            }
+
+            // draw this contour to mask
+            // its fine if we have a noise, backboard will have very little noise
+            // minor errors will then be filtered out when we get distance between centers and points
+            maskBuffer.set(0, cnt);
+            Imgproc.fillPoly(outMask, maskBuffer, new Scalar(255));
+            cnt.release();
+
+            // we only want the children (interior hexagons)
+            // https://docs.opencv.org/4.x/d9/d8b/tutorial_py_contours_hierarchy.html
+            if (parent == -1) continue;
+
+            // this may be overkill, might only need to filter based on verts
+            // ratio between area of hexagon and minEnclosingCircle should be ~0.827
+            float[] radius = new float[1];
+            Point center = new Point();
+            Imgproc.minEnclosingCircle(curve, center, radius);
+            double error = area / (radius[0] * radius[0] * Math.PI);
+
+            if (error < 0.827 - 0.4 || error > 0.827 + 0.4) continue;
+
+            long verts = curve.total();
+            if (verts <= 4 || verts >= 9) continue;
+
+            // get centroid
+            Moments m = Imgproc.moments(curve);
+            Point p = new Point(m.m10 / (m.m00 + 1e-5), m.m01 / (m.m00 + 1e-5));
+            valid.add(p);
+        }
+
+        hierarchy.release();
+        curve.release();
+        segment.release();
+        // mask buffer is alr released (see cnt)
+
+        return valid;
+    }
+
+    private Pose getPoseFromTag(ArrayList<AprilTagDetection> detections) {
+        // average rvecs, get tvec of center
+        ArrayList<Mat> rvecs = new ArrayList<>();
+        Mat tvec = new Mat();
+        for (AprilTagDetection detection : detections) {
+            // the detections already solve pnp, so we don't need to do it
+            Pose p = getCVPose(detection.pose);
+            if (detection.id == BoardConstants.tagID.blue.center || detection.id == BoardConstants.tagID.red.center) tvec = p.tvec;
+
+            // sometimes the z vector (pointing towards camera) will be backwards
+            // right now, hack is to just ignore these values
+            // maybe need to recalibrate camera?
+            // see discord for relevant github issues discussion, consider implementing that
+            if (get1D(p.rvec, 1) < 0.4) {
+                telemetry.add("WARNING", "RVEC likely is backwards, ignoring");
+                continue;
+            }
+
+            rvecs.add(p.rvec);
+        }
+
+        if (tvec.empty()) {
+            telemetry.add("WARNING", "Did not detect center tag!");
+            tvec = getCVPose(detections.get(0).pose).tvec;
+        }
+
+        if (rvecs.size() != 3) telemetry.add("WARNING", "Did not detect all 3 april tags");
+
+        // now average rvec
+        Mat rvec = new Mat(3, 1, CvType.CV_32F);
+        set1D(rvec, 0, 0); set1D(rvec, 1, 0); set1D(rvec, 2, 0); // not sure if this is needed
+        for (int i = 0; i < rvecs.size(); i++) {
+            for (int j = i + 1; j < rvecs.size(); j++) {
+                double error = nDistance(rvecs.get(i), rvecs.get(j));
+                if (error > RVEC_ERROR_THRESHOLD) telemetry.add("WARNING", "RVEC (" + error + ") surpasses RVEC_ERROR_THRESHOLD");
+            }
+
+            // [i] += [i] / length
+            for (int j = 0; j < 3; j++) { // iterate over each dimension
+                double d = get1D(rvecs.get(i), j) / (double) rvecs.size();
+                set1D(rvec, j, get1D(rvec, j) + d);
+            }
+        }
+
+        return new Pose(rvec, tvec);
+    }
+
+    private double nDistance(Mat v1, Mat v2) {
+        Mat n1 = norm(v1);
+        Mat n2 = norm(v2);
+
+        return Math.sqrt(
+            Math.pow(get1D(n1, 0) - get1D(n2, 0), 2) +
+            Math.pow(get1D(n1, 1) - get1D(n2, 1), 2) +
+            Math.pow(get1D(n1, 2) - get1D(n2, 2), 2)
+        );
+    }
+
+    private Mat norm(Mat m) {
+        double x = get1D(m, 0);
+        double y = get1D(m, 1);
+        double z = get1D(m, 2);
+        double l = Math.sqrt(x * x + y * y + z * z);
+
+        Mat out = new Mat(3, 1, CvType.CV_32F);
+        set1D(out, 0, x / l);
+        set1D(out, 1, y / l);
+        set1D(out, 2, z / l);
+
+        return out;
+    }
+
+    private double get1D(Mat m, int i) { return m.get(i, 0)[0]; }
+    private void set1D(Mat m, int i, double d) { m.put(i, 0, d); }
+
+    private Pose getCVPose(AprilTagPose p) {
+        Pose pose = new Pose();
+        pose.tvec.put(0,0, p.x);
+        pose.tvec.put(1,0, p.y);
+        pose.tvec.put(2,0, p.z);
+
+        Mat R = new Mat(3, 3, CvType.CV_32F);
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                R.put(i,j, p.R.get(i,j));
+            }
+        }
+
+        Calib3d.Rodrigues(R, pose.rvec);
+
+        return pose;
+    }
+
+    private void drawAxisMarker(Mat buf, double length, int thickness, Mat rvec, Mat tvec, Mat cameraMatrix) {
+        Scalar blue = new Scalar(7,197,235,255);
+        Scalar red = new Scalar(255,0,0,255);
+        Scalar green = new Scalar(0,255,0,255);
+        Scalar white = new Scalar(255,255,255,255);
+
+        // The points in 3D space we wish to project onto the 2D image plane.
+        // The origin of the coordinate space is assumed to be in the center of the detection.
+        MatOfPoint3f axis = new MatOfPoint3f(
+                new Point3(0,0,0),
+                new Point3(length,0,0),
+                new Point3(0,length,0),
+                new Point3(0,0,-length)
+        );
+
+        // Project those points
+        MatOfPoint2f matProjectedPoints = new MatOfPoint2f();
+        Calib3d.projectPoints(axis, rvec, tvec, cameraMatrix, new MatOfDouble(), matProjectedPoints);
+        Point[] projectedPoints = matProjectedPoints.toArray();
+
+        // Draw the marker!
+        Imgproc.line(buf, projectedPoints[0], projectedPoints[1], red, thickness);
+        Imgproc.line(buf, projectedPoints[0], projectedPoints[2], green, thickness);
+        Imgproc.line(buf, projectedPoints[0], projectedPoints[3], blue, thickness);
+
+        Imgproc.circle(buf, projectedPoints[0], thickness, white, -1);
+    }
+
+    @Override
+    protected void finalize() {
+        if (detectorPtr != 0) AprilTagDetectorJNI.releaseApriltagDetector(detectorPtr);
+    }
+
+    enum pipelineStatus {
+        running, idle, toStart, initializing
+    }
+}
