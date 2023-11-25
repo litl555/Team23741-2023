@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.FTC.Pixels;
 
+import com.arcrobotics.ftclib.geometry.Pose2d;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.CameraIntrinsics;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.BoardConstants;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.PixelConstants;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.AprilTag;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Hex;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.PixelColor;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
@@ -44,13 +47,13 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
     private boolean hasDetectedTags, hasDetectedBoard, shouldGetBoard;
     private MatOfPoint3f world = new MatOfPoint3f();
     private Map<Hex, PixelColor> detectedBoard = new Hashtable<>();
-    private Pose tagPose;
+    private AprilTag detectedTag;
     private OpenCvCamera camera;
 
     public boolean hasReadTags() { return hasDetectedTags; }
     public boolean hasReadBoard() { return hasDetectedBoard; }
     public boolean hasInitialized() { return status != pipelineStatus.initializing; }
-    public Pose getTag() { return tagPose; }
+    public AprilTag getTag() { return detectedTag; }
     public Map<Hex, PixelColor> getBoard() { return detectedBoard; }
     public boolean requestDetection(boolean shouldGetBoard) { // returns if it succeed in starting or not
         if (status != pipelineStatus.idle) {
@@ -168,7 +171,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
             return input;
         }
 
-        tagPose = getPoseFromTag(detections);
+        detectedTag = detectAprilTags(detections);
         hasDetectedTags = true;
 
         if (!shouldGetBoard) {
@@ -192,7 +195,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         // TODO: do we need distCoeff?
         MatOfPoint2f screen = new MatOfPoint2f();
         MatOfDouble _distCoeff = new MatOfDouble();
-        Calib3d.projectPoints(world, tagPose.rvec, tagPose.tvec, camMatrix, _distCoeff, screen); // assumes that we have center tag
+        Calib3d.projectPoints(world, detectedTag.pose.rvec, detectedTag.pose.tvec, camMatrix, _distCoeff, screen); // assumes that we have center tag
         Point[] screenPoints = screen.toArray();
 
         // dilate mask to close gaps between differing colors
@@ -339,14 +342,19 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         return valid;
     }
 
-    private Pose getPoseFromTag(ArrayList<AprilTagDetection> detections) {
+    private AprilTag detectAprilTags(ArrayList<AprilTagDetection> detections) {
         // average rvecs, get tvec of center
         ArrayList<Mat> rvecs = new ArrayList<>();
         Mat tvec = new Mat();
+
+        int id = 0;
         for (AprilTagDetection detection : detections) {
             // the detections already solve pnp, so we don't need to do it
             Pose p = getCVPose(detection.pose);
-            if (detection.id == BoardConstants.tagID.blue.center || detection.id == BoardConstants.tagID.red.center) tvec = p.tvec;
+            if (detection.id == BoardConstants.tagID.blue.center || detection.id == BoardConstants.tagID.red.center) {
+                tvec = p.tvec;
+                id = detection.id;
+            }
 
             // sometimes the z vector (pointing towards camera) will be backwards
             // right now, hack is to just ignore these values
@@ -363,6 +371,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         if (tvec.empty()) {
             telemetry.add("WARNING", "Did not detect center tag!");
             tvec = getCVPose(detections.get(0).pose).tvec;
+            id = detections.get(0).id;
         }
 
         if (rvecs.size() != 3) telemetry.add("WARNING", "Did not detect all 3 april tags");
@@ -383,7 +392,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
             }
         }
 
-        return new Pose(rvec, tvec);
+        return new AprilTag(new Pose(rvec, tvec), id);
     }
 
     private double nDistance(Mat v1, Mat v2) {

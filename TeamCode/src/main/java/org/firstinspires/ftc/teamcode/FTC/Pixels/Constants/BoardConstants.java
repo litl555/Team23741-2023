@@ -1,6 +1,13 @@
 package org.firstinspires.ftc.teamcode.FTC.Pixels.Constants;
 
+import com.arcrobotics.ftclib.geometry.Pose2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
+
 import org.opencv.core.Scalar;
+
+import java.util.Hashtable;
+import java.util.Map;
 
 public class BoardConstants {
     // all in meters
@@ -25,6 +32,22 @@ public class BoardConstants {
             public static final int center = 5;
             public static final int right = 6;
         }
+
+        // IN METERS
+        public static Map<Integer, Pose2d> positionFromCenter = new Hashtable<Integer, Pose2d>() {{
+            double x = (24 + 12) * inchToMeter;
+            double y = (48 + 24 - 11.25) * inchToMeter;
+            double t = 6 * inchToMeter; // distance from each tag center to each other
+            Rotation2d rot = new Rotation2d();
+
+            put(blue.left, new Pose2d(-x - t, y, rot));
+            put(blue.center, new Pose2d(-x, y, rot));
+            put(blue.right, new Pose2d(-x + t, y, rot));
+
+            put(red.left, new Pose2d(x - t, y, rot));
+            put(red.center, new Pose2d(x, y, rot));
+            put(red.right, new Pose2d(x + t, y, rot));
+        }};
     }
 
     public static class hsv {
