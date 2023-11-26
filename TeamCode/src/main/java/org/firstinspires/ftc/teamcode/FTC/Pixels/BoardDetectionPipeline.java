@@ -39,7 +39,7 @@ import java.util.Map;
 public class BoardDetectionPipeline extends OpenCvPipeline {
     private static final double RVEC_ERROR_THRESHOLD = 0.05;
     private long detectorPtr;
-    private Mat camMatrix, sharpenKernel, openKernel, closeKernel;
+    private Mat camMatrix, sharpenKernel, hexKernel;
     private MatOfDouble distCoeff;
     private ArrayList<AprilTagDetection> detections = new ArrayList<>();
     private LoggerTool telemetry;
@@ -55,6 +55,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
     public boolean hasInitialized() { return status != pipelineStatus.initializing; }
     public AprilTag getTag() { return detectedTag; }
     public Map<Hex, PixelColor> getBoard() { return detectedBoard; }
+    public boolean canRequestDetection() { return status == pipelineStatus.idle; }
     public boolean requestDetection(boolean shouldGetBoard) { // returns if it succeed in starting or not
         if (status != pipelineStatus.idle) {
             telemetry.add("ERROR", "Pipeline is not available to run.");
@@ -67,7 +68,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         return true;
     }
 
-    public BoardDetectionPipeline(OpenCvCamera camera) {
+    public BoardDetectionPipeline(OpenCvCamera camera, LoggerTool telemetry) {
         /*
          * we dont have access to HardwareMap (doesnt extend LinearOpMode) so you have to pass that in
          * everything else is done here though
@@ -89,16 +90,13 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         distCoeff = new MatOfDouble();
         distCoeff.fromArray(CameraIntrinsics.dist);
 
-        telemetry = new LoggerTool();
+        this.telemetry = telemetry;
 
         // pre generate board from offset coordinates
         ArrayList<Point3> worldBuffer = new ArrayList<>();
         for (int row = 0; row < 11; row++) {
             for (int col = 0; col < (row % 2 == 0 ? 6 : 7); col++) {
-                int q = col - (row - (row % 2)) / 2;
-                int r = row;
-
-                Hex h = new Hex(q, r);
+                Hex h = new Hex(col, row);
                 detectedBoard.put(h, PixelColor.empty);
 
                 worldBuffer.add(h.irl);
@@ -114,13 +112,8 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
                 -1, 5, -1,
                 0, -1, 0);
 
-        openKernel = new Mat(2, 2, CvType.CV_32SC1);
-        openKernel.put(0, 0,
-                1, 1,
-                1, 1);
-
-        closeKernel = new Mat(3, 3, CvType.CV_32SC1);
-        closeKernel.put(0, 0,
+        hexKernel = new Mat(3, 3, CvType.CV_32SC1);
+        hexKernel.put(0, 0,
                 1, 1, 1,
                 1, 1, 1,
                 1, 1, 1);
@@ -135,11 +128,12 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         });
 
         // enable it for debugging
-        this.camera.pauseViewport();
+        //this.camera.pauseViewport();
     }
 
     @Override
     public Mat processFrame(Mat input) {
+        status = pipelineStatus.toStart;
         if (status == pipelineStatus.idle || status == pipelineStatus.initializing) return input;
         if (status == pipelineStatus.running) {
             telemetry.add("ERROR", "Pipeline is already running. Aborting.");
@@ -165,7 +159,6 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
 
         if (detections.size() == 0) {
             telemetry.add("Status", "No tags detected");
-            telemetry.update();
 
             processedTag.release();
             return input;
@@ -174,6 +167,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         detectedTag = detectAprilTags(detections);
         hasDetectedTags = true;
 
+        shouldGetBoard = true;
         if (!shouldGetBoard) {
             processedTag.release();
             status = pipelineStatus.idle;
@@ -182,14 +176,18 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
 
         // now get where the pixels are
         Mat processedHex = new Mat();
+
         Imgproc.filter2D(input, processedHex, -1, sharpenKernel);
         Imgproc.cvtColor(processedHex, processedHex, Imgproc.COLOR_RGB2HSV);
+
         Map<PixelColor, ArrayList<Point>> hexCenters = new Hashtable<>();
-        Mat mask = new Mat(input.rows(), input.cols(), CvType.CV_8U, new Scalar(0)); // 8 bit unsigned
-        hexCenters.put(PixelColor.white, getHexCenters(BoardConstants.hsv.white.upper, BoardConstants.hsv.white.lower, processedHex, mask));
-        hexCenters.put(PixelColor.yellow, getHexCenters(BoardConstants.hsv.yellow.upper, BoardConstants.hsv.yellow.lower, processedHex, mask));
-        hexCenters.put(PixelColor.green, getHexCenters(BoardConstants.hsv.green.upper, BoardConstants.hsv.green.lower, processedHex, mask));
-        hexCenters.put(PixelColor.purple, getHexCenters(BoardConstants.hsv.purple.upper, BoardConstants.hsv.purple.lower, processedHex, mask));
+        Mat[] masks = new Mat[4];
+        for (int i = 0; i < 4; i++) masks[i] = new Mat(input.rows(), input.cols(), CvType.CV_8U, new Scalar(0));
+        hexCenters.put(PixelColor.white, getHexCenters(BoardConstants.hsv.white.upper, BoardConstants.hsv.white.lower, processedHex, masks[0]));
+        hexCenters.put(PixelColor.yellow, getHexCenters(BoardConstants.hsv.yellow.upper, BoardConstants.hsv.yellow.lower, processedHex, masks[1]));
+        hexCenters.put(PixelColor.green, getHexCenters(BoardConstants.hsv.green.upper, BoardConstants.hsv.green.lower, processedHex, masks[2]));
+        hexCenters.put(PixelColor.purple, getHexCenters(BoardConstants.hsv.purple.upper, BoardConstants.hsv.purple.lower, processedHex, masks[3]));
+        PixelColor[] maskOverlapKey = new PixelColor[] {PixelColor.white, PixelColor.yellow, PixelColor.green, PixelColor.purple};
 
         // iterate over every expected center and pull each point to the nearest one. start from the bottom
         // TODO: do we need distCoeff?
@@ -198,21 +196,28 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         Calib3d.projectPoints(world, detectedTag.pose.rvec, detectedTag.pose.tvec, camMatrix, _distCoeff, screen); // assumes that we have center tag
         Point[] screenPoints = screen.toArray();
 
-        // dilate mask to close gaps between differing colors
-        Imgproc.dilate(mask, mask, closeKernel);
-
         // world is saved in this order (bottom to top)
         int index = 0;
         for (int row = 0; row < 11; row++) {
             for (int col = 0; col < (row % 2 == 0 ? 6 : 7); col++) {
                 if (index >= screenPoints.length) continue;
 
-                // currently,camera distortion is such that all the points are below where they should be
+                // currently, camera distortion is such that all the points are below where they should be
                 // which means that they will always on a pixel, just maybe not the right one
                 // hence use mask to filter out- if they are not on mask, dont bother checking them
                 Point p = screenPoints[index];
-                double[] pBuffer = mask.get((int) p.y, (int) p.x);
-                if (pBuffer != null && pBuffer[0] == 255) {
+
+                int maskOverlapId = -1; // 0 = white, 1 = yellow, 2 = green, 3 = purple
+                for (int i = 0; i < 4; i++) {
+                    double[] pBuffer = masks[i].get((int) p.y, (int) p.x);
+                    if (pBuffer == null || pBuffer[0] == 0) continue;
+
+                    maskOverlapId = i;
+                    break;
+                }
+
+                // -1 is default value, != -1 means it must have been set- something must overlap
+                if (maskOverlapId != -1) {
                     // loop through every hexCenter and find the closest
                     PixelColor closestColor = PixelColor.empty;
                     double bestDist = 1_000_000;
@@ -235,38 +240,36 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
                     }
 
                     if (closestColor == PixelColor.empty) {
-                        // TODO
-                        // one potential fix is to have mask be colored, then set the point to whatever color it is currently over
-                        // as the fill (mask) will probably encompass the point
+                        // sometimes we will fail to detect a hexagon, but the mask will usually still contain it
+                        // use the mask then to try and figure out what the pixel is- this becomes more unreliable the higher up a pixel is
+                        // (due to project points distorting)
+                        closestColor = maskOverlapKey[maskOverlapId];
+
                         telemetry.add("WARNING", "More points in mask than actually detected, most likely failed to detect some pixels");
-                        continue;
+                    } else {
+                        // remove the closest center from being considered again
+                        hexCenters.get(closestColor).remove(pixelIndex);
                     }
 
-                    // remove the closest center from being considered again
-                    hexCenters.get(closestColor).remove(pixelIndex);
+                    Scalar c = PixelConstants.colorToRgb.get(closestColor);
+                    Imgproc.circle(input, truePos, 8, c, -1);
 
-                    // Scalar c = PixelConstants.colorToRgb.get(closestColor);
-                    // Imgproc.circle(input, truePos, 8, c, -1);
-
-                    int q = col - (row - (row % 2)) / 2;
-                    int r = row;
-
-                    detectedBoard.put(new Hex(q, r), closestColor);
+                    detectedBoard.put(new Hex(col, row), closestColor);
                 }
 
                 index++;
             }
         }
 
+        drawAxisMarker(input, 0.2, 3, detectedTag.pose.rvec, detectedTag.pose.tvec, camMatrix);
+
         hasDetectedBoard = true;
 
         processedHex.release();
         processedTag.release();
-        mask.release();
         screen.release();
         _distCoeff.release();
-
-        telemetry.update();
+        for (int i = 0; i < 4; i++) masks[i].release();
 
         status = pipelineStatus.idle;
 
@@ -279,8 +282,13 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         // remove noise, then close holes
         Mat segment = new Mat();
         Core.inRange(sharp, lower, upper, segment);
-        Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_OPEN, openKernel);
-        Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_CLOSE, closeKernel);
+        // erode to remove noise, dilate to try and force hexagons to join together
+        // be very aggressive- we want to remove as much noise as possible
+        Imgproc.erode(segment, segment, hexKernel);
+        Imgproc.dilate(segment, segment, hexKernel);
+        Imgproc.dilate(segment, segment, hexKernel);
+        //Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_OPEN, openKernel);
+        //Imgproc.morphologyEx(segment, segment, Imgproc.MORPH_CLOSE, closeKernel);
 
         ArrayList<MatOfPoint> cnts = new ArrayList<>();
         Mat hierarchy = new Mat();
@@ -314,7 +322,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
 
             // we only want the children (interior hexagons)
             // https://docs.opencv.org/4.x/d9/d8b/tutorial_py_contours_hierarchy.html
-            if (parent == -1) continue;
+            //if (parent == -1) continue;
 
             // this may be overkill, might only need to filter based on verts
             // ratio between area of hexagon and minEnclosingCircle should be ~0.827

@@ -12,6 +12,7 @@ import java.util.Map;
 public class BoardConstants {
     // all in meters
     public static final double inchToMeter = 1.0 / 39.37;
+    public static final double meterToInch = 39.37;
     public static final double tagSize = 2.0 * inchToMeter;
     public static final double tagCenterHeight = 4.116025 * inchToMeter;
     public static final double tagCenterToFirstRowCenter = (1.25 + 2.0) * inchToMeter;

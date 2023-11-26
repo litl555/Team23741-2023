@@ -7,22 +7,20 @@ import org.opencv.core.Point;
 import org.opencv.core.Point3;
 
 public class Hex {
-    // q, r, s = cube
     // x, y = odd-r offset
-    public int q, r, s, x, y;
+    public int x, y;
 
     // irlX = distance x on board plane from center of center april tag
     // irlY = distance y on board plane from center of center april tag
     public double irlX, irlY;
     public Point3 irl; // so that we dont have to reallocate every time
+    public PixelColor color;
 
-    public Hex(int q, int r) {
-        this.q = q;
-        this.r = r;
-        this.s = -q - r;
+    public Hex(int x, int y) {
+        this.x = x;
+        this.y = y;
 
-        this.x = q + (r - (r % 2)) / 2;
-        this.y = r;
+        color = PixelColor.empty;
 
         irlY = BoardConstants.tagCenterToFirstRowCenter + y * PixelConstants.vert;
         if (y % 2 == 0) {
@@ -37,15 +35,7 @@ public class Hex {
     }
 
     @Override
-    public int hashCode() {
-        // szudziks hashing function
-        // is overkill lmao
-        int A = q >= 0 ? 2 * q : -2 * q - 1;
-        int B = r >= 0 ? 2 * r : -2 * r - 1;
-        int C = ((A >= B ? A * A + A + B : A + B * B) / 2);
-
-        return q < 0 && r < 0 || q >= 0 && r >= 0 ? C : -C - 1;
-    }
+    public int hashCode() { return x ^ (y << 2); }
 
     @Override
     public boolean equals(Object o) {
