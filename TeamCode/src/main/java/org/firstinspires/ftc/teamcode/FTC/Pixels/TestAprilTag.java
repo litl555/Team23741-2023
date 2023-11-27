@@ -1,21 +1,27 @@
 package org.firstinspires.ftc.teamcode.FTC.Pixels;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.BoardConstants;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Hex;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.PixelColor;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.Map;
 
+@Config
 @TeleOp
 public class TestAprilTag extends LinearOpMode {
+    public static double brightness;
+
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         LoggerTool telemetry = new LoggerTool();
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
@@ -24,6 +30,7 @@ public class TestAprilTag extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            pipeline.brightness = brightness;
             if (!pipeline.hasInitialized()) {
                 telemetry.add("STATUS", "Pipeline still initializing");
             } else {
@@ -52,11 +59,22 @@ public class TestAprilTag extends LinearOpMode {
                         telemetry.add("NUM GREEN", ngreen);
                         telemetry.add("NUM YELLOW", nyellow);
                         telemetry.add("NUM PURPLE", npurple);
+
+                        telemetry.add("DIST X", pipeline.getTag().positionFromCenter.getX() * BoardConstants.meterToInch);
+                        telemetry.add("DIST Y", pipeline.getTag().positionFromCenter.getY() * BoardConstants.meterToInch);
+
+                        telemetry.add("TVEC X", pipeline.getTag().pose.tvec.get(0, 0)[0] * BoardConstants.meterToInch);
+                        telemetry.add("TVEC Y", pipeline.getTag().pose.tvec.get(1, 0)[0] * BoardConstants.meterToInch);
+                        telemetry.add("TVEC Z", pipeline.getTag().pose.tvec.get(2, 0)[0] * BoardConstants.meterToInch);
                     }
                 }
             }
 
+            telemetry.add("MEMORY FREE", (double) Runtime.getRuntime().freeMemory() / (double) Runtime.getRuntime().totalMemory());
+
             telemetry.update();
+
+            sleep(20);
         }
     }
 }

@@ -22,7 +22,7 @@ public class Hex {
 
         color = PixelColor.empty;
 
-        irlY = BoardConstants.tagCenterToFirstRowCenter + y * PixelConstants.vert;
+        irlY = -(BoardConstants.tagCenterToFirstRowCenter + y * PixelConstants.vert);
         if (y % 2 == 0) {
             // even, only 6 pixels
             irlX = (x - 3) * PixelConstants.horz + (PixelConstants.horz / 2.0);

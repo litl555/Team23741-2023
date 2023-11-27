@@ -22,8 +22,8 @@ public class AprilTag {
 
         Pose2d ref = BoardConstants.tagID.positionFromCenter.get(id);
         positionFromCenter = new Pose2d(
-                ref.getX() - pose.tvec.get(0, 0)[0], // x
-                ref.getY() - pose.tvec.get(2, 0)[0], // z
+                ref.getX() + pose.tvec.get(0, 0)[0], // x
+                ref.getY() - pose.tvec.get(2, 0)[0] + (2.0580125 * BoardConstants.inchToMeter), // z
                 ref.getRotation()
         );
     }
