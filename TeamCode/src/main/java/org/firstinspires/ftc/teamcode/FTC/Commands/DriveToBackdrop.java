@@ -19,9 +19,9 @@ import java.util.ArrayList;
 ///Drives to central position of backdrop
 public class DriveToBackdrop extends CommandBase {
     private boolean isFinished = false;
-    Trajectory tr = new Trajectory(new Pose2d(-Constants.robotPose.getY(), Constants.robotPose.getX()), new Pose2d(900, -900), new Pose2d(0, 00), new Pose2d(0, 1000), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
+    Trajectory tr = new Trajectory(new Pose2d(-Constants.robotPose.getY(), Constants.robotPose.getX()), new Pose2d(900, 900), new Pose2d(4040, 150), new Pose2d(1800, 000), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
     //    Trajectory tr1 = new Trajectory(new Pose2d(900, 600), new Pose2d(900, 600), new Pose2d(0, 800), new Pose2d(0, 500), new Pose2d(0, 0), new Pose2d(0, 0), true, false);
-    Line line = new Line(new Pose2d(900, -900), new Pose2d(901, 1000), false, true);
+    //Line line = new Line(new Pose2d(900, -900), new Pose2d(901, 1000), false, true);
     MultipleTrajectoryRunner mtr;
     Pose2d backdropPos = new Pose2d(2700, 2400);
 //    Trajectory tr2 = new Trajectory(new Pose2d(900, 1750), backdropPos, new Pose2d(1490, 950), new Pose2d(950, 1350), new Pose2d(-160, 270), new Pose2d(0, 0), false, true);
@@ -30,7 +30,7 @@ public class DriveToBackdrop extends CommandBase {
     LoggerTool telemetry = new LoggerTool();
     CustomLocalization l;
 
-    public DriveToBackdrop(DriveSubsystem robot) {
+    public DriveToBackdrop(DriveSubsystem robot, LoggerTool telemetry) {
         this.l = robot.l;
 
         ArrayList<TrajectoryRunner> trajectoryRunners = new ArrayList<>();
@@ -38,7 +38,7 @@ public class DriveToBackdrop extends CommandBase {
 
         trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
 
-        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, line, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
+        //trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, line, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
 //        trajectoryRunners.add(new TrajectoryRunner(hardwareMap, l, tr2, 0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, telemetry));
         mtr = new MultipleTrajectoryRunner(trajectoryRunners);
     }
@@ -54,7 +54,7 @@ public class DriveToBackdrop extends CommandBase {
 
 
         mtr.update();
-        telemetry.update();
+        //telemetry.update();
         if (mtr.finished) {
             isFinished = true;
         }

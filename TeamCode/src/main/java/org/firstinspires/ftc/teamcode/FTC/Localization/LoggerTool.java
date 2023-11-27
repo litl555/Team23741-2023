@@ -4,12 +4,16 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryInterface;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
+
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
 
 /**
  * Custom telemetry class to reduce clutter
@@ -21,7 +25,7 @@ public class LoggerTool {
     private final ArrayList<Double> yPosVals = new ArrayList<>();
     private double[] xvals;
     private double[] yvals;
-
+    TrajectoryInterface current = null;
     public void add(String name, Object output) {
         p.put(name, output);
     }
@@ -30,11 +34,19 @@ public class LoggerTool {
         drawPoseHistory();
         if (!getTrajectoryNull()) drawTrajectory();
         drawRobot();
+        if (current != null) {
+            drawRobot(current.equation(Robot.t));
+            Vector2d vec = current.getCentripetalForceVector(Robot.t);
+
+            drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
+        }
         dash.sendTelemetryPacket(p);
         p = new TelemetryPacket();
+
     }
 
     public void setCurrentTrajectory(TrajectoryInterface trajectory) {
+        current = trajectory;
         xvals = new double[100];
         yvals = new double[100];
         for (int i = 0; i < 100; i++) {
@@ -45,9 +57,20 @@ public class LoggerTool {
 
     }
 
+    private void drawRobot(Pose2d pose) {
+        pose = new Pose2d(pose.getY() / 25.4, -pose.getX() / 25.4, pose.getHeading());
+        p.fieldOverlay().setStroke("red");
+        DashboardUtil.drawRobot(p.fieldOverlay(), pose);
+
+    }
+
     private void drawRobot() {
         p.fieldOverlay().setStroke("blue");
         DashboardUtil.drawRobot(p.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
+    }
+
+    public void drawPoint(Pose2d pose) {
+        p.fieldOverlay().fillCircle(pose.getY() / 25.4, -pose.getX() / 25.4, 1);
     }
 
     private void drawTrajectory() {

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import java.util.ArrayList;
 
@@ -14,6 +15,8 @@ public interface TrajectoryInterface {
     ArrayList<Double> getVelosSpaced();
 
     ArrayList<Double> getMp();
+
+    Vector2d getCentripetalForceVector(double t);
 
     double getClosestTValue(Pose2d point);
 

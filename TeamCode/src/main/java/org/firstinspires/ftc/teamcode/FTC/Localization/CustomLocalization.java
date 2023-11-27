@@ -1,31 +1,37 @@
 package org.firstinspires.ftc.teamcode.FTC.Localization;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.Const;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.List;
 
 /**
  * Handles the calculations of odometry and drivetrain commands
  */
+
 public class CustomLocalization {
 
-    Pose2d pose = new Pose2d(0, 0, 0);
+    public Pose2d pose = new Pose2d(0, 0, 0);
 
     OdometryModule leftPod, rightPod, backPod;
     DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
     double X_MULTIPLIER = .994;
-    double Y_MULTIPLER = (double) 1;
+    double Y_MULTIPLER = (double) 1.0;
+    SampleMecanumDrive dr;
 
-    public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
+    public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap, SampleMecanumDrive dr) {
         Constants.angle = 0;
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-
+        this.dr = dr;
         for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.OFF);
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -37,10 +43,10 @@ public class CustomLocalization {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pose = startPose;
         Constants.robotPose = startPose;
-        leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
+        leftPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
         rightPod.reverse();
-        backPod = new OdometryModule(hardwareMap.dcMotor.get("rightFront"));
+        backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
 
         backPod.reset();
         rightPod.reset();
@@ -52,11 +58,31 @@ public class CustomLocalization {
     }
 
     public void update() {
-        rd = rightPod.getDelta();
-        ld = leftPod.getDelta();
-        bd = backPod.getDelta();
-        pose = pose.plus(calculateDeltaPos(rd, ld, bd));
+        dr.updatePoseEstimate();
+        //rd = rightPod.getDelta();
+        //ld = leftPod.getDelta();
+        //bd = backPod.getDelta();
+//        calculateDeltaPos(rd,ld,bd);
+
+//        pose = pose.plus(calculateDeltaPos(rd, ld, bd));
+        pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 - (double) 1500.0, dr.getPoseEstimate().getY() * (double) 25.4 + (double) 1500.0, dr.getPoseEstimate().getHeading());
+
+        Pose2d veloVec = (pose.minus(Constants.robotPose)).div(Constants.toSec(Constants.getTime()) - Constants.lastTime1);
+        Constants.lastTime1 = Constants.toSec(Constants.getTime());
+        Constants.velocity = veloVec;
+
         Constants.robotPose = pose;
+        if (Math.abs(Math.toDegrees(Constants.lastPose.getHeading() - Constants.robotPose.getHeading())) < 100) {
+            Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()));
+        } else {
+            if (Math.toDegrees(Constants.lastPose.getHeading()) > 300) {
+                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) + 360);
+            } else {
+                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) - 360);
+
+            }
+        }
+        Constants.lastPose = pose;
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {
@@ -69,7 +95,7 @@ public class CustomLocalization {
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
         Constants.angle += dT;
         double T = Constants.robotPose.getHeading();
-        dF = (R + L) / (double) 2;
+        dF = (R + L) / (double) 2.0;
         dS = (B - Constants.PERPENDICULAR_X * dT);
         if (dT == 0.0) {
             dX = dF;
@@ -77,18 +103,18 @@ public class CustomLocalization {
         } else {
             r0 = dF / dT;
             r1 = dS / dT;
-            dX = r0 * Math.sin(dT) - r1 * ((double) 1 - Math.cos(dT));
-            dY = r1 * Math.sin(dT) + r0 * ((double) 1 - Math.cos(dT));
+            dX = r0 * Math.sin(dT) - r1 * ((double) 1.0 - Math.cos(dT));
+            dY = r1 * Math.sin(dT) + r0 * ((double) 1.0 - Math.cos(dT));
         }
-        fx = (double) (dX * Math.cos(T) - dY * Math.sin(T));
-        fy = (double) (dY * Math.cos(T) + dX * Math.sin(T));
+        fx = (double) (dX * Math.cos(T) - (double) dY * Math.sin(T));
+        fy = (double) (dY * Math.cos(T) + (double) dX * Math.sin(T));
 
         return (new Pose2d(fx, fy, dT));
     }
 
     public void setWeightedDrivePowers(Pose2d pose) {
         double y = -pose.getY();
-        double x = pose.getX() * 1.1;
+        double x = pose.getX() * Constants.strafeMult;
         double rx = pose.getHeading();
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         setMotorPowers((y + x + rx) / denominator, (y - x - rx) / denominator, (y - x + rx) / denominator, (y + x - rx) / denominator);

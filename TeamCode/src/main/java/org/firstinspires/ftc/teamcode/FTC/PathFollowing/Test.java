@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 @Config
@@ -28,11 +29,12 @@ public class Test extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         //Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(395, -560), new Pose2d(330, -1170), new Pose2d(1480, 1800), new Pose2d(3110, 1950), new Pose2d(-1280, -1250));
         //Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(740, 2560), new Pose2d(-1000, 3940), new Pose2d(1530, 780), new Pose2d(-750, -1305));
+        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
 
         Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(0, 1000), new Pose2d(1560, 2610), new Pose2d(580, 2885), new Pose2d(3110, 1950), new Pose2d(-1280, -1250), true, true);
         //Trajectory trajectory=new Trajectory(new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist),new Pose2d(0,0),new Pose2d(0,dist));
         FtcDashboard ftcDashboard = FtcDashboard.getInstance();
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
         BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
         BasicFeedforward fy = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
         double lastTime = 0;

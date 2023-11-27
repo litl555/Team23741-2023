@@ -9,5 +9,6 @@ public class UpdateIntake extends InstantCommand {
         super(
                 () -> intake.update(power)
         );
+        addRequirements(intake);
     }
 }

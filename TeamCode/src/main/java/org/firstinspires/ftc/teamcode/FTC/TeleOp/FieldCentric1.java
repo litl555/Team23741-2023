@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.List;
@@ -40,7 +41,9 @@ public class FieldCentric1 extends LinearOpMode {
         int counter = 0;
         double timeprev = 0;
         //SampleMecanumDrive driver=new SampleMecanumDrive(hardwareMap);
-        CustomLocalization customLocalization = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
+
+        CustomLocalization customLocalization = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
         double[] xvals = new double[101];
         double[] yvals = new double[101];
 

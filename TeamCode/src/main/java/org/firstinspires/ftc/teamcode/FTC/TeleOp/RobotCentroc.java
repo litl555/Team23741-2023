@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @Config
 @TeleOp
@@ -20,7 +21,9 @@ public class RobotCentroc extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         LoggerTool telemetry = new LoggerTool();
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
+
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             desAngle -= Math.toRadians(gamepad1.right_stick_x * speed);
@@ -28,6 +31,8 @@ public class RobotCentroc extends LinearOpMode {
             telemetry.add("Angle", Constants.angle);
             telemetry.add("x", l.getPoseEstimate().getX());
             telemetry.add("y", l.getPoseEstimate().getY());
+            telemetry.add("error", Constants.lastPose.getHeading() - Constants.robotPose.getHeading());
+            telemetry.add("angle", Constants.robotPose.getHeading());
             telemetry.update();
             l.setWeightedDrivePowers(new Pose2d(Math.pow(gamepad1.left_stick_x, 2) * Math.signum(gamepad1.left_stick_x), Math.pow(gamepad1.left_stick_y, 2) * Math.signum(gamepad1.left_stick_y), kp * (desAngle - Constants.angle)));
             l.update();

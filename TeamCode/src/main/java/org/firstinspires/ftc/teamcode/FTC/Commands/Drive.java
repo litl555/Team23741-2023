@@ -20,6 +20,8 @@ public class Drive extends CommandBase {
 
     @Override
     public void execute() {
-        drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x));
+        if (!Robot.isBusy) {
+            drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, gamepad.right_stick_x));
+        }
     }
 }
