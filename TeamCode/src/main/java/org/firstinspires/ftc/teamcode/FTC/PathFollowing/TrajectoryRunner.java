@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
@@ -38,12 +39,12 @@ public class TrajectoryRunner {
         TangentHeading
     }
 
+    public static double speed = .2;
     public int ind;
-    public double kvCorrect = 0;
-    public double kvFollow = 0;
+
     public static double angleDes = 90;
     public State currentState = State.PRESTART;
-
+    int count = 0;
 
     private double lastTime = 0;
     BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
@@ -84,15 +85,47 @@ public class TrajectoryRunner {
     }
 
     private void runningMode() {
-        double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
-        Pose2d derivative = t.velocities(closestT);
-        Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * derivative.getY());
-        Pose2d point = t.equation(closestT);
-        Vector2d correctionalVector = new Vector2d(kvCorrect * point.getX() + robotPose.getY(), kvCorrect * point.getY() - robotPose.getX());
-        Vector2d sum = pathVector.plus(correctionalVector);
-        sum = sum.div(Math.sqrt(sum.dot(sum)));
-        l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
-        getLoopTime();
+        count++;
+        if (count % 5 == 0) {
+            double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
+            Robot.t = closestT;
+            //loggerTool.add("t",closestT);
+            Pose2d derivative = t.velocities(closestT);
+            //loggerTool.drawPoint(t.equation(closestT));
+
+            //loggerTool.add("der",derivative);
+            if (closestT == 1.0) {
+                derivative = new Pose2d(0, 0, 0);
+            }
+            //loggerTool.add("radius",Math.sqrt(Math.abs(t.getCentripetalForceVector(closestT).dot(t.getCentripetalForceVector(closestT)))));
+            Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * -1.0 * derivative.getY());
+            //loggerTool.add("path",pathVector);
+            Pose2d point = t.equation(closestT);
+            //loggerTool.add("closestPoint",point);
+            Vector2d centripetalForce = t.getCentripetalForceVector(closestT);
+            centripetalForce = new Vector2d(centripetalForce.getX(), -centripetalForce.getY());
+            Vector2d correctionalVector = new Vector2d(kvCorrect * (point.getX() + robotPose.getY()) + ka * (centripetalForce.getX()), ka * (centripetalForce.getY()) - kvCorrect * (point.getY() - robotPose.getX()));
+            //loggerTool.add("xerror",point.getX() + robotPose.getY());
+            //loggerTool.add("yerror",(point.getY() - robotPose.getX()));
+
+            Vector2d sum = pathVector.plus(correctionalVector);
+            if (Math.sqrt(sum.dot(sum)) > 1.0) {
+                sum = sum.div(Math.sqrt(sum.dot(sum)));
+            }
+            sum = sum.times(speed);
+            //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
+
+            l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
+            loggerTool.add("loop", getLoopTime());
+            Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
+            if (robot.distTo(t.getEnd().vec()) < 200 && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)) {
+                if (!t.getEndStopped()) {
+                    currentState = State.FINISHED;
+                } else {
+                    currentState = State.CORRECTING;
+
+                }
+            }
 //        ind = getIndex();
 //        double tv = t.getVelosSpaced().get(ind);
 //        Pose2d velocity = t.velocities(tv);
@@ -114,7 +147,6 @@ public class TrajectoryRunner {
 //        double angleVal = getAngleValue(velocityNormalized);
 //
 //        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), angleVal));
-//        Constants.lastPose = Constants.robotPose;
 //        loggerTool.add("totaltime", t.getTotalTime());
 //        loggerTool.add("looptime", getLoopTime());
 //
@@ -127,18 +159,21 @@ public class TrajectoryRunner {
 //                loggerTool.add("end", Constants.toSec(Constants.getTime()));
 //            }
 //        }
+        }
     }
 
     private void correctMode() {
-        Pose2d positions = t.equation(1.0);
-        double x = .007 * (positions.getX() + robotPose.getY());
-        double y = -1.0 * .007 * (positions.getY() - robotPose.getX());
+        Pose2d positions = t.getEnd();
+        double x = speed * .007 * (positions.getX() + robotPose.getY());
+        double y = speed * -1.0 * .007 * (positions.getY() - robotPose.getX());
+        //l.setWeightedDrivePowers(new Pose2d(0,0,0));
+
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
         Constants.lastPose = Constants.robotPose;
 
-        loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
-        loggerTool.add("end", this.t.getEnd());
-        loggerTool.add("pos", robotPose);
+        //loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
+        //loggerTool.add("end", this.t.getEnd());
+        //loggerTool.add("pos", robotPose);
 
         if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
             currentState = State.FINISHED;

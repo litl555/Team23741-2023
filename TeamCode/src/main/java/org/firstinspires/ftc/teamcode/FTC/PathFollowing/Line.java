@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 
@@ -42,6 +43,10 @@ public class Line implements TrajectoryInterface {
         double slope = getSlope();
         return ((-1.0 * point.getX() / slope - point.getY() - slope * start.getX() + start.getY()) / (-1 / slope - slope));
 
+    }
+
+    public Vector2d getCentripetalForceVector(double t) {
+        return new Vector2d(0, 0);
     }
 
     private ArrayList<Double> generateLineMP() {

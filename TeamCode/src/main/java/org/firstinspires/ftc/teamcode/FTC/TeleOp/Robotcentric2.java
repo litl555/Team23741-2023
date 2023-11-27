@@ -7,13 +7,16 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @TeleOp
 public class Robotcentric2 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
+
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
         LoggerTool telemetry = new LoggerTool();
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {

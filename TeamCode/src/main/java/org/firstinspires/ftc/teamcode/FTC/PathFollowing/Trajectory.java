@@ -38,11 +38,11 @@ public class Trajectory implements TrajectoryInterface {
         p2 = new Pose2d(startAccel.getX() / 20.0 + 2.0 * p1.getX() - p0.getX(), startAccel.getY() / 20.0 + 2.0 * p1.getY() - p0.getY());
         p4 = new Pose2d(p5.getX() - endVelo.getX() / 5.0, p5.getY() - endVelo.getY() / 5.0);
         p3 = new Pose2d(endAccel.getX() / 20.0 + 2.0 * p4.getX() - p5.getX(), endAccel.getY() / 20.0 + 2.0 * p4.getY() - p5.getY());
-        length = calculateLength(0, 1);
+        //length = calculateLength(0, 1);
         //generateTValues();
-        mp = generateMotionProfile();
-        getTimeValues();
-        getTotalTimeSum();
+        //mp = generateMotionProfile();
+        //getTimeValues();
+        //getTotalTimeSum();
 
 
     }
@@ -405,6 +405,7 @@ public class Trajectory implements TrajectoryInterface {
 
     public double getRadiusOfCurvature(double t) {
         Pose2d velocity = velocities(t);
+
         Pose2d acc = accelerrations(t);
         double numerator = Math.pow((Math.pow(velocity.getX(), 2) + Math.pow(velocity.getY(), 2)), 3.0 / 2.0);
         double denominator = (velocity.getX() * acc.getY() - velocity.getY() * acc.getX());
@@ -417,7 +418,7 @@ public class Trajectory implements TrajectoryInterface {
         Vector2d point2 = new Vector2d(-velocities(t).getY(), velocities(t).getX());
         point2 = point2.div(Math.sqrt(point2.dot(point2)));
         Vector2d point = new Vector2d(0, 0);
-        if (equation(t + .01).vec().distTo(point1.times(getRadiusOfCurvature(t))) > equation(t + .01).vec().distTo(point2.times(getRadiusOfCurvature(t)))) {
+        if (equation(t + .01).vec().distTo(equation(t).vec().plus(point1.times(getRadiusOfCurvature(t)))) > equation(t + .01).vec().distTo(equation(t).vec().plus(point2.times(getRadiusOfCurvature(t))))) {
             point = point2;
         } else {
             point = point1;
@@ -425,18 +426,72 @@ public class Trajectory implements TrajectoryInterface {
         return (point);
     }
 
+    public Vector2d getCentripetalForceVector(double t) {
+        double radius = getRadiusOfCurvature(t);
+        Vector2d b = velocities(t).vec();
+        Vector2d velocityReal = new Vector2d(Constants.velocity.getY() * (double) -1.0, Constants.velocity.getX());
+        Vector2d velocityV = b.times(velocityReal.dot(b) / Math.abs(b.dot(b)));
+        double velocity = Math.sqrt(velocityV.dot(velocityV));
+        double centripetalAcceleration = velocity * velocity / radius;
+        Vector2d radiusVec = getRadiusVectorNormalized(t);
+        return (radiusVec.times(centripetalAcceleration));
+
+    }
+
     public double getClosestTValue(Pose2d point) {
-        double t = 0;
-        for (int o = 0; o < 20; o++) {
-            if (getDistance((double) o * 1.0 / 20.0, point) < 0 && getDistanceDerivative((double) o * 1.0 / 20.0, point) > 0) {
-                t = (double) o * 1.0 / 20.0;
+        double t = 0.013;
+        boolean finished = false;
+        int res = 30;
+        for (int o = 0; o < res; o++) {
+            if (!finished) {
+                if (getDistanceSecondDerivative((double) o * 1.0 / (double) res, point) > 1 && getDistanceDerivative((double) o * 1.0 / (double) res, point) < 0.0) {
+
+                    if (t == .01) {
+                        t = (double) o * 1.0 / (double) res;
+                    }
+
+
+                }
+                if (getDistanceDerivative((double) o * 1.0 / (double) res, point) > 0.0) {
+                    t = (double) (o - 1.0) / (double) res;
+                    finished = true;
+
+                }
             }
         }
-        for (int i = 0; i < 20; i++) {
-            double slope = getDistanceDerivative(t, point);
-            t = -getDistance(t, point) / slope + t;
+        if (t == 0.0) {
+            return 0.01;
+        }
+        if (t == .013) {
+            if (getDistanceDerivative(0, point) < getDistanceDerivative(1.0, point)) {
+                return 0.1;
+
+            } else {
+                return 1.0;
+            }
         }
         return (t);
+/*
+        for (int i = 0; i < 100; i++) {
+
+            double slope = getDistanceSecondDerivative(t, point);
+            if(slope==0.0){
+                return t;
+            }
+            t = -(double)getDistanceDerivative(t, point) / slope + t;
+
+        }
+        if(t<0.0){
+            return(0.0);
+        }
+        else if(t>1.0){
+            return(1.0);
+        }
+        else {
+            return (t);
+        }
+
+ */
     }
 
     public double getDistance(double t, Pose2d point) {
@@ -444,14 +499,24 @@ public class Trajectory implements TrajectoryInterface {
     }
 
     public double getDistanceDerivative(double t, Pose2d point) {
+
         Pose2d velocity = velocities(t);
-        return (2.0 * (equation(t).getX() - point.getX()) * velocity.getX() + 2.0 * (equation(t).getY() - point.getY()) * velocity.getY());
+        double numerator = 2.0 * (point.getX() - equation(t).getX()) * velocity.getX() + 2.0 * (point.getY() - equation(t).getY()) * velocity.getY();
+        double denom = -(double) 2.0 * Math.sqrt(Math.pow(point.getX() - equation(t).getX(), 2) + Math.pow(point.getY() - equation(t).getY(), 2));
+
+        return (numerator / denom);
+//        return (2.0 * (equation(t).getX() - point.getX()) * velocity.getX() + 2.0 * (equation(t).getY() - point.getY()) * velocity.getY());
     }
 
     public double getDistanceSecondDerivative(double t, Pose2d point) {
-        Pose2d velocity = velocities(t);
-        Pose2d acc = accelerrations(t);
-        return (2.0 * acc.getX() * (equation(t).getX() - point.getX()) + Math.pow(velocity.getX(), 2) + 2.0 * acc.getY() * (velocity.getY() - point.getY()) + velocity.getY() * velocity.getY());
+        double topDer = (double) 2.0 * (accelerrations(t).getX() * (point.getX() - equation(t).getX()) + (-velocities(t).getX()) * (velocities(t).getX())) + (double) 2.0 * (accelerrations(t).getY() * (point.getY() - equation(t).getY()) + (-velocities(t).getY()) * (velocities(t).getY()));
+        double bottom = 2.0 * Math.sqrt(Math.pow(point.getX() - equation(t).getX(), 2) + Math.pow(point.getY() - equation(t).getY(), 2));
+        double bottomDer = (double) 2.0 * getDistanceDerivative(t, point);
+        double top = (double) 2.0 * (point.getX() - equation(t).getX()) * velocities(t).getX() + (double) 2.0 * (point.getY() - equation(t).getY()) * velocities(t).getY();
+        return ((topDer * bottom - bottomDer * top) / (Math.pow(bottom, 2)) * -(double) 1.0);
+//        Pose2d velocity = velocities(t);
+//        Pose2d acc = accelerrations(t);
+//        return (2.0 * acc.getX() * (equation(t).getX() - point.getX()) + Math.pow(velocity.getX(), 2) + 2.0 * acc.getY() * (velocity.getY() - point.getY()) + velocity.getY() * velocity.getY());
 
     }
 
@@ -494,7 +559,7 @@ public class Trajectory implements TrajectoryInterface {
     }
 
     public Pose2d accelerrations(double t) {
-        return (new Pose2d(20.0 * (p5.getX() - 5.0 * p4.getX() + 10 * p3.getX() - 10 * p2.getX() + 5 * p1.getX() - p0.getX()) * t * t * t + 60.0 * (p4.getX() - 4.0 * (p3.getX() + p1.getX()) + 6.0 * p2.getX() + p0.getX()) * t * t + 60.0 * (p3.getX() - 3.0 * p2.getX() + 3.0 * p1.getX() - p0.getX()) * t + 20.0 * (p2.getX() - 2.0 * p1.getX() + p0.getX()), 20.0 * (p5.getY() - 5.0 * p4.getY() + 10 * p3.getY() - 10 * p2.getY() + 5 * p1.getY() - p0.getY()) * t * t * t + 60.0 * (p4.getY() - 4.0 * (p3.getY() + p1.getY()) + 6.0 * p2.getY() + p0.getY()) * t * t + 60.0 * (p3.getY() - 3.0 * p2.getY() + 3.0 * p1.getY() - p0.getY()) * t + 20.0 * (p2.getY() - 2.0 * p1.getY() + p0.getY())
+        return (new Pose2d(20.0 * (p5.getX() - 5.0 * p4.getX() + 10.0 * p3.getX() - 10.0 * p2.getX() + 5.0 * p1.getX() - p0.getX()) * t * t * t + 60.0 * (p4.getX() - 4.0 * (p3.getX() + p1.getX()) + 6.0 * p2.getX() + p0.getX()) * t * t + 60.0 * (p3.getX() - 3.0 * p2.getX() + 3.0 * p1.getX() - p0.getX()) * t + 20.0 * (p2.getX() - 2.0 * p1.getX() + p0.getX()), 20.0 * (p5.getY() - 5.0 * p4.getY() + 10.0 * p3.getY() - 10.0 * p2.getY() + 5.0 * p1.getY() - p0.getY()) * t * t * t + 60.0 * (p4.getY() - 4.0 * (p3.getY() + p1.getY()) + 6.0 * p2.getY() + p0.getY()) * t * t + 60.0 * (p3.getY() - 3.0 * p2.getY() + 3.0 * p1.getY() - p0.getY()) * t + 20.0 * (p2.getY() - 2.0 * p1.getY() + p0.getY())
 //:))
         ));
     }

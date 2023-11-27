@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
@@ -22,7 +23,7 @@ public class PlacePixel extends SequentialCommandGroup {
     private Pose2d leftColumn = new Pose2d(0, 0, 0);
 
     public PlacePixel(ClawSubsystem claw, LiftSubsystem lift, DriveSubsystem drive, int row1, int column1, int row2, int column2, CustomLocalization l) {
-        DriveToBackdrop driveToBackdrop = new DriveToBackdrop(drive);
+        DriveToBackdrop driveToBackdrop = new DriveToBackdrop(drive, new LoggerTool());
         addCommands(
                 new ScheduleCommand(driveToBackdrop),
                 new WaitUntilCommand(Robot::isPastTruss),
