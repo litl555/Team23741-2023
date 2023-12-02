@@ -197,7 +197,7 @@ public class BoardDetectionPipeline extends OpenCvPipeline {
         Mat processedHex = new Mat();
 
         Imgproc.filter2D(input, processedHex, -1, sharpenKernel);
-        Imgproc.cvtColor(processedHex, processedHex, Imgproc.COLOR_RGB2HSV);
+        Imgproc.cvtColor(processedHex, processedHex, Imgproc.COLOR_RGB2HSV); // should this be rgba?
 
         Map<PixelColor, ArrayList<Point>> hexCenters = new Hashtable<>();
         Mat[] masks = new Mat[4];

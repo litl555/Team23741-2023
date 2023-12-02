@@ -58,18 +58,18 @@ public class BoardConstants {
         }
 
         public static class purple {
-            public static final Scalar lower = new Scalar(80, 25, 80);
-            public static final Scalar upper = new Scalar(200, 255, 255);
+            public static final Scalar lower = new Scalar(120, 35, 100);
+            public static final Scalar upper = new Scalar(150, 255, 255);
         }
 
         public static class green {
-            public static final Scalar lower = new Scalar(40, 100, 30);
-            public static final Scalar upper = new Scalar(100, 255, 255);
+            public static final Scalar lower = new Scalar(35, 50, 100);
+            public static final Scalar upper = new Scalar(80, 255, 255);
         }
 
         public static class yellow {
-            public static final Scalar lower = new Scalar(15, 50, 110);
-            public static final Scalar upper = new Scalar(40, 255, 255);
+            public static final Scalar lower = new Scalar(15, 50, 100);
+            public static final Scalar upper = new Scalar(30, 255, 255);
         }
     }
 }
