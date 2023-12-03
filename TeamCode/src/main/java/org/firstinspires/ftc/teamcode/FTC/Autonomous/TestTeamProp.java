@@ -12,6 +12,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 @Config
 @TeleOp
 public class TestTeamProp extends LinearOpMode {
+
     @Override
     public void runOpMode() {
         LoggerTool telemetry = new LoggerTool();
