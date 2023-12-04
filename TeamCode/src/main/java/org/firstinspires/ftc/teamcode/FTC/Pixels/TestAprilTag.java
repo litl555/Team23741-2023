@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Constants.BoardConstants;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Hex;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.PixelColor;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -22,7 +23,7 @@ public class TestAprilTag extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry = Robot.telemetry;
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         BoardDetectionPipeline pipeline = new BoardDetectionPipeline(cam, telemetry);

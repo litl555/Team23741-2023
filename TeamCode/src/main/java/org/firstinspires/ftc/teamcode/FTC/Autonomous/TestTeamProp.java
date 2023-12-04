@@ -15,16 +15,16 @@ public class TestTeamProp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry1 = new LoggerTool(telemetry);
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
-        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry, false);
+        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
 
         waitForStart();
 
         while (opModeIsActive()) {
-            telemetry.add("Detected position", pipeline.propPos);
-            telemetry.update();
+            telemetry1.add("Detected position", pipeline.propPos);
+            telemetry1.update();
 
             // when done call
             // pipeline.destroy();

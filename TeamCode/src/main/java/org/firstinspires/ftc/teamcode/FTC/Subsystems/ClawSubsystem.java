@@ -15,12 +15,16 @@ public class ClawSubsystem extends SubsystemBase {
         HALFCLOSE
     }
 
-    public List<Double> rowWrist = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    public static double wristIntake = 0.0;
+    public static double wristClearing = 0.0;
+    public static double wristGround = 0.0;
+    public static double wristPlacing = 0.0;
+    public List<Double> rowWrist = Arrays.asList(wristIntake, wristGround, wristPlacing, wristPlacing, wristPlacing, wristPlacing, wristPlacing);
     public List<Double> rowArm = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-    private double closedPos1 = 0.0;
-    private double closedPos2 = 0.0;
-    private double halfPos = .5;
-    private double openPos = 1.0;
+    private double closedPos1 = 1.0;
+    private double closedPos2 = 1.0;
+    private double halfPos = .85;
+    private double openPos = .7;
 
     private double gearRatio = 2.0 / 3.0;
     private double maxDegrees = 45;
@@ -32,17 +36,21 @@ public class ClawSubsystem extends SubsystemBase {
     public void update(ClawState state) {
         switch (state) {
             case OPEN:
-                Robot.claw1.setPosition(openPos);
-                Robot.claw2.setPosition(openPos);
+                Robot.clawBottom.setPosition(openPos);
+                Robot.clawTop.setPosition(openPos);
+                break;
             case CLOSED:
-                Robot.claw1.setPosition(closedPos1);
-                Robot.claw2.setPosition(closedPos2);
+                Robot.clawTop.setPosition(closedPos1);
+                Robot.clawBottom.setPosition(closedPos2);
+                break;
             case OPENONE:
-                Robot.claw1.setPosition(openPos);
-                Robot.claw2.setPosition(closedPos2);
+                Robot.clawBottom.setPosition(openPos);
+                Robot.clawTop.setPosition(closedPos2);
+                break;
             case HALFCLOSE:
-                Robot.claw2.setPosition(halfPos);
-                Robot.claw1.setPosition(halfPos);
+                Robot.clawTop.setPosition(halfPos);
+                Robot.clawBottom.setPosition(halfPos);
+                break;
         }
 
     }
@@ -66,6 +74,7 @@ public class ClawSubsystem extends SubsystemBase {
     }
 
     private double angleToServo(double angle) {
-        return (angle / (300 * gearRatio) + (maxDegrees - (300 * gearRatio)) / (300 * gearRatio));
+        return (angle);
+//        return (angle / (300 * gearRatio) + (maxDegrees - (300 * gearRatio)) / (300 * gearRatio));
     }
 }

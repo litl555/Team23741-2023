@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryInterface;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
@@ -26,8 +27,15 @@ public class LoggerTool {
     private double[] xvals;
     private double[] yvals;
     TrajectoryInterface current = null;
+    Telemetry telemetry;
+
+    public LoggerTool(Telemetry telemetry) {
+        this.telemetry = telemetry;
+    }
+
     public void add(String name, Object output) {
         p.put(name, output);
+        telemetry.addData(name, output);
     }
 
     public void update() {
@@ -41,7 +49,9 @@ public class LoggerTool {
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
         dash.sendTelemetryPacket(p);
+
         p = new TelemetryPacket();
+        telemetry.update();
 
     }
 

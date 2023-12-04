@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Const;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import java.util.List;
@@ -22,6 +23,8 @@ public class CustomLocalization {
     OdometryModule leftPod, rightPod, backPod;
     DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
+    double rightTotal = 0;
+    double leftTotal = 0;
     double X_MULTIPLIER = .994;
     double Y_MULTIPLER = (double) 1.0;
     SampleMecanumDrive dr;
@@ -44,7 +47,7 @@ public class CustomLocalization {
         pose = startPose;
         Constants.robotPose = startPose;
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
-        rightPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("lift2"));
         rightPod.reverse();
         backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
 
@@ -59,6 +62,12 @@ public class CustomLocalization {
 
     public void update() {
         dr.updatePoseEstimate();
+        rightTotal += rightPod.getDelta() / 25.4;
+        rightPod.update();
+        leftTotal += leftPod.getDelta() / 25.4;
+        leftPod.update();
+        //Robot.telemetry.add("rightTotal",rightTotal);
+        //Robot.telemetry.add("leftTotal",leftTotal);
         //rd = rightPod.getDelta();
         //ld = leftPod.getDelta();
         //bd = backPod.getDelta();

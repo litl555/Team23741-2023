@@ -9,6 +9,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
@@ -22,7 +23,7 @@ public class TrajectoryTester extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
 
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry = Robot.telemetry;
         CustomLocalization localization = new CustomLocalization(Constants.startPose, hardwareMap, dr);
 //        Trajectory trajectory = new Trajectory(new Pose2d(0, 0), new Pose2d(1, 1000), new Pose2d(-800, 4800), new Pose2d(-1600, 1800), new Pose2d(-1530, 4120), new Pose2d(0, -200));
 //        Trajectory trajectory = new Trajectory(new Pose2d(-100, 0), new Pose2d(100, 000), new Pose2d(00, 3000), new Pose2d(0, -3000), new Pose2d(-500, 0), new Pose2d(500, 0));

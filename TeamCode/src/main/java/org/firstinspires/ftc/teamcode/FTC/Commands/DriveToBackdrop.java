@@ -27,7 +27,7 @@ public class DriveToBackdrop extends CommandBase {
 //    Trajectory tr2 = new Trajectory(new Pose2d(900, 1750), backdropPos, new Pose2d(1490, 950), new Pose2d(950, 1350), new Pose2d(-160, 270), new Pose2d(0, 0), false, true);
 
     HardwareMap hardwareMap = Robot.hardwareMap;
-    LoggerTool telemetry = new LoggerTool();
+    LoggerTool telemetry = Robot.telemetry;
     CustomLocalization l;
 
     public DriveToBackdrop(DriveSubsystem robot, LoggerTool telemetry) {

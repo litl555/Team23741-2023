@@ -17,7 +17,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        telemetry.add("Pose: ", Constants.robotPose);
+//        Robot.telemetry.add("Pose: ", Constants.robotPose);
 
     }
 }

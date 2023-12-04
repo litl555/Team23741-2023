@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Line;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.LineRunner;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
@@ -29,7 +30,7 @@ public class FeedforwardTuner extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         Mode mode = Mode.AUTO;
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry = Robot.telemetry;
         SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
 
         CustomLocalization localization = new CustomLocalization(Constants.startPose, hardwareMap, dr);

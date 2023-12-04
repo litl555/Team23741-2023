@@ -23,7 +23,7 @@ public class PlacePixel extends SequentialCommandGroup {
     private Pose2d leftColumn = new Pose2d(0, 0, 0);
 
     public PlacePixel(ClawSubsystem claw, LiftSubsystem lift, DriveSubsystem drive, int row1, int column1, int row2, int column2, CustomLocalization l) {
-        DriveToBackdrop driveToBackdrop = new DriveToBackdrop(drive, new LoggerTool());
+        DriveToBackdrop driveToBackdrop = new DriveToBackdrop(drive, Robot.telemetry);
         addCommands(
                 new ScheduleCommand(driveToBackdrop),
                 new WaitUntilCommand(Robot::isPastTruss),

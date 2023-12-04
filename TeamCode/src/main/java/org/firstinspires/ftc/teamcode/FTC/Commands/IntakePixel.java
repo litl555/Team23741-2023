@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 public class IntakePixel extends CommandBase {
     private boolean finished = false;
     IntakeSubsystem intake;
+    private double intakeMMThreshold = 20.0;
 
     public IntakePixel(IntakeSubsystem intake) {
         this.intake = intake;
@@ -19,7 +20,7 @@ public class IntakePixel extends CommandBase {
 
     @Override
     public void execute() {
-        if (intake.getDistance() > 20) {
+        if (intake.getDistance() > intakeMMThreshold) {
             if (intake.seePixel == true) {
                 intake.pixelPassCount++;
 

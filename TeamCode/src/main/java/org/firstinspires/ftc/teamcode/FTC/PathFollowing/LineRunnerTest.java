@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @Autonomous
@@ -18,7 +19,7 @@ public class LineRunnerTest extends LinearOpMode {
         Line line = new Line(new Pose2d(0, 0), new Pose2d(1, 1000), true, true);
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
         LineRunner lr = new LineRunner(hardwareMap, l, line, 0, LineRunner.HeadingType.ConstantHeadingVelo);
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry = Robot.telemetry;
         waitForStart();
 
         lr.start();

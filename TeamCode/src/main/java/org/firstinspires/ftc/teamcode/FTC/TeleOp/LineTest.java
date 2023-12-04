@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Line;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.LineRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @TeleOp
@@ -17,7 +18,7 @@ public class LineTest extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        LoggerTool telemetry = new LoggerTool();
+        LoggerTool telemetry = Robot.telemetry;
         SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
 
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
