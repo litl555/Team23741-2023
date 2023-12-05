@@ -31,7 +31,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 @TeleOp
 public class Auto extends LinearOpMode {
     TeamPropPosition pos;
-    public static Pose2d startPos = new Pose2d(300, -1500, -3.14159 / 2.0);
+    public static Pose2d startPos = new Pose2d(300, -1500, 0);
 
     public static double liftControlSpeed = 0.3;
     public static long liftRiseTime = 1000;

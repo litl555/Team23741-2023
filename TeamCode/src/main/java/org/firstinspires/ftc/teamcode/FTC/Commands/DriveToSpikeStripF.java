@@ -17,7 +17,7 @@ public class DriveToSpikeStripF extends CommandBase {
     Trajectory trajectory;
     private boolean finished = false;
     public static Pose2d endPos1 = new Pose2d(970, 300, 0);
-    public static Pose2d endPos2 = new Pose2d(970, 300, -Math.toRadians(90));
+    public static Pose2d endPos2 = new Pose2d(970, 300, 0);
     public static Pose2d endPos3 = new Pose2d(970, 300, 0);
 
     public DriveToSpikeStripF(TeamPropPosition pos) {
@@ -27,7 +27,7 @@ public class DriveToSpikeStripF extends CommandBase {
     @Override
     public void initialize() {
 
-        Pose2d startPose = new Pose2d(Robot.l.getPoseEstimate().getY() * -1.0, Robot.l.getPoseEstimate().getX(), -3.14159 / 2.0);
+        Pose2d startPose = new Pose2d(Robot.l.getPoseEstimate().getY() * -1.0, Robot.l.getPoseEstimate().getX(), 0);
         switch (pos) {
             case right:
                 trajectory = new Trajectory(startPose, endPos3, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);

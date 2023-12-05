@@ -1,5 +1,14 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armGround;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armIntake;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armPlace1;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armPlace2;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristClearing;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristGround;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristIntake;
+import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristPlacing;
+
 import com.arcrobotics.ftclib.command.SubsystemBase;
 
 import java.util.ArrayList;
@@ -15,16 +24,12 @@ public class ClawSubsystem extends SubsystemBase {
         HALFCLOSE
     }
 
-    public static double wristIntake = 0.0;
-    public static double wristClearing = 0.0;
-    public static double wristGround = 0.0;
-    public static double wristPlacing = 0.0;
-    public List<Double> rowWrist = Arrays.asList(wristIntake, wristGround, wristPlacing, wristPlacing, wristPlacing, wristPlacing, wristPlacing);
-    public List<Double> rowArm = Arrays.asList(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    public List<Double> rowWrist = Arrays.asList(wristIntake, wristPlacing, wristClearing, wristGround);
+    public List<Double> rowArm = Arrays.asList(armIntake, armPlace1, armPlace2, armGround);
     private double closedPos1 = 1.0;
     private double closedPos2 = 1.0;
     private double halfPos = .85;
-    private double openPos = .7;
+    private double openPos = .67;
 
     private double gearRatio = 2.0 / 3.0;
     private double maxDegrees = 45;
@@ -68,9 +73,24 @@ public class ClawSubsystem extends SubsystemBase {
         Robot.wrist2.setPosition(angleToServo(angle));
     }
 
+    public void updateWrist(double change) {
+        Robot.wrist1.setPosition(Robot.wrist1.getPosition() + change);
+        Robot.wrist2.setPosition(Robot.wrist2.getPosition() + change);
+    }
+
     public void setArm(double angle) {
         Robot.arm1.setPosition(angleToServo(angle));
         Robot.arm2.setPosition(angleToServo(angle));
+    }
+
+    public void updateArm(double change) {
+        Robot.arm1.setPosition(Robot.arm1.getPosition() + change);
+        Robot.arm2.setPosition(Robot.arm2.getPosition() + change);
+    }
+
+    public void syncRows(int index) {
+        updateWristRow(index);
+        updateArmRow(index);
     }
 
     private double angleToServo(double angle) {

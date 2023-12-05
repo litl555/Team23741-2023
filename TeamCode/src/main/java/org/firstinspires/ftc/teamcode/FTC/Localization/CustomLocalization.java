@@ -97,7 +97,7 @@ public class CustomLocalization {
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {
         R *= X_MULTIPLIER;
-        L *= -X_MULTIPLIER;
+        L *= X_MULTIPLIER;
         B *= Y_MULTIPLER;
         rightPod.update();
         leftPod.update();

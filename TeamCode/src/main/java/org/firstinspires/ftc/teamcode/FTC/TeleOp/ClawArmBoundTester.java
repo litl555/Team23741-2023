@@ -42,6 +42,8 @@ public class ClawArmBoundTester extends CommandOpMode {
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whileHeld(new InstantCommand(() -> clawPos -= speed).andThen(new InstantCommand(() -> claw.setWrist(clawPos))));
         Robot.claw.setArm(0.5);
         Robot.claw.setWrist(0.5);
+
+        gamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.setWrist(0)));
     }
 
     @Override

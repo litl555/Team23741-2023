@@ -3,9 +3,12 @@ package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -34,23 +37,138 @@ import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.Inta
 @TeleOp
 public class SafeTeleop extends CommandOpMode {
     int levelCount = 0;
+    private boolean isDroppingFirst = true, isHalfClosed = true, isControllingWrist = true, isLiftOverride = false;
+    private int clawMode = 0;
+    private LoggerTool telemetry1;
+
+    private ClawSubsystem claw;
 
     @Override
     public void initialize() {
-        LoggerTool telemetry1 = new LoggerTool(telemetry);
+        // initialization
+        telemetry1 = new LoggerTool(telemetry);
         CommandScheduler.getInstance().reset();
-        LiftSubsystem lift = new LiftSubsystem();
-        ClawSubsystem claw = new ClawSubsystem();
-        register(claw);
-        //register(lift);
 
-        IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
-        register(intake);
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
-        DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
-        register(drive);
+
+        LiftSubsystem lift = new LiftSubsystem(); //register(lift);
+        claw = new ClawSubsystem(); register(claw);
+        IntakeSubsystem intake = new IntakeSubsystem(telemetry1); register(intake);
+        DriveSubsystem drive = new DriveSubsystem(l, telemetry1); register(drive);
+
+        // liam will not notice this and this will cause bugs - with love, leo
+        assert claw.rowArm.size() == claw.rowWrist.size();
+
+        //GamepadEx pad1 = new GamepadEx(gamepad1);
+        GamepadEx pad2 = new GamepadEx(gamepad2);
+
+        // lift controls
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP)
+                .whileHeld(new InstantCommand(() -> lift.setPower(TeleOpConstants.liftUpSpeed)))
+                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
+                .whileHeld(new InstantCommand(() -> lift.setPower(-1 * TeleOpConstants.liftDownSpeed)))
+                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+
+        // claw controls
+        pad2.getGamepadButton(GamepadKeys.Button.Y) // open claw
+                .whenPressed(
+                        new ConditionalCommand(
+                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPENONE)), // on true
+                            new SequentialCommandGroup( // on false
+                                    new InstantCommand(() -> claw.updateWrist(0.03)),
+                                    new WaitCommand(200),
+                                    new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN))),
+                            () -> { // condition
+                                isDroppingFirst = !isDroppingFirst;
+                                return !isDroppingFirst; // since we have to invert it first
+                            }));
+
+        pad2.getGamepadButton(GamepadKeys.Button.X) // close claw
+                .whenPressed(
+                        new ConditionalCommand(
+                            new InstantCommand(() -> {
+                                isDroppingFirst = true;
+                                if (isHalfClosed) claw.update(ClawSubsystem.ClawState.CLOSED);
+                                else claw.update(ClawSubsystem.ClawState.HALFCLOSE);
+
+                                isHalfClosed = !isHalfClosed;
+                            }),
+                            new SequentialCommandGroup(
+                                    new InstantCommand(() -> isDroppingFirst = true),
+                                    new InstantCommand(() -> lift.setPower(0.2)),
+                                    new WaitCommand(70),
+                                    new InstantCommand(() -> lift.setPower(0)),
+                                    new InstantCommand(() -> claw.setWrist(TeleOpConstants.wristIntakeGrab)),
+                                    new WaitCommand(350),
+                                    new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                                    new WaitCommand(500),
+                                    new InstantCommand(() -> lift.setPower(0.2)),
+                                    new WaitCommand(TeleOpConstants.liftWait1),
+                                    new InstantCommand(() -> claw.updateArm(TeleOpConstants.armAdjust1)),
+                                    new WaitCommand(TeleOpConstants.armWait2),
+                                    new InstantCommand(() -> claw.updateArm(TeleOpConstants.armAdjust2)),
+                                    new WaitCommand(TeleOpConstants.armWait3),
+                                    new InstantCommand(() -> lift.setPower(0))
+                            ),
+                            () -> isLiftOverride
+                        ));
+
+        // wrist controls
+        pad2.getGamepadButton(GamepadKeys.Button.B) // go to current mode
+                .whenPressed(new InstantCommand(() -> claw.syncRows(clawMode)));
+
+        // arm controls
+        pad2.getGamepadButton(GamepadKeys.Button.A) // go to intake position
+                .whenPressed(new InstantCommand(() -> {
+                    clawMode = 0;
+                    claw.syncRows(0);
+
+                    isHalfClosed = true;
+                    claw.update(ClawSubsystem.ClawState.HALFCLOSE);
+                }));
+
+        // arm and wrist controls -> bumpers are used to control level
+        // if we are in override bumpers control rotation of whatever were controlling
+        pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER) // claw mode += 1
+                .whenPressed(new InstantCommand(() -> {
+                    if (!isLiftOverride) setClawMode(1);
+                })) // conditional commands are fake
+                .whileHeld(new InstantCommand(() -> { // if we are in override then holding bumpers should continuously cause change
+                    if (isLiftOverride) clawOverride(1);
+                }));
+
+        pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER) // claw mode -= 1
+                .whenPressed(new InstantCommand(() -> {
+                    if (!isLiftOverride) setClawMode(-1);
+                }))
+                .whileHeld(new InstantCommand(() -> {
+                    if (isLiftOverride) clawOverride(-1);
+                }));
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT) // change if we are wrist or arm
+                .whenPressed(new InstantCommand(() -> isControllingWrist = !isControllingWrist));
+
+        // overrides
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT)
+                .whenPressed(new InstantCommand(() -> isLiftOverride = !isLiftOverride));
+
+        // intake controls
+        schedule(new RunCommand(() -> {
+            double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+            double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+
+            if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
+            else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
+        }));
+
+        /*
+
         GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
         GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
+
+
         gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ParallelCommandGroup(
                 new InstantCommand(() -> levelCount++),
                 new GoToHeight(lift, claw, levelCount)
@@ -92,17 +210,38 @@ public class SafeTeleop extends CommandOpMode {
         gamepadEx2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
         gamepadEx2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
         //gamepadEx2.getGamepadButton(GamepadKeys.Button.B).whenPressed(()->schedule(new IntakePixel(intake)));
+        */
+
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
+    }
 
+    private void clawOverride(double mult) {
+        if (isControllingWrist) claw.updateWrist(mult * TeleOpConstants.overrideWristSpeed);
+        else claw.updateArm(mult * TeleOpConstants.overrideArmSpeed);
+    }
+
+    private void setClawMode(int change) {
+        clawMode += change;
+
+        if (clawMode < 0) clawMode = claw.rowWrist.size() - 1;
+        else if (clawMode > claw.rowWrist.size() - 1) clawMode = 0;
     }
 
     @Override
     public void run() {
-
         Robot.l.update();
+
         CommandScheduler.getInstance().run();
 
-//        Robot.telemetry.update();
+        telemetry1.add("OVERRIDE", isLiftOverride);
+        telemetry1.add("CONTROLLING", isControllingWrist ? "wrist" : "arm");
+        telemetry1.add("===", "===");
+        telemetry1.add("MODE", clawMode);
+        telemetry1.add("======", "======");
+        telemetry1.add("ARM ROTATION", Robot.arm1.getPosition());
+        telemetry1.add("WRIST ROTATION", Robot.wrist1.getPosition());
+
+        Robot.telemetry.update();
     }
 }
