@@ -6,9 +6,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.PlacePixelOnBackboardF;
+import org.firstinspires.ftc.teamcode.FTC.Commands.PlacePixelOnSpikeStrip;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.BoardDetectionPipeline;
+import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
@@ -20,6 +22,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 
 public class Auto extends LinearOpMode {
     TeamPropPosition pos;
+    public static Pose2d startPos = new Pose2d(0.0, 0.0, 0.0);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -35,18 +38,19 @@ public class Auto extends LinearOpMode {
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
 
         SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(startPos, hardwareMap, dr);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         while (!isStarted()) {
             pos = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new PlacePixelOnBackboardF(pos));
+
         waitForStart();
+        CommandScheduler.getInstance().schedule(new PlacePixelOnSpikeStrip(pos).andThen(new PlacePixelOnBackboardF(pos)).andThen());
         while (opModeIsActive() && !isStopRequested()) {
 
-
+            lift.periodic();
         }
     }
 }

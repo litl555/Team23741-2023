@@ -41,6 +41,10 @@ public class Robot {
         distance2 = hardwareMap.get(DistanceSensor.class, "dist2");
 
         intakeMotor = Robot.hardwareMap.dcMotor.get("intake");
+        arm1 = Robot.hardwareMap.servo.get("arm1");
+        arm2 = Robot.hardwareMap.servo.get("arm2");
+        wrist1 = Robot.hardwareMap.servo.get("wrist1");
+        wrist2 = Robot.hardwareMap.servo.get("wrist2");
         intakeServo1 = hardwareMap.servo.get("intakeServo1");
         intakeServo2 = hardwareMap.servo.get("intakeServo2");
         motor1 = hardwareMap.dcMotor.get("lift1");
