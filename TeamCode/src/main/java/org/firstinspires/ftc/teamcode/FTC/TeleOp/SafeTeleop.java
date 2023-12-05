@@ -57,9 +57,10 @@ public class SafeTeleop extends CommandOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1); register(drive);
 
         // liam will not notice this and this will cause bugs - with love, leo
+        //What in the world is that (insert sobbing emoji here)
         assert claw.rowArm.size() == claw.rowWrist.size();
 
-        //GamepadEx pad1 = new GamepadEx(gamepad1);
+        GamepadEx pad1 = new GamepadEx(gamepad1);
         GamepadEx pad2 = new GamepadEx(gamepad2);
 
         // lift controls
@@ -70,20 +71,27 @@ public class SafeTeleop extends CommandOpMode {
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whileHeld(new InstantCommand(() -> lift.setPower(-1 * TeleOpConstants.liftDownSpeed)))
                 .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+        pad1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
+                .whileHeld(new InstantCommand(() -> lift.setPower(TeleOpConstants.liftUpSpeed)))
+                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+
+        pad1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
+                .whileHeld(new InstantCommand(() -> lift.setPower(-1 * TeleOpConstants.liftDownSpeed)))
+                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
 
         // claw controls
         pad2.getGamepadButton(GamepadKeys.Button.Y) // open claw
                 .whenPressed(
                         new ConditionalCommand(
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPENONE)), // on true
-                            new SequentialCommandGroup( // on false
-                                    new InstantCommand(() -> claw.updateWrist(0.03)),
-                                    new WaitCommand(200),
-                                    new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN))),
-                            () -> { // condition
-                                isDroppingFirst = !isDroppingFirst;
-                                return !isDroppingFirst; // since we have to invert it first
-                            }));
+                                new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), // on true
+                                new SequentialCommandGroup( // on false
+                                        new InstantCommand(() -> claw.updateWrist(0.03)),
+                                        new WaitCommand(200),
+                                        new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN)),
+                                () -> { // condition
+                                    isDroppingFirst = !isDroppingFirst;
+                                    return !isDroppingFirst; // since we have to invert it first
+                                }));
 
         pad2.getGamepadButton(GamepadKeys.Button.X) // close claw
                 .whenPressed(
@@ -101,9 +109,9 @@ public class SafeTeleop extends CommandOpMode {
                                     new WaitCommand(70),
                                     new InstantCommand(() -> lift.setPower(0)),
                                     new InstantCommand(() -> claw.setWrist(TeleOpConstants.wristIntakeGrab)),
-                                    new WaitCommand(350),
+//                                    new WaitCommand(350),
                                     new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                                    new WaitCommand(500),
+                                    new WaitCommand(850),
                                     new InstantCommand(() -> lift.setPower(0.2)),
                                     new WaitCommand(TeleOpConstants.liftWait1),
                                     new InstantCommand(() -> claw.updateArm(TeleOpConstants.armAdjust1)),
