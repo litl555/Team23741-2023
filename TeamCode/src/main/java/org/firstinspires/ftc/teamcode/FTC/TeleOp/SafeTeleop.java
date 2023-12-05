@@ -37,12 +37,12 @@ import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.Inta
 @TeleOp
 public class SafeTeleop extends CommandOpMode {
     int levelCount = 0;
-    private boolean isDroppingFirst = true, isHalfClosed = true, isControllingWrist = true, isLiftOverride = false;
+    private boolean isDroppingFirst = true, isHalfClosed = true, isControllingWrist = true, isLiftOverride = false, isClawInTray = false;
     private int clawMode = 0;
     private LoggerTool telemetry1;
 
     private ClawSubsystem claw;
-
+    private boolean turning=false;
     @Override
     public void initialize() {
         // initialization
@@ -66,28 +66,28 @@ public class SafeTeleop extends CommandOpMode {
         // lift controls
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP)
                 .whileHeld(new InstantCommand(() -> lift.setPower(TeleOpConstants.liftUpSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+                .whenReleased(new InstantCommand(() -> lift.setPower(0.0)));
 
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
                 .whileHeld(new InstantCommand(() -> lift.setPower(-1 * TeleOpConstants.liftDownSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+                .whenReleased(new InstantCommand(() -> lift.setPower(0.0)));
         pad1.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER)
                 .whileHeld(new InstantCommand(() -> lift.setPower(TeleOpConstants.liftUpSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+                .whenReleased(new InstantCommand(() -> lift.setPower(0.0)));
 
         pad1.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER)
                 .whileHeld(new InstantCommand(() -> lift.setPower(-1 * TeleOpConstants.liftDownSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
+                .whenReleased(new InstantCommand(() -> lift.setPower(0.0)));
 
         // claw controls
         pad2.getGamepadButton(GamepadKeys.Button.Y) // open claw
                 .whenPressed(
                         new ConditionalCommand(
-                                new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), // on true
+                                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPENONE)),
                                 new SequentialCommandGroup( // on false
-                                        new InstantCommand(() -> claw.updateWrist(0.03)),
+                                        new InstantCommand(() -> claw.setWrist(TeleOpConstants.wristPlacing + 0.012)),
                                         new WaitCommand(200),
-                                        new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN)),
+                                        new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN))),
                                 () -> { // condition
                                     isDroppingFirst = !isDroppingFirst;
                                     return !isDroppingFirst; // since we have to invert it first
@@ -105,20 +105,18 @@ public class SafeTeleop extends CommandOpMode {
                             }),
                             new SequentialCommandGroup(
                                     new InstantCommand(() -> isDroppingFirst = true),
-                                    new InstantCommand(() -> lift.setPower(0.2)),
-                                    new WaitCommand(70),
-                                    new InstantCommand(() -> lift.setPower(0)),
                                     new InstantCommand(() -> claw.setWrist(TeleOpConstants.wristIntakeGrab)),
                                     new WaitCommand(350),
                                     new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                                    new WaitCommand(500),
+                                    new WaitCommand(1500),
                                     new InstantCommand(() -> lift.setPower(0.2)),
                                     new WaitCommand(TeleOpConstants.liftWait1),
-                                    new InstantCommand(() -> claw.updateArm(TeleOpConstants.armAdjust1)),
+                                    new InstantCommand(() -> claw.setArm(TeleOpConstants.wristIntakeGrab + TeleOpConstants.armAdjust1)),
                                     new WaitCommand(TeleOpConstants.armWait2),
-                                    new InstantCommand(() -> claw.updateArm(TeleOpConstants.armAdjust2)),
+                                    new InstantCommand(() -> claw.setArm(TeleOpConstants.wristIntakeGrab + TeleOpConstants.armAdjust1 + TeleOpConstants.armAdjust2)),
                                     new WaitCommand(TeleOpConstants.armWait3),
                                     new InstantCommand(() -> lift.setPower(0))
+
                             ),
                             () -> isLiftOverride
                         ));
@@ -133,8 +131,14 @@ public class SafeTeleop extends CommandOpMode {
                     clawMode = 0;
                     claw.syncRows(0);
 
-                    isHalfClosed = true;
-                    claw.update(ClawSubsystem.ClawState.HALFCLOSE);
+                    if (isClawInTray) {
+                        claw.update(ClawSubsystem.ClawState.OPEN); // does this need to lift up lift?
+                    } else {
+                        isHalfClosed = false;
+                        claw.update(ClawSubsystem.ClawState.CLOSED);
+                    }
+
+                    isClawInTray = !isClawInTray;
                 }));
 
         // arm and wrist controls -> bumpers are used to control level
@@ -164,8 +168,8 @@ public class SafeTeleop extends CommandOpMode {
 
         // intake controls
         schedule(new RunCommand(() -> {
-            double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-            double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+            double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+            double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
             if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
             else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
@@ -244,6 +248,7 @@ public class SafeTeleop extends CommandOpMode {
 
         telemetry1.add("OVERRIDE", isLiftOverride);
         telemetry1.add("CONTROLLING", isControllingWrist ? "wrist" : "arm");
+        telemetry1.add("CLAW IN TRAY", isClawInTray);
         telemetry1.add("===", "===");
         telemetry1.add("MODE", clawMode);
         telemetry1.add("======", "======");

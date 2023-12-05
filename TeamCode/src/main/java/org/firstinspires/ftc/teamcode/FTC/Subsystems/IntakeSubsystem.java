@@ -68,7 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
             case INTAKE:
                 Robot.setIntakePower(intakePower);
-                Robot.intakeRoller.setPower(1.0);
+                Robot.intakeRoller.setPower(-1.0);
                 break;
             case IDLE:
                 telemetry.add("powering off", "yes");
@@ -80,7 +80,7 @@ public class IntakeSubsystem extends SubsystemBase {
                 telemetry.add("powerset1", powerset);
                 telemetry.add("outtaking", "outtaking");
                 Robot.setIntakePower(outtakePower);
-                Robot.intakeRoller.setPower(-1.0);
+                Robot.intakeRoller.setPower(1.0);
                 break;
 
         }
@@ -88,7 +88,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setPower(double power) {
         Robot.intakeMotor.setPower(power);
-        Robot.intakeRoller.setPower(-power);
+        Robot.intakeRoller.setPower(power);
 
     }
 
