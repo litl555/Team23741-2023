@@ -77,12 +77,16 @@ public class TrajectoryRunner {
     }
 
     public void update() {
+        loggerTool.add("current state", currentState);
+        loggerTool.add("current state update", System.currentTimeMillis());
         if (currentState == State.RUNNING) {
             runningMode();
         } else if (currentState == State.CORRECTING) {
             correctMode();
         }
     }
+
+    public int indexRunTime = 0;
 
     private void runningMode() {
         count++;
@@ -92,11 +96,13 @@ public class TrajectoryRunner {
             //loggerTool.add("t",closestT);
             Pose2d derivative = t.velocities(closestT);
             //loggerTool.drawPoint(t.equation(closestT));
-
+            Robot.telemetry.add("amgle",Constants.angle);
+            Robot.telemetry.add("angleDes",angleDes);
             //loggerTool.add("der",derivative);
             if (closestT == 1.0) {
                 derivative = new Pose2d(0, 0, 0);
             }
+
             //loggerTool.add("radius",Math.sqrt(Math.abs(t.getCentripetalForceVector(closestT).dot(t.getCentripetalForceVector(closestT)))));
             Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * -1.0 * derivative.getY());
             //loggerTool.add("path",pathVector);
@@ -122,10 +128,14 @@ public class TrajectoryRunner {
                 if (!t.getEndStopped()) {
                     currentState = State.FINISHED;
                 } else {
+                    loggerTool.add("set to correcting", indexRunTime);
+                    indexRunTime++;
                     currentState = State.CORRECTING;
 
                 }
             }
+
+            loggerTool.add("closetT from runningMode", t.equation(closestT));
 //        ind = getIndex();
 //        double tv = t.getVelosSpaced().get(ind);
 //        Pose2d velocity = t.velocities(tv);
@@ -164,8 +174,8 @@ public class TrajectoryRunner {
 
     private void correctMode() {
         Pose2d positions = t.getEnd();
-        double x = speed * .007 * (positions.getX() + robotPose.getY());
-        double y = speed * -1.0 * .007 * (positions.getY() - robotPose.getX());
+        double x = speed * trajRunnerSpeedMult * (positions.getX() + robotPose.getY());
+        double y = speed * -1.0 * trajRunnerSpeedMult * (positions.getY() - robotPose.getX());
         //l.setWeightedDrivePowers(new Pose2d(0,0,0));
 
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
@@ -181,6 +191,8 @@ public class TrajectoryRunner {
             loggerTool.setCurrentTrajectoryNull();
 
         }
+
+        loggerTool.add("last correct mode run", System.currentTimeMillis());
     }
 
     private double getAngleValue(Pose2d velocityNormalized) {

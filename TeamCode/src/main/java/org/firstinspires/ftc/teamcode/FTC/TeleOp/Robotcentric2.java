@@ -15,9 +15,7 @@ public class Robotcentric2 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         LoggerTool telemetry = Robot.telemetry;
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {

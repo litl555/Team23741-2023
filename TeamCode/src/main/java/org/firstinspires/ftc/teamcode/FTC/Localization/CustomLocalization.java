@@ -25,14 +25,13 @@ public class CustomLocalization {
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
     double rightTotal = 0;
     double leftTotal = 0;
-    double X_MULTIPLIER = .994;
-    double Y_MULTIPLER = (double) 1.0;
-    SampleMecanumDrive dr;
-
-    public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap, SampleMecanumDrive dr) {
+    double X_MULTIPLIER = 1.00551;
+    double Y_MULTIPLER = (double) 1.00197;
+    Pose2d start;
+    public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
         Constants.angle = 0;
+        this.start=startPose;
         List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-        this.dr = dr;
         for (LynxModule hub : allHubs) {
             hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
@@ -46,14 +45,16 @@ public class CustomLocalization {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pose = startPose;
         Constants.robotPose = startPose;
-        leftPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
+        leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("lift2"));
         rightPod.reverse();
+
         backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
 
         backPod.reset();
         rightPod.reset();
         leftPod.reset();
+        Constants.angle=start.getHeading();
     }
 
     public Pose2d getPoseEstimate() {
@@ -61,42 +62,42 @@ public class CustomLocalization {
     }
 
     public void update() {
-        dr.updatePoseEstimate();
-        rightTotal += rightPod.getDelta() / 25.4;
-        rightPod.update();
-        leftTotal += leftPod.getDelta() / 25.4;
-        leftPod.update();
+        //dr.updatePoseEstimate();
+        //rightTotal += rightPod.getDelta() / 25.4;
+        //rightPod.update();
+        //leftTotal += leftPod.getDelta() / 25.4;
+        //leftPod.update();
         //Robot.telemetry.add("rightTotal",rightTotal);
         //Robot.telemetry.add("leftTotal",leftTotal);
-        //rd = rightPod.getDelta();
-        //ld = leftPod.getDelta();
-        //bd = backPod.getDelta();
-//        calculateDeltaPos(rd,ld,bd);
+        rd = rightPod.getDelta();
+        ld = leftPod.getDelta();
+        bd = backPod.getDelta();
+        calculateDeltaPos(rd,ld,bd);
 
-//        pose = pose.plus(calculateDeltaPos(rd, ld, bd));
-        pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 - (double) 1500.0, dr.getPoseEstimate().getY() * (double) 25.4 + (double) 1500.0, dr.getPoseEstimate().getHeading());
+        pose = pose.plus(calculateDeltaPos(rd, ld, bd));
+        //pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 + (double) start.getX(), dr.getPoseEstimate().getY() * (double) 25.4 + (double) start.getY(), dr.getPoseEstimate().getHeading()+start.getHeading());
 
         Pose2d veloVec = (pose.minus(Constants.robotPose)).div(Constants.toSec(Constants.getTime()) - Constants.lastTime1);
         Constants.lastTime1 = Constants.toSec(Constants.getTime());
         Constants.velocity = veloVec;
 
         Constants.robotPose = pose;
-        if (Math.abs(Math.toDegrees(Constants.lastPose.getHeading() - Constants.robotPose.getHeading())) < 100) {
-            Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()));
-        } else {
-            if (Math.toDegrees(Constants.lastPose.getHeading()) > 300) {
-                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) + 360);
-            } else {
-                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) - 360);
-
-            }
-        }
+//        if (Math.abs(Math.toDegrees(Constants.lastPose.getHeading() - Constants.robotPose.getHeading())) < 100) {
+//            Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()));
+//        } else {
+//            if (Math.toDegrees(Constants.lastPose.getHeading()) > 300) {
+//                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) + 360);
+//            } else {
+//                Constants.angle += Math.toRadians(Math.toDegrees(Constants.robotPose.getHeading() - Constants.lastPose.getHeading()) - 360);
+//
+//            }
+//        }
         Constants.lastPose = pose;
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {
         R *= X_MULTIPLIER;
-        L *= X_MULTIPLIER;
+        L *= -X_MULTIPLIER;
         B *= Y_MULTIPLER;
         rightPod.update();
         leftPod.update();

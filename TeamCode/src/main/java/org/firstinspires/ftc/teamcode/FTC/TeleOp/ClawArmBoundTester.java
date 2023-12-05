@@ -32,8 +32,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
         IntakeSubsystem intake = new IntakeSubsystem(tele);
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, tele);
         Robot.robotInit(hardwareMap, l, tele, intake, claw);
 

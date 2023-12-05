@@ -33,7 +33,6 @@ public class LiftSubsystem extends SubsystemBase {
     public void updateRow(int index) {
         index1 = index;
         targetPos = rowHeights.get(index);
-
     }
 
     public void setTargetPos(double height) {

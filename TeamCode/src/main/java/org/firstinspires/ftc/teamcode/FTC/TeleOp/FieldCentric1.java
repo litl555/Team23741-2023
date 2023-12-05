@@ -40,10 +40,8 @@ public class FieldCentric1 extends LinearOpMode {
         long lastTime = 0;
         int counter = 0;
         double timeprev = 0;
-        //SampleMecanumDrive driver=new SampleMecanumDrive(hardwareMap);
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
 
-        CustomLocalization customLocalization = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization customLocalization = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         double[] xvals = new double[101];
         double[] yvals = new double[101];
 
@@ -94,6 +92,8 @@ public class FieldCentric1 extends LinearOpMode {
 
             lastTime=Constants.getTime();
             DashboardUtil.drawRobot(packet.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
+
+            packet.put("tele op test angle", Constants.angle);
             packet.fieldOverlay().strokePolyline(xvals, yvals);
             dashboard.sendTelemetryPacket(packet);
 

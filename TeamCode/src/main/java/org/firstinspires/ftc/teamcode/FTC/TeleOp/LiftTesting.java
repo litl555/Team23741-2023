@@ -34,8 +34,7 @@ public class LiftTesting extends CommandOpMode {
 
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
         register(intake);
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
         register(drive);
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);

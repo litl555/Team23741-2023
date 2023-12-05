@@ -22,9 +22,7 @@ public class RobotCentroc extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         LoggerTool telemetry = Robot.telemetry;
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             desAngle -= Math.toRadians(gamepad1.right_stick_x * speed);

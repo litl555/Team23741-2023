@@ -18,10 +18,9 @@ import java.util.ArrayList;
 public class NumberTracer extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
         ArrayList<TrajectoryRunner> trajectoryRunners = new ArrayList<>();
         LoggerTool telemetry = Robot.telemetry;
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, -300, 0), hardwareMap, dr);
+        CustomLocalization l = new CustomLocalization(new Pose2d(0, -300, 0), hardwareMap);
         Trajectory tr = new Trajectory(new Pose2d(300, 0), new Pose2d(900, 1750), new Pose2d(670, 1580), new Pose2d(160, 2900), new Pose2d(6330, -4220), new Pose2d(4600, -3400), true, false);
 
 

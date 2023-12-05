@@ -36,7 +36,6 @@ public class CommandTest extends CommandOpMode {
     SampleMecanumDrive dr;
     @Override
     public void initialize() {
-        dr = new SampleMecanumDrive(hardwareMap);
         telemetry1 = new LoggerTool(telemetry);
         Constants.angle = 0;
         IntakeSubsystem intakeSubsystem = new IntakeSubsystem(telemetry1);
@@ -46,7 +45,7 @@ public class CommandTest extends CommandOpMode {
         Robot.robotInit(hardwareMap, l, telemetry1, intakeSubsystem, claw);
         gamepadEx1 = new GamepadEx(gamepad1);
         CommandScheduler.getInstance().reset();
-        l = new CustomLocalization(new Pose2d(-1500, 1500, 0), hardwareMap, dr);
+        l = new CustomLocalization(new Pose2d(-1500, 1500, 0), hardwareMap);
 
         driveSubsystem = new DriveSubsystem(l, telemetry1);
         gamepadEx1.getGamepadButton(GamepadKeys.Button.A).whenPressed(() -> schedule(new GetUpdatedPoseXHeading(l)));

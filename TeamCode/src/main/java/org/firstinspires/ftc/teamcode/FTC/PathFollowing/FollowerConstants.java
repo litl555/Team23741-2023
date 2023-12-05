@@ -14,4 +14,6 @@ public class FollowerConstants {
     public static double ks = .0001;
     public static double kp = .0003;
     public static double kpa = -3;
+
+    public static double trajRunnerSpeedMult = .007;
 }

@@ -18,9 +18,7 @@ public class LateralDistanceTuner extends LinearOpMode {
     private FtcDashboard dashboard = FtcDashboard.getInstance();
     @Override
     public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
-
-        CustomLocalization localizer = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap, dr);
+        CustomLocalization localizer = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
 

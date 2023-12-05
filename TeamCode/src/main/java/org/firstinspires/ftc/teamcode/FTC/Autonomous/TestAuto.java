@@ -21,10 +21,9 @@ public class TestAuto extends CommandOpMode {
     @Override
     public void initialize() {
         CommandScheduler.getInstance().reset();
-        dr = new SampleMecanumDrive(hardwareMap);
         telemetry1 = new LoggerTool(telemetry);
 
-        l = new CustomLocalization(new Pose2d(300, -1500, Math.toRadians(90)), hardwareMap, dr);
+        l = new CustomLocalization(new Pose2d(300, -1500, Math.toRadians(90)), hardwareMap);
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);

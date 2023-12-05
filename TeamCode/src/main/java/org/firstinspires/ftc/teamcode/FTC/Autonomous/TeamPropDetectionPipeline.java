@@ -84,8 +84,6 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
             }
         }
 
-        telemetry.add("Last run", System.currentTimeMillis());
-
         if (bestCntInd != -1) {
             ArrayList<MatOfPoint> toDraw = new ArrayList<>();
 

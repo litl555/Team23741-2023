@@ -41,14 +41,15 @@ public class Robot {
         distance2 = hardwareMap.get(DistanceSensor.class, "dist2");
 
         intakeMotor = Robot.hardwareMap.dcMotor.get("intake");
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         arm1 = Robot.hardwareMap.servo.get("arm1");
         arm2 = Robot.hardwareMap.servo.get("arm2");
         wrist1 = Robot.hardwareMap.servo.get("wrist1");
         wrist2 = Robot.hardwareMap.servo.get("wrist2");
         intakeServo1 = hardwareMap.servo.get("intakeServo1");
         intakeServo2 = hardwareMap.servo.get("intakeServo2");
-        motor1 = hardwareMap.dcMotor.get("lift1");
-        motor2 = hardwareMap.dcMotor.get("lift2");
+        motor1 = hardwareMap.dcMotor.get("lift1"); // control 2
+        motor2 = hardwareMap.dcMotor.get("lift2"); // expansion 3
         clawTop = hardwareMap.get(Servo.class, "clawTop");
         clawBottom = hardwareMap.get(Servo.class, "clawBottom");
         //distance = hardwareMap.get(DistanceSensor.class, "distance");
