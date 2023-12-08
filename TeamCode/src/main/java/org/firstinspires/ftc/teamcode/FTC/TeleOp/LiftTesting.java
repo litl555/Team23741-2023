@@ -41,16 +41,16 @@ public class LiftTesting extends CommandOpMode {
         GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
         gamepadEx2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ParallelCommandGroup(
                 new InstantCommand(() -> levelCount--),
-                new UpdateLift(lift, levelCount)
+                new UpdateLift(lift)
         ));
         gamepadEx2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new ParallelCommandGroup(
 
-                new UpdateLift(lift, 0)
+                new UpdateLift(lift)
         ));
         gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ParallelCommandGroup(
                 new InstantCommand(() -> levelCount++),
-                new UpdateLift(lift, levelCount)
+                new UpdateLift(lift)
         ));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new UpdateLift(lift, levelCount));
+        gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new UpdateLift(lift));
     }
 }

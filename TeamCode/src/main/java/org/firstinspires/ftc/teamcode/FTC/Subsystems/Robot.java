@@ -12,8 +12,9 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 
 @Config
 public class Robot {
-    public static DcMotor motor1, motor2, intakeMotor;
+    public static DcMotor motor1, motor2, intakeMotor, liftEncoder;
     public static Servo clawBottom, clawTop, intakeServo1, intakeServo2, wrist1, wrist2, arm1, arm2;
+
     public static CRServo intakeRoller;
     public static DistanceSensor distance;
     public static DistanceSensor distance1;
@@ -28,12 +29,15 @@ public class Robot {
     public static LiftSubsystem lift;
     public static ClawSubsystem claw;
     public static IntakeSubsystem intakeSubsystem;
+    public static int level = 0;
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem _intakeSubsystem, ClawSubsystem _claw) {
         l = _l;
         intakeRoller = hardwareMap.crservo.get("intakeRoller");
+        level = 0;
         //lift=_lift;
         _intakeSubsystem = intakeSubsystem;
+        liftEncoder = hardwareMap.dcMotor.get("rightFront");
         claw = _claw;
         telemetry = _telemetry;
         Robot.hardwareMap = hardwareMap;

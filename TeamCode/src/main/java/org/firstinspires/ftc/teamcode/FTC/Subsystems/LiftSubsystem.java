@@ -17,7 +17,7 @@ public class LiftSubsystem extends SubsystemBase {
     public static double safetyThreshold = inchesToTicks(3); //TODO: DON'T FORGET SAFETY THRESHOLD
     private static double circumfrence = 4;
     private static double PPR = 384.5; //ticks per revolution of the motor
-    public List<Double> rowHeights = Arrays.asList(0.0, 1.0, 2.0, 3.0, 4.0); //in ticks index 0 is intaking 1 is placing on ground 2 is first row...
+    public List<Double> rowHeights = Arrays.asList(0.0, 500.0, 1000.0, 1500.0, 2000.0); //in ticks index 0 is intaking 1 is placing on ground 2 is first row...
     public static double P = 0.0;
     double I = 0.0;
     public static double D = 0.0;
@@ -41,13 +41,17 @@ public class LiftSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (Robot.motor1.getCurrentPosition() > safetyThreshold) {
+        if (Math.abs(Robot.liftEncoder.getCurrentPosition()) > safetyThreshold) {
             safeRegion = true;
         } else {
             safeRegion = false;
         }
-//        double controllerPower = controller.calculate(inchesToTicks(targetPos), read());
-//        setPower(Range.clip(controllerPower + F, -1, 1));
+        double controllerPower = controller.calculate(targetPos, read());
+        Robot.telemetry.add("power", controllerPower);
+        Robot.telemetry.add("target", targetPos);
+        Robot.telemetry.add("index", index1);
+
+        setPower(Range.clip(controllerPower + F, -1, 1));
     }
 
     public void setPower(double power) {
@@ -56,7 +60,7 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
     public double read() {
-        return (Robot.motor2.getCurrentPosition());
+        return (-1.0 * Robot.liftEncoder.getCurrentPosition());
     } //TODO: PLUG IN ENCODER CABLE AND REMEMBER MOTOR
 
     public static double inchesToTicks(double inches) {
