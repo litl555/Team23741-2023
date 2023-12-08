@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixel;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RetractLift;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
@@ -49,7 +50,7 @@ public class SafeTeleop extends CommandOpMode {
         telemetry1 = new LoggerTool(telemetry);
         CommandScheduler.getInstance().reset();
 
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        CustomLocalization l = new CustomLocalization(new Pose2d(300, -1500, -Math.PI / 2.0), hardwareMap);
 
         LiftSubsystem lift = new LiftSubsystem(); //register(lift);
         claw = new ClawSubsystem(); register(claw);
@@ -254,7 +255,8 @@ public class SafeTeleop extends CommandOpMode {
         telemetry1.add("======", "======");
         telemetry1.add("ARM ROTATION", Robot.arm1.getPosition());
         telemetry1.add("WRIST ROTATION", Robot.wrist1.getPosition());
-
+        telemetry1.add("angle", Constants.angle);
+        telemetry1.add("pose", Constants.robotPose);
         Robot.telemetry.update();
     }
 }

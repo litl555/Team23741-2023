@@ -31,7 +31,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 @TeleOp
 public class Auto extends LinearOpMode {
     TeamPropPosition pos;
-    public static Pose2d startPos = new Pose2d(300, -1500, 0);
+    public static Pose2d startPos = new Pose2d(300, -1500, -Math.PI / 2.0);
 
     public static double liftControlSpeed = 0.3;
     public static long liftRiseTime = 1000;
@@ -74,7 +74,7 @@ public class Auto extends LinearOpMode {
                 .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
         */
 
-        CommandScheduler.getInstance().schedule(new DriveToSpikeStripF(TeamPropPosition.middle));
+        CommandScheduler.getInstance().schedule(new DriveToSpikeStripF(TeamPropPosition.left));
 
         while (opModeIsActive() && !isStopRequested()) {
             Robot.l.update();

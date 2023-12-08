@@ -103,7 +103,7 @@ public class CustomLocalization {
         leftPod.update();
         backPod.update();
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
-        Constants.angle += dT;
+        Constants.angle += dT / 2;
         double T = Constants.robotPose.getHeading();
         dF = (R + L) / (double) 2.0;
         dS = (B - Constants.PERPENDICULAR_X * dT);

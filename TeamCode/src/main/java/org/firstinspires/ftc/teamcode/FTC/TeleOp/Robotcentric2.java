@@ -15,13 +15,14 @@ public class Robotcentric2 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
+        CustomLocalization l = new CustomLocalization(new Pose2d(300, -1500, -Math.PI / 2.0), hardwareMap);
         LoggerTool telemetry = Robot.telemetry;
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
             l.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
             l.update();
             telemetry.add("angle", Constants.angle);
+
             telemetry.update();
         }
     }

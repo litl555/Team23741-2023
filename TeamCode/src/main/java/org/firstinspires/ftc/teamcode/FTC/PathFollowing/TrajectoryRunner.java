@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
+import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.angle;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.toSec;
@@ -39,7 +40,7 @@ public class TrajectoryRunner {
         TangentHeading
     }
 
-    public static double speed = .2;
+    public static double speed = .3;
     public int ind;
 
     public static double angleDes = 90;
@@ -47,11 +48,14 @@ public class TrajectoryRunner {
     int count = 0;
 
     private double lastTime = 0;
+
     BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
     BasicFeedforward fy = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
     public TrajectoryInterface t;
     private double startTime;
     private final CustomLocalization l;
+    private double startAngle = 0.0;
+    private double angleDes1 = 0.0;
     HeadingType headingType;
     LoggerTool loggerTool;
 
@@ -68,6 +72,9 @@ public class TrajectoryRunner {
 
     public void start() {
         loggerTool.setCurrentTrajectory(t);
+        angleDes1 = -Constants.angle;
+        startAngle = angleDes1;
+
         currentState = State.RUNNING;
         startTime = toSec(getTime());
         lastTime = startTime;
@@ -77,6 +84,23 @@ public class TrajectoryRunner {
     }
 
     public void update() {
+        if (Math.toRadians(angleDes) - startAngle > 0.0) {
+            if (angleDes1 + angleSpeed > Math.toRadians(angleDes)) {
+                angleDes1 = Math.toRadians(angleDes);
+            } else {
+                angleDes1 += angleSpeed;
+            }
+        }
+        if (Math.toRadians(angleDes) - startAngle < 0.0) {
+            if (angleDes1 - angleSpeed < Math.toRadians(angleDes)) {
+                angleDes1 = Math.toRadians(angleDes);
+            } else {
+                angleDes1 -= angleSpeed;
+            }
+        }
+        if (Math.toRadians(angleDes) == startAngle) {
+            angleDes1 = Math.toRadians(angleDes);
+        }
         loggerTool.add("current state", currentState);
         loggerTool.add("current state update", System.currentTimeMillis());
         if (currentState == State.RUNNING) {
@@ -121,7 +145,7 @@ public class TrajectoryRunner {
             sum = sum.times(speed);
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
-            l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
+            l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
             loggerTool.add("loop", getLoopTime());
             Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
             if (robot.distTo(t.getEnd().vec()) < 200 && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)) {
@@ -178,14 +202,14 @@ public class TrajectoryRunner {
         double y = speed * -1.0 * trajRunnerSpeedMult * (positions.getY() - robotPose.getX());
         //l.setWeightedDrivePowers(new Pose2d(0,0,0));
 
-        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - Math.toRadians(angleDes))));
+        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
         Constants.lastPose = Constants.robotPose;
 
         //loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
         //loggerTool.add("end", this.t.getEnd());
         //loggerTool.add("pos", robotPose);
 
-        if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - Math.toRadians(angleDes)) < aTolerance) {
+        if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - angleDes1) < aTolerance) {
             currentState = State.FINISHED;
             l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
             loggerTool.setCurrentTrajectoryNull();
