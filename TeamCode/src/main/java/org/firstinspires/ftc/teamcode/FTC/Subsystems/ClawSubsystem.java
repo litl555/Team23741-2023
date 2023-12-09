@@ -11,32 +11,41 @@ import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristPla
 
 import com.arcrobotics.ftclib.command.SubsystemBase;
 
+import org.firstinspires.ftc.teamcode.FTC.TeleOp.ArmWristPos;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ClawSubsystem extends SubsystemBase {
+    // this matches LiftSubsystem values
+    // 0 -> intake
+    // 1 -> slightly above pixel, in tray
+    // 2 -> ground
+    // 3 -> board row 1
+    // 4 -> board row 2
+    // 5 -> board row 3...
+    public static ArmWristPos[] rowDelta = new ArmWristPos[] {
+        new ArmWristPos(0.00333, -0.0105555),
+        new ArmWristPos(0.00333, -0.0105555),
+        new ArmWristPos(0.0022223, 0.011666),
+        new ArmWristPos(-0.07777, 0.0816666),
+        new ArmWristPos(-0.09833, 0.0816666),
+        new ArmWristPos(-0.06777, 0.0816666),
+        new ArmWristPos(-0.08777, 0.0816666),
+        new ArmWristPos(-0.03777, 0.0816666),
+        new ArmWristPos(-0.07777, 0.0816666),
+    };
 
-    public enum ClawState {
-        CLOSED,
-        OPENONE,
-        OPEN,
-        HALFCLOSE
-    }
 
+    // TODO: remove
     public List<Double> rowWrist = Arrays.asList(wristIntake, wristPlacing, wristClearing, wristGround);
     public List<Double> rowArm = Arrays.asList(armIntake, armPlace1, armPlace2, armGround);
-    private double closedPos1 = 1.0;
-    private double closedPos2 = 1.0;
-    private double halfPos = .85;
-    private double openPos = .67;
+    private double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .67;
 
-    private double gearRatio = 2.0 / 3.0;
-    private double maxDegrees = 45;
+    public static double wristZero = 0.50666;
+    public static double armZero = 0.475;
 
-    public ClawSubsystem() {
-
-    }
 
     public void update(ClawState state) {
         switch (state) {
@@ -45,12 +54,12 @@ public class ClawSubsystem extends SubsystemBase {
                 Robot.clawTop.setPosition(openPos);
                 break;
             case CLOSED:
-                Robot.clawTop.setPosition(closedPos1);
-                Robot.clawBottom.setPosition(closedPos2);
+                Robot.clawTop.setPosition(closedPosTop);
+                Robot.clawBottom.setPosition(closedPosBot);
                 break;
             case OPENONE:
                 Robot.clawBottom.setPosition(openPos);
-                Robot.clawTop.setPosition(closedPos2);
+                Robot.clawTop.setPosition(closedPosBot);
                 break;
             case HALFCLOSE:
                 Robot.clawTop.setPosition(halfPos);
@@ -68,24 +77,16 @@ public class ClawSubsystem extends SubsystemBase {
         setWrist(rowWrist.get(index));
     }
 
-    public void setWrist(double angle) {
-        Robot.wrist1.setPosition(angleToServo(angle));
-        Robot.wrist2.setPosition(angleToServo(angle));
-    }
+    public void updateArmWristPos(int index) { rowDelta[index].apply(this); }
 
-    public void updateWrist(double change) {
-        Robot.wrist1.setPosition(Robot.wrist1.getPosition() + change);
-        Robot.wrist2.setPosition(Robot.wrist2.getPosition() + change);
+    public void setWrist(double angle) {
+        Robot.wrist1.setPosition(angle);
+        Robot.wrist2.setPosition(angle);
     }
 
     public void setArm(double angle) {
-        Robot.arm1.setPosition(angleToServo(angle));
-        Robot.arm2.setPosition(angleToServo(angle));
-    }
-
-    public void updateArm(double change) {
-        Robot.arm1.setPosition(Robot.arm1.getPosition() + change);
-        Robot.arm2.setPosition(Robot.arm2.getPosition() + change);
+        Robot.arm1.setPosition(angle);
+        Robot.arm2.setPosition(angle);
     }
 
     public void syncRows(int index) {
@@ -93,8 +94,10 @@ public class ClawSubsystem extends SubsystemBase {
         updateArmRow(index);
     }
 
-    private double angleToServo(double angle) {
-        return (angle);
-//        return (angle / (300 * gearRatio) + (maxDegrees - (300 * gearRatio)) / (300 * gearRatio));
+    public enum ClawState {
+        CLOSED,
+        OPENONE,
+        OPEN,
+        HALFCLOSE
     }
 }

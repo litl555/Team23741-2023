@@ -147,17 +147,11 @@ public class SafeTeleop extends CommandOpMode {
         pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER) // claw mode += 1
                 .whenPressed(new InstantCommand(() -> {
                     if (!isLiftOverride) setClawMode(1);
-                })) // conditional commands are fake
-                .whileHeld(new InstantCommand(() -> { // if we are in override then holding bumpers should continuously cause change
-                    if (isLiftOverride) clawOverride(1);
                 }));
 
         pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER) // claw mode -= 1
                 .whenPressed(new InstantCommand(() -> {
                     if (!isLiftOverride) setClawMode(-1);
-                }))
-                .whileHeld(new InstantCommand(() -> {
-                    if (isLiftOverride) clawOverride(-1);
                 }));
 
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT) // change if we are wrist or arm
@@ -178,11 +172,6 @@ public class SafeTeleop extends CommandOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
-    }
-
-    private void clawOverride(double mult) {
-        if (isControllingWrist) claw.updateWrist(mult * TeleOpConstants.overrideWristSpeed);
-        else claw.updateArm(mult * TeleOpConstants.overrideArmSpeed);
     }
 
     private void setClawMode(int change) {

@@ -24,7 +24,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 @TeleOp
 public class LiftTester extends CommandOpMode {
     LoggerTool telemetry1;
-    private ClawSubsystem claw;
+    private LiftSubsystem lift;
     private int newLevel = 0;
 
     @Override
@@ -34,12 +34,13 @@ public class LiftTester extends CommandOpMode {
 
         CustomLocalization l = new CustomLocalization(new Pose2d(300, -1500, -Math.PI / 2.0), hardwareMap);
 
-        LiftSubsystem lift = new LiftSubsystem();                   register(lift);
+                      lift = new LiftSubsystem();                   register(lift);
         ClawSubsystem claw = new ClawSubsystem();                   register(claw);
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);   register(intake);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);   register(drive);
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
 
         GamepadEx pad2 = new GamepadEx(gamepad2);
 
@@ -62,6 +63,12 @@ public class LiftTester extends CommandOpMode {
                 schedule(new GoToHeight(lift, claw, newLevel));
             })
         );
+
+        pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+            new InstantCommand(() -> {
+                claw.update(ClawSubsystem.ClawState.CLOSED);
+            })
+        );
     }
 
     @Override
@@ -71,8 +78,11 @@ public class LiftTester extends CommandOpMode {
 
         Robot.telemetry.add("robot lift level", Robot.level);
         Robot.telemetry.add("liftSubsystem lift level", LiftSubsystem.index1);
-        telemetry1.add("encoder", Robot.liftEncoder.getCurrentPosition());
-        telemetry1.update();
+        Robot.telemetry.add("encoder", Robot.liftEncoder.getCurrentPosition());
+        Robot.telemetry.add("lift done", lift.finishedMovement());
+        Robot.telemetry.add("Arm", Robot.arm1.getPosition());
+        Robot.telemetry.add("Wrist", Robot.wrist1.getPosition());
+        Robot.telemetry.update();
     }
 
 }

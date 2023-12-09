@@ -11,5 +11,4 @@ public class AutonomousConstants {
     public static double wristIntake = .495;
     public static int waitAfterWristClear = 200;
     public static double wristClearDelta = -.035;
-
 }
