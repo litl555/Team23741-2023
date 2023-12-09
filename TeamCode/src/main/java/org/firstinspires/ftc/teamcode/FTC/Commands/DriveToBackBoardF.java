@@ -19,7 +19,8 @@ public class DriveToBackBoardF extends CommandBase {
     double leftPos = -30.0;
     public static double leftClose = 20.0;
     public static double angleLeft = 8.0;
-    public static double rightPos = 30.0;
+    public static double rightPos = 90.0;
+    public static double rightClose = -10.0;
     MultipleTrajectoryRunner mtr;
     public static Pose2d end = new Pose2d(844, 1145);
     TeamPropPosition position; //1=left 2=center 3=right
@@ -45,7 +46,7 @@ public class DriveToBackBoardF extends CommandBase {
 
                 break;
             case right:
-                trajectory = new Trajectory(new Pose2d(1500, 300), new Pose2d(end.getX(), end.getY() + rightPos), new Pose2d(-100, 100), new Pose2d(-1900, 1600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
+                trajectory = new Trajectory(new Pose2d(1500, 300), new Pose2d(end.getX() + rightPos, end.getY()), new Pose2d(-100, 100), new Pose2d(-1900, 1600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
                 tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
                 break;
