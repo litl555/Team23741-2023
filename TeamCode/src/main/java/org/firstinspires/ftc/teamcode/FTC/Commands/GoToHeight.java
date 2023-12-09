@@ -25,16 +25,12 @@ public class GoToHeight extends ParallelCommandGroup {
          * (2)
          * if (going to 1 or 0)
          *      (3)
-         *      if (going from not 0) // going down into the tray
-         *          close claw
-         *
-         *      (4)
          *      if (going to 0)
          *          open claw
          *
          *      wait until claw finishes
          *
-         * (5)
+         * (4)
          * tilt arm and wrist for intake position
          * move lift
          */
@@ -69,14 +65,6 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // 3
                         new ConditionalCommand(
-                            new InstantCommand(),
-                            //new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                            new InstantCommand(),
-                            () -> Robot.level != 0
-                        ),
-
-                        // 4
-                        new ConditionalCommand(
                             new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)),
                             new InstantCommand(),
                             () -> (newLevel == 0 && Robot.level == 1)
@@ -88,7 +76,7 @@ public class GoToHeight extends ParallelCommandGroup {
                     () -> (newLevel == 0 || newLevel == 1)
                 ),
 
-                // 5
+                // 4
                 new InstantCommand(() -> {
                     // hack, if were picking up pixel we dont want to stop at top of tray
                     if (Robot.level == 0 && newLevel == 1) claw.updateArmWristPos(2);

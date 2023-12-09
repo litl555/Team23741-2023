@@ -85,42 +85,6 @@ public class ClawArmBoundTester extends CommandOpMode {
 
         GamepadEx pad2 = new GamepadEx(gamepad2);
 
-        pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> claw.updateWristRow(0)),
-                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                new WaitCommand(1000),
-                new InstantCommand(() -> lift.setTargetPos(190)),
-                new WaitUntilCommand(lift.pid::atSetPoint),
-                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)),
-                new WaitCommand(1000),
-                new InstantCommand(() -> lift.setTargetPos(85)),
-                new WaitUntilCommand(lift.pid::atSetPoint),
-                new InstantCommand(() -> new ArmWristPos(0.005556, -0.000556).apply(claw)),
-                new WaitCommand(1000)
-            )
-        );
-
-        pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
-            new SequentialCommandGroup(
-                new InstantCommand(() -> {
-                    lift.maxPower = 0.3;
-                    new ArmWristPos(-0.01888, -0.055).apply(claw);
-                    lift.setTargetPos(220);
-                }),
-                new WaitUntilCommand(lift.pid::atSetPoint),
-                new InstantCommand(() -> {
-                    lift.maxPower = 1;
-                    lift.setTargetPos(500);
-                }),
-                // hack -> cant use atPos or whatever cause we adjust lift.maxPower so itll never reach, so instead wait until lift stops moving
-                // measured by power. however power is small at the start, so wait until we start moving :skull:
-                new WaitCommand(200),
-                new WaitUntilCommand(() -> lift.samePowerCount >= 5),
-                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN))
-            )
-        );
-
         pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
         pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
     }

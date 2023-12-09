@@ -39,7 +39,7 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
-    public static double[] rowHeights = new double[] {50, 190, 350, 660, 660, 980, 1774, 1774};
+    public static double[] rowHeights = new double[] {50, 250, 350, 660, 660, 980, 1774, 1774};
 
     public LiftSubsystem() {
         pid.setTolerance(10);
