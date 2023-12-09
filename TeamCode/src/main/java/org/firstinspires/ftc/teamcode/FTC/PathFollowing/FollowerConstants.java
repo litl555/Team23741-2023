@@ -4,7 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 
 @Config
 public class FollowerConstants {
-    public static double angleSpeed = .004;
+    public static double angleSpeed = .01;
     public static double kv = .0007;
     public static double xyTolerance = 20;
     public static double aTolerance = Math.toRadians(1);

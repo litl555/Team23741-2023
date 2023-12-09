@@ -14,7 +14,7 @@ public class PlacePixelOnBackboardF extends SequentialCommandGroup {
         addCommands(
                 new ParallelCommandGroup(
                         new DriveToBackBoardF(propToInt(position)),
-                        new GoToHeight(Robot.lift, Robot.claw, 2)
+                        new GoToHeight(Robot.lift, Robot.claw, Robot.level)
                 ),
                 new WaitCommand(2000),
                 new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN)

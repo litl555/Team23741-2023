@@ -29,15 +29,15 @@ public class Robot {
     public static LiftSubsystem lift;
     public static ClawSubsystem claw;
     public static IntakeSubsystem intakeSubsystem;
-    public static int level = 0;
+    public static int level = 0; // this is automatically controlled by GoToHeight, so dont touch it!
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem _intakeSubsystem, ClawSubsystem _claw) {
         l = _l;
         intakeRoller = hardwareMap.crservo.get("intakeRoller");
-        level = 0;
         //lift=_lift;
         _intakeSubsystem = intakeSubsystem;
         liftEncoder = hardwareMap.dcMotor.get("rightFront");
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         claw = _claw;
         telemetry = _telemetry;
         Robot.hardwareMap = hardwareMap;
@@ -58,6 +58,8 @@ public class Robot {
         clawBottom = hardwareMap.get(Servo.class, "clawBottom");
         //distance = hardwareMap.get(DistanceSensor.class, "distance");
 
+        // have to manually reset values because ftc dashboard (i think?) causes static vars to stay across runs
+        level = 0;
     }
 
     public static void setIntakePower(double power) {

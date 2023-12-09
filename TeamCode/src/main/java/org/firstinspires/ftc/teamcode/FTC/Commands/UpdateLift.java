@@ -10,7 +10,7 @@ public class UpdateLift extends InstantCommand {
         super(
                 () -> {
                     lift.updateRow(Robot.level);
-                    Robot.telemetry.add("height", Robot.level);
+                    Robot.telemetry.add("height", Robot.level); // bruh
                 }
         );
     }

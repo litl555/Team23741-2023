@@ -28,7 +28,7 @@ public class PlacePixel extends SequentialCommandGroup {
                 new ScheduleCommand(driveToBackdrop),
                 new WaitUntilCommand(Robot::isPastTruss),
                 new ParallelCommandGroup(
-                        new GoToHeight(new LiftSubsystem(), new ClawSubsystem(), row1),
+                        new GoToHeight(new LiftSubsystem(), new ClawSubsystem(), Robot.level),
                         new SequentialCommandGroup(
                                 new WaitUntilCommand(driveToBackdrop::isFinished),
                                 //Snap a pic and correct
@@ -39,7 +39,7 @@ public class PlacePixel extends SequentialCommandGroup {
                 new UpdateClaw(claw, ClawSubsystem.ClawState.OPENONE),
                 new ParallelCommandGroup(
                         new PIDToPose(leftColumn.plus(new Pose2d(column2, 0, 0)), l),
-                        new GoToHeight(lift, claw, row2)
+                        new GoToHeight(lift, claw, Robot.level)
                 ),
                 new UpdateClaw(claw, ClawSubsystem.ClawState.OPEN)
 

@@ -5,11 +5,13 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
+import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateLift;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
@@ -23,48 +25,52 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 public class LiftTester extends CommandOpMode {
     LoggerTool telemetry1;
     private ClawSubsystem claw;
-    private static int level = 0;
+    private int newLevel = 0;
 
     @Override
     public void initialize() {
         telemetry1 = new LoggerTool(telemetry);
-
-
-        GamepadEx pad2 = new GamepadEx(gamepad2);
         CommandScheduler.getInstance().reset();
 
         CustomLocalization l = new CustomLocalization(new Pose2d(300, -1500, -Math.PI / 2.0), hardwareMap);
 
-        LiftSubsystem lift = new LiftSubsystem(); //register(lift);
-        register(lift);
-        claw = new ClawSubsystem();
-        register(claw);
-        IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
-        register(intake);
-        DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
-        register(drive);
+        LiftSubsystem lift = new LiftSubsystem();                   register(lift);
+        ClawSubsystem claw = new ClawSubsystem();                   register(claw);
+        IntakeSubsystem intake = new IntakeSubsystem(telemetry1);   register(intake);
+        DriveSubsystem drive = new DriveSubsystem(l, telemetry1);   register(drive);
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new SequentialCommandGroup(new InstantCommand(() -> {
-                    Robot.level--;
-                }), new UpdateLift(lift))
-        );
-        pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new SequentialCommandGroup(new InstantCommand(() -> {
+        GamepadEx pad2 = new GamepadEx(gamepad2);
 
-                    Robot.level++;
-                }), new UpdateLift(lift))
+        pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+            new InstantCommand(() -> {
+                newLevel = Robot.level - 1;
+                if (newLevel < 0) newLevel = LiftSubsystem.rowHeights.length - 1;
+                else if (newLevel > LiftSubsystem.rowHeights.length - 1) newLevel = 0;
+
+                schedule(new GoToHeight(lift, claw, newLevel));
+            })
+        );
+
+        pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+            new InstantCommand(() -> {
+                newLevel = Robot.level + 1;
+                if (newLevel < 0) newLevel = LiftSubsystem.rowHeights.length - 1;
+                else if (newLevel > LiftSubsystem.rowHeights.length - 1) newLevel = 0;
+
+                schedule(new GoToHeight(lift, claw, newLevel));
+            })
         );
     }
 
     @Override
     public void run() {
-        Robot.telemetry.add("level", level);
-
+        Robot.l.update();
         CommandScheduler.getInstance().run();
 
+        Robot.telemetry.add("robot lift level", Robot.level);
+        Robot.telemetry.add("liftSubsystem lift level", LiftSubsystem.index1);
         telemetry1.add("encoder", Robot.liftEncoder.getCurrentPosition());
         telemetry1.update();
     }

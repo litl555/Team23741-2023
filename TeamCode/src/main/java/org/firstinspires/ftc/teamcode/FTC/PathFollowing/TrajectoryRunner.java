@@ -127,6 +127,7 @@ public class TrajectoryRunner {
                 derivative = new Pose2d(0, 0, 0);
             }
 
+
             //loggerTool.add("radius",Math.sqrt(Math.abs(t.getCentripetalForceVector(closestT).dot(t.getCentripetalForceVector(closestT)))));
             Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * -1.0 * derivative.getY());
             //loggerTool.add("path",pathVector);
@@ -146,9 +147,12 @@ public class TrajectoryRunner {
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
+            if(closestT==0.0){
+                l.setWeightedDrivePowers(new Pose2d(.2,0.0,0.0));
+            }
             loggerTool.add("loop", getLoopTime());
             Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
-            if (robot.distTo(t.getEnd().vec()) < 200 && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)) {
+            if (robot.distTo(t.getEnd().vec()) < 200) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)
                 if (!t.getEndStopped()) {
                     currentState = State.FINISHED;
                 } else {

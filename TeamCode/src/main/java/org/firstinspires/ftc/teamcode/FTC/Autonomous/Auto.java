@@ -2,29 +2,19 @@ package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripF;
-import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
-import org.firstinspires.ftc.teamcode.FTC.Commands.PlacePixelOnBackboardF;
-import org.firstinspires.ftc.teamcode.FTC.Commands.PlacePixelOnSpikeStrip;
-import org.firstinspires.ftc.teamcode.FTC.Commands.timing.liftUpTime;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
-import org.firstinspires.ftc.teamcode.FTC.Pixels.BoardDetectionPipeline;
-import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
@@ -54,6 +44,8 @@ public class Auto extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
+        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
 
         waitForStart();
 
@@ -73,10 +65,23 @@ public class Auto extends LinearOpMode {
         pad1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
         */
-
-        CommandScheduler.getInstance().schedule(new DriveToSpikeStripF(TeamPropPosition.left));
+        int similarityCount=0;
+        TeamPropPosition last=TeamPropPosition.undefined;
+        while(similarityCount<10) {
+            if(last!=pipeline.propPos||pipeline.propPos==TeamPropPosition.undefined){
+                similarityCount=0;
+            }
+            else{
+                similarityCount++;
+            }
+            last=pipeline.propPos;
+        }
+        CommandScheduler.getInstance().schedule(new DriveToSpikeStripF(pipeline.propPos));
+        //pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
+            Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
+
             Robot.l.update();
             Robot.telemetry.update();
 

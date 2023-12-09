@@ -29,25 +29,7 @@ public class TestTeamProp extends LinearOpMode {
         LoggerTool telemetry1 = new LoggerTool(telemetry);
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
-        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
-
-        DcMotor lift1 = hardwareMap.get(DcMotor.class, "lift1");
-        DcMotor lift2 = hardwareMap.get(DcMotor.class, "lift2");
-
-        Servo ccl = hardwareMap.get(Servo.class, "clawCenterLeft"); // con 1
-        Servo at = hardwareMap.get(Servo.class, "armTop"); // con 2
-        Servo ab = hardwareMap.get(Servo.class, "armBottom"); // con 3
-
-        Servo ccr = hardwareMap.get(Servo.class, "clawCenterRight"); // exp 2
-        Servo ct = hardwareMap.get(Servo.class, "clawTop"); // exp 3
-        Servo cb = hardwareMap.get(Servo.class, "clawBottom"); // exp 4
-
-        /*
-         * center (cc) : 0.7 -> 1 (open, close)
-         * arm    (a)  :
-         * claw   (c)  :
-         */
-
+        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
         waitForStart();
 
         boolean aDown = false;
@@ -58,49 +40,6 @@ public class TestTeamProp extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry1.add("Detected position", pipeline.propPos);
             telemetry1.update();
-
-            // when done call
-            // pipeline.destroy();
-
-            if (gamepad1.dpad_up) {
-                lift1.setPower(liftPower);
-                lift2.setPower(liftPower);
-            } else if (gamepad1.dpad_down) {
-                lift1.setPower(-1 * liftPower);
-                lift2.setPower(-1 * liftPower);
-            } else {
-                lift1.setPower(0);
-                lift2.setPower(0);
-            }
-
-            // close
-            if (gamepad1.right_bumper) {
-                ccl.setPosition(1);
-                ccr.setPosition(1);
-
-                isDroppingBottomPixel = true;
-            }
-
-            // open
-            if (gamepad1.left_bumper && !lbDown) {
-                lbDown = true;
-
-                if (isDroppingBottomPixel) ccl.setPosition(0.7);
-                else ccr.setPosition(0.7);
-
-                isDroppingBottomPixel = !isDroppingBottomPixel;
-            } else if (!gamepad1.left_bumper) lbDown = false;
-
-            if (gamepad1.a && !aDown) {
-                aDown = true;
-
-                ccl.setPosition(_ccl);
-                ccr.setPosition(_ccr);
-                at.setPosition(_at);
-                ab.setPosition(_ab);
-                ct.setPosition(_ct);
-                cb.setPosition(_cb);
-            } else if (!gamepad1.right_bumper) aDown = false;
         }
     }
 }

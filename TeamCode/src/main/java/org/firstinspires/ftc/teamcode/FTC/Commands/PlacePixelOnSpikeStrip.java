@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 public class PlacePixelOnSpikeStrip extends SequentialCommandGroup {
     public PlacePixelOnSpikeStrip(TeamPropPosition pos) {
         addCommands(
-                new ParallelCommandGroup(new DriveToSpikeStripF(pos), new GoToHeight(Robot.lift, Robot.claw, 1)),
+                new ParallelCommandGroup(new DriveToSpikeStripF(pos), new GoToHeight(Robot.lift, Robot.claw, Robot.level)),
                 new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE)
         );
     }

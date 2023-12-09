@@ -176,55 +176,6 @@ public class SafeTeleop extends CommandOpMode {
             else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
         }));
 
-        /*
-
-        GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
-        GamepadEx gamepadEx1 = new GamepadEx(gamepad1);
-
-
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new ParallelCommandGroup(
-                new InstantCommand(() -> levelCount++),
-                new GoToHeight(lift, claw, levelCount)
-        ));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(new GoToHeight(Robot.lift, Robot.claw, levelCount));
-//        gamepadEx2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(()->{
-//            lift.setPower(1.0);
-//        })).whenReleased(new InstantCommand(()->{
-//            lift.setPower(0.0);
-//        }));
-//        gamepadEx2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(()->{
-//            lift.setPower(-1.0);
-//        })).whenReleased(new InstantCommand(()->{
-//            lift.setPower(0.0);
-//        }));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ParallelCommandGroup(
-                new InstantCommand(() -> levelCount--),
-                new GoToHeight(lift, claw, levelCount)
-        ));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new ParallelCommandGroup(
-
-                new RetractLift()
-        ));
-
-//        gamepadEx2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new UpdateIntake(intake,OUTTAKE)).whenReleased(new UpdateIntake(intake,IDLE));
-//        gamepadEx2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new UpdateIntake(intake,INTAKE)).whenReleased(new UpdateIntake(intake,IDLE));
-        schedule(new RunCommand(() -> {
-            if (gamepadEx2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) != 0.0 || gamepadEx2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) != 0.0) {
-                intake.setPower(gamepadEx2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) - gamepadEx2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER));
-            } else {
-                if (Robot.intakeMotor.getPower() != 0.0) {
-                    intake.setPower(0.0);
-                }
-            }
-        }));
-
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new UpdateClaw(claw, ClawSubsystem.ClawState.OPEN));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.X).whenPressed(new UpdateClaw(claw, ClawSubsystem.ClawState.CLOSED));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
-        gamepadEx2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
-        //gamepadEx2.getGamepadButton(GamepadKeys.Button.B).whenPressed(()->schedule(new IntakePixel(intake)));
-        */
-
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
     }

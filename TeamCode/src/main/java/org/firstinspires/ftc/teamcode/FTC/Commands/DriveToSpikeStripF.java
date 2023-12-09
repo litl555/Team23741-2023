@@ -28,6 +28,7 @@ public class DriveToSpikeStripF extends CommandBase {
     public void initialize() {
 
         Pose2d startPose = new Pose2d(Robot.l.getPoseEstimate().getY() * -1.0, Robot.l.getPoseEstimate().getX(), 0);
+
         switch (pos) {
             case right:
                 trajectory = new Trajectory(startPose, endPos3, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
