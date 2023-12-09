@@ -24,11 +24,13 @@ public class LiftSubsystem extends SubsystemBase {
     public static double P = 0.0025, I = 0.145, D = 2, F = 0.0;
     double targetPos = 0;
     public static int index1 = 0;
-    private double currentLiftPower = 0;
-    private ArrayDeque<Double> oldPower = new ArrayDeque<>();
-    private double oldPowerAverage = 0;
+    public double maxPower = 0.8;
+    public int samePowerCount = 0;
 
-    PIDFController pid = new PIDFController(P, I, D, F);
+    private Queue<Double> averagePowerQueue = new ArrayDeque<>();
+    public double averagePower;
+
+    public PIDFController pid = new PIDFController(P, I, D, F);
 
     // in ticks
     // 0 -> intake
@@ -37,10 +39,10 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
-    public static double[] rowHeights = new double[] {0, 190, 270, 660, 660, 980, 1774, 1774};
+    public static double[] rowHeights = new double[] {50, 190, 350, 660, 660, 980, 1774, 1774};
 
     public LiftSubsystem() {
-        pid.setTolerance(5);
+        pid.setTolerance(10);
         index1 = 0;
         safeRegion = false;
     }
@@ -65,28 +67,25 @@ public class LiftSubsystem extends SubsystemBase {
     public void periodic() {
         safeRegion = Math.abs(Robot.liftEncoder.getCurrentPosition()) > safetyThreshold;
         double controllerPower = -pid.calculate(targetPos, read());
+        controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
+        //controllerPower = 0;
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
         Robot.telemetry.add("lift index", index1);
 
         setPower(Range.clip(controllerPower + F, -1, 1));
-
-        if (oldPower.size() == 5) {
-            double d = oldPower.remove();
-            oldPowerAverage -= d / 5.0;
-        }
-        oldPower.add(controllerPower);
-        oldPowerAverage += controllerPower / 5.0;
     }
 
     public void setPower(double power) {
-        currentLiftPower = power;
+        if (averagePowerQueue.size() == 5) averagePower -= averagePowerQueue.remove() / 5.0;
+        averagePowerQueue.add(power);
+        averagePower += power / 5.0;
+
+        if (averagePower == power) samePowerCount++;
+        else samePowerCount = 0;
+
         Robot.motor1.setPower(power);
         Robot.motor2.setPower(-power);
-    }
-
-    public boolean finishedMovement() {
-        return Math.abs(oldPowerAverage - oldPower.peek()) < 0.01 && Math.abs(targetPos - read()) < 150; // pid goes wild lol
     }
 
 

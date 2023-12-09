@@ -79,7 +79,6 @@ public class LiftTester extends CommandOpMode {
         Robot.telemetry.add("robot lift level", Robot.level);
         Robot.telemetry.add("liftSubsystem lift level", LiftSubsystem.index1);
         Robot.telemetry.add("encoder", Robot.liftEncoder.getCurrentPosition());
-        Robot.telemetry.add("lift done", lift.finishedMovement());
         Robot.telemetry.add("Arm", Robot.arm1.getPosition());
         Robot.telemetry.add("Wrist", Robot.wrist1.getPosition());
         Robot.telemetry.update();

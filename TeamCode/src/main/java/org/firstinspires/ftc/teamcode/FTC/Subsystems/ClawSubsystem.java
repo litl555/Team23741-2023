@@ -26,16 +26,18 @@ public class ClawSubsystem extends SubsystemBase {
     // 4 -> board row 2
     // 5 -> board row 3...
     public static ArmWristPos[] rowDelta = new ArmWristPos[] {
-        new ArmWristPos(0.00333, -0.0105555),
-        new ArmWristPos(0.00333, -0.0105555),
-        new ArmWristPos(0.0022223, 0.011666),
-        new ArmWristPos(-0.07777, 0.0816666),
-        new ArmWristPos(-0.09833, 0.0816666),
-        new ArmWristPos(-0.06777, 0.0816666),
-        new ArmWristPos(-0.08777, 0.0816666),
-        new ArmWristPos(-0.03777, 0.0816666),
-        new ArmWristPos(-0.07777, 0.0816666),
+        new ArmWristPos(0.02122, -0.0338888),
+        new ArmWristPos(0.02122, -0.0338888),
+        new ArmWristPos(-0.057777, -0.023888),
+        new ArmWristPos(-0.07777, 0.066111),
+        new ArmWristPos(-0.09833, 0.066111),
+        new ArmWristPos(-0.06777, 0.066111),
+        new ArmWristPos(-0.08777, 0.066111),
+        new ArmWristPos(-0.03777, 0.066111),
+        new ArmWristPos(-0.07777, 0.066111),
     };
+
+    public static ArmWristPos clearPixelIntake = new ArmWristPos(-0.01888, -0.075);
 
 
     // TODO: remove
@@ -43,8 +45,8 @@ public class ClawSubsystem extends SubsystemBase {
     public List<Double> rowArm = Arrays.asList(armIntake, armPlace1, armPlace2, armGround);
     private double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .67;
 
-    public static double wristZero = 0.50666;
-    public static double armZero = 0.475;
+    // zero is the starting position of claw
+    public static ArmWristPos zero = new ArmWristPos(0.477777, 0.4638887);
 
 
     public void update(ClawState state) {

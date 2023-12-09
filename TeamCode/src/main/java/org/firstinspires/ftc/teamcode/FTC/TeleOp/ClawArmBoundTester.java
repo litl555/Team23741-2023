@@ -5,6 +5,9 @@ import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -53,8 +56,8 @@ public class ClawArmBoundTester extends CommandOpMode {
         }));
 
         gamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> {
-            claw.setWrist(ClawSubsystem.wristZero);
-            claw.setArm(ClawSubsystem.armZero);
+            claw.setWrist(ClawSubsystem.zero.wrist);
+            claw.setArm(ClawSubsystem.zero.wrist);
         }));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand(() -> speed += 0.0005));
@@ -79,6 +82,47 @@ public class ClawArmBoundTester extends CommandOpMode {
                     schedule(new GoToHeight(lift, claw, newLevel));
                 })
         );
+
+        GamepadEx pad2 = new GamepadEx(gamepad2);
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> claw.updateWristRow(0)),
+                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                new WaitCommand(1000),
+                new InstantCommand(() -> lift.setTargetPos(190)),
+                new WaitUntilCommand(lift.pid::atSetPoint),
+                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)),
+                new WaitCommand(1000),
+                new InstantCommand(() -> lift.setTargetPos(85)),
+                new WaitUntilCommand(lift.pid::atSetPoint),
+                new InstantCommand(() -> new ArmWristPos(0.005556, -0.000556).apply(claw)),
+                new WaitCommand(1000)
+            )
+        );
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+            new SequentialCommandGroup(
+                new InstantCommand(() -> {
+                    lift.maxPower = 0.3;
+                    new ArmWristPos(-0.01888, -0.055).apply(claw);
+                    lift.setTargetPos(220);
+                }),
+                new WaitUntilCommand(lift.pid::atSetPoint),
+                new InstantCommand(() -> {
+                    lift.maxPower = 1;
+                    lift.setTargetPos(500);
+                }),
+                // hack -> cant use atPos or whatever cause we adjust lift.maxPower so itll never reach, so instead wait until lift stops moving
+                // measured by power. however power is small at the start, so wait until we start moving :skull:
+                new WaitCommand(200),
+                new WaitUntilCommand(() -> lift.samePowerCount >= 5),
+                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN))
+            )
+        );
+
+        pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
+        pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
     }
 
     @Override
@@ -89,13 +133,14 @@ public class ClawArmBoundTester extends CommandOpMode {
         Robot.telemetry.add("Wrist1", Robot.wrist1.getPosition());
         Robot.telemetry.add("Wrist2", Robot.wrist2.getPosition());
 
-        Robot.telemetry.add("delta Arm1", Robot.arm1.getPosition() - ClawSubsystem.armZero);
-        Robot.telemetry.add("delta Arm2", Robot.arm2.getPosition() - ClawSubsystem.armZero);
-        Robot.telemetry.add("delta Wrist1", Robot.wrist1.getPosition() - ClawSubsystem.wristZero);
-        Robot.telemetry.add("delta Wrist2", Robot.wrist2.getPosition() - ClawSubsystem.wristZero);
+        Robot.telemetry.add("delta Arm1", Robot.arm1.getPosition() - ClawSubsystem.zero.arm);
+        Robot.telemetry.add("delta Arm2", Robot.arm2.getPosition() - ClawSubsystem.zero.arm);
+        Robot.telemetry.add("delta Wrist1", Robot.wrist1.getPosition() - ClawSubsystem.zero.wrist);
+        Robot.telemetry.add("delta Wrist2", Robot.wrist2.getPosition() - ClawSubsystem.zero.wrist);
         Robot.telemetry.add("Speed", speed);
 
         Robot.telemetry.add("lift level", lift.read());
+        Robot.telemetry.add("same power count", lift.samePowerCount);
         Robot.telemetry.update();
 
     }

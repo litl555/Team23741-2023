@@ -10,7 +10,12 @@ public class ArmWristPos {
     }
 
     public void apply(ClawSubsystem claw) {
-        claw.setArm(arm + ClawSubsystem.armZero);
-        claw.setWrist(wrist + ClawSubsystem.wristZero);
+        claw.setArm(arm + ClawSubsystem.zero.arm);
+        claw.setWrist(wrist + ClawSubsystem.zero.wrist);
+    }
+
+    public void override(ClawSubsystem claw) {
+        claw.setArm(arm);
+        claw.setWrist(wrist);
     }
 }

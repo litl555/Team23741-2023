@@ -10,6 +10,7 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.FTC.TeleOp.ArmWristPos;
 import org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants;
 
 public class GoToHeight extends ParallelCommandGroup {
@@ -38,12 +39,28 @@ public class GoToHeight extends ParallelCommandGroup {
          * move lift
          */
 
+        /* pixel grabbing motion
+         * l
+         */
+
         addCommands(
             new SequentialCommandGroup(
                 // 1
                 new ConditionalCommand(
-                    new SequentialCommandGroup(),
-                    new InstantCommand(), // TODO
+                    new SequentialCommandGroup(
+                        new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
+                        new WaitCommand(700),
+                        new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                        new WaitCommand(700),
+                        new InstantCommand(() -> {
+                            lift.maxPower = 0.2;
+                            ClawSubsystem.clearPixelIntake.apply(claw);
+                            lift.setTargetPos(250);
+                        }),
+                        new WaitUntilCommand(lift.pid::atSetPoint),
+                        new InstantCommand(() -> lift.maxPower = 0.8)
+                    ),
+                    new InstantCommand(),
                     () -> Robot.level == 0
                 ),
 
@@ -52,7 +69,8 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // 3
                         new ConditionalCommand(
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                            new InstantCommand(),
+                            //new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
                             new InstantCommand(),
                             () -> Robot.level != 0
                         ),
@@ -64,16 +82,28 @@ public class GoToHeight extends ParallelCommandGroup {
                             () -> (newLevel == 0 && Robot.level == 1)
                         ),
 
-                        new WaitCommand(500) // hopefully this allows claw to move
+                        new WaitCommand(700) // hopefully this allows claw to move
                     ),
                     new InstantCommand(),
                     () -> (newLevel == 0 || newLevel == 1)
                 ),
 
                 // 5
-                new InstantCommand(() -> lift.updateRow(newLevel)),
-                new InstantCommand(() -> claw.updateArmWristPos(newLevel)),
-                new InstantCommand(() -> Robot.level = newLevel)
+                new InstantCommand(() -> {
+                    // hack, if were picking up pixel we dont want to stop at top of tray
+                    if (Robot.level == 0 && newLevel == 1) claw.updateArmWristPos(2);
+                    else claw.updateArmWristPos(newLevel);
+                }),
+                new WaitCommand(700),
+                new InstantCommand(() -> {
+                    if (Robot.level == 0 && newLevel == 1) {
+                        lift.updateRow(2);
+                        Robot.level = 2;
+                    } else {
+                        lift.updateRow(newLevel);
+                        Robot.level = newLevel;
+                    }
+                })
             )
         );
     }
