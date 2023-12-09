@@ -2,12 +2,20 @@ package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardF;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripF;
+import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
+import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
+import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -66,22 +74,21 @@ public class Auto extends LinearOpMode {
                 .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
         */
         int similarityCount=0;
-        TeamPropPosition last=TeamPropPosition.undefined;
-        while(similarityCount<10) {
-            if(last!=pipeline.propPos||pipeline.propPos==TeamPropPosition.undefined){
-                similarityCount=0;
-            }
-            else{
+        TeamPropPosition last = TeamPropPosition.undefined;
+        while (similarityCount < 10) {
+            if (last != pipeline.propPos || pipeline.propPos == TeamPropPosition.undefined) {
+                similarityCount = 0;
+            } else {
                 similarityCount++;
             }
-            last=pipeline.propPos;
+            last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new DriveToSpikeStripF(pipeline.propPos));
-        //pipeline.destroy();
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripF(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(3000), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardF(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN)));
+        pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
-
+            Robot.telemetry.add("pose", Constants.robotPose);
             Robot.l.update();
             Robot.telemetry.update();
 

@@ -16,9 +16,11 @@ public class DriveToSpikeStripF extends CommandBase {
     TrajectoryRunner tr = null;
     Trajectory trajectory;
     private boolean finished = false;
-    public static Pose2d endPos3 = new Pose2d(934.858, 488.861, 90.0);
-    public static Pose2d endPos2 = new Pose2d(818.479, 269.194, 90.0);
-    public static Pose2d endPos1 = new Pose2d(774.279, 231.441, 0.0);
+    public static double leftOffset = 50.0;
+    public static double leftYOffset = 80.0;
+    public Pose2d endPos3 = new Pose2d(1106.858, 523.861, 90.0);
+    public Pose2d endPos2 = new Pose2d(840.479, 269.194, 90.0);
+    public Pose2d endPos1 = new Pose2d(772.279 - leftOffset, 213.441 + leftYOffset, 2.0);
 
     public DriveToSpikeStripF(TeamPropPosition pos) {
         this.pos = pos;

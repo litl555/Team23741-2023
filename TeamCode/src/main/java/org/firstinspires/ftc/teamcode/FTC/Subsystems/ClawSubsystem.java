@@ -26,15 +26,15 @@ public class ClawSubsystem extends SubsystemBase {
     // 4 -> board row 2
     // 5 -> board row 3...
     public static ArmWristPos[] rowDelta = new ArmWristPos[] {
-        new ArmWristPos(0.02122, -0.0338888),
-        new ArmWristPos(0.02122, -0.0338888),
-        new ArmWristPos(-0.057777, -0.023888),
-        new ArmWristPos(-0.07777, 0.066111),
-        new ArmWristPos(-0.09833, 0.066111),
-        new ArmWristPos(-0.06777, 0.066111),
-        new ArmWristPos(-0.08777, 0.066111),
-        new ArmWristPos(-0.03777, 0.066111),
-        new ArmWristPos(-0.07777, 0.066111),
+            new ArmWristPos(0.02122, -0.0338888),
+            new ArmWristPos(0.02122, -0.0338888),
+            new ArmWristPos(-0.00611, 0.03611),
+            new ArmWristPos(-0.07777, 0.066111),
+            new ArmWristPos(-0.09833, 0.066111),
+            new ArmWristPos(-0.06777, 0.066111),
+            new ArmWristPos(-0.08777, 0.066111),
+            new ArmWristPos(-0.03777, 0.066111),
+            new ArmWristPos(-0.07777, 0.066111),
     };
 
     public static ArmWristPos clearPixelIntake = new ArmWristPos(-0.01888, -0.075);

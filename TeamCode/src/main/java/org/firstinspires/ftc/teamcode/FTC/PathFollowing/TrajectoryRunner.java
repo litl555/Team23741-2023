@@ -40,7 +40,7 @@ public class TrajectoryRunner {
         TangentHeading
     }
 
-    public static double speed = .3;
+    public static double speed = .25;
     public int ind;
 
     public static double angleDes = 90;
@@ -57,6 +57,12 @@ public class TrajectoryRunner {
     private double startAngle = 0.0;
     private double angleDes1 = 0.0;
     HeadingType headingType;
+    double xerror;
+
+    double yerror;
+    int counter = 0;
+    double xerrorLast = 0;
+    double yerrorLast = 0;
     LoggerTool loggerTool;
 
     public TrajectoryRunner(HardwareMap hardwareMap, CustomLocalization l, TrajectoryInterface trajectory, double angle, HeadingType headingType, LoggerTool telemetry) {
@@ -202,8 +208,13 @@ public class TrajectoryRunner {
 
     private void correctMode() {
         Pose2d positions = t.getEnd();
-        double x = speed * trajRunnerSpeedMult * (positions.getX() + robotPose.getY());
-        double y = speed * -1.0 * trajRunnerSpeedMult * (positions.getY() - robotPose.getX());
+        double xerror = (positions.getX() + robotPose.getY());
+        double yerror = positions.getY() - robotPose.getX();
+
+        double x = speed * trajRunnerSpeedMult * xerror + dxy * (xerror - xerrorLast);
+        double y = speed * -1.0 * trajRunnerSpeedMult * yerror + dxy * (yerror - yerrorLast);
+        yerrorLast = yerror;
+        xerrorLast = xerror;
         //l.setWeightedDrivePowers(new Pose2d(0,0,0));
 
         l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
@@ -212,12 +223,22 @@ public class TrajectoryRunner {
         //loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
         //loggerTool.add("end", this.t.getEnd());
         //loggerTool.add("pos", robotPose);
+        Robot.telemetry.add("error", Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)));
+        Robot.telemetry.add("end", t.getEnd());
+        Robot.telemetry.add("pose", robotPose);
+        Robot.telemetry.add("headingError", angle + angleDes);
+        if (Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle + Math.toRadians(angleDes)) < aTolerance) {
 
-        if (Math.sqrt(Math.pow(robotPose.getX() - t.getEnd().getY(), 2) + Math.pow(-robotPose.getY() - t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle - angleDes1) < aTolerance) {
-            currentState = State.FINISHED;
+            if (counter > 10) {
+                currentState = State.FINISHED;
+            }
+
+            counter++;
             l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
             loggerTool.setCurrentTrajectoryNull();
 
+        } else {
+            counter = 0;
         }
 
         loggerTool.add("last correct mode run", System.currentTimeMillis());

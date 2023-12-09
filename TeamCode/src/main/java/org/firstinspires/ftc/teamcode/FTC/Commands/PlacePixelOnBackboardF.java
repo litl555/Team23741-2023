@@ -13,7 +13,7 @@ public class PlacePixelOnBackboardF extends SequentialCommandGroup {
     public PlacePixelOnBackboardF(TeamPropPosition position) {
         addCommands(
                 new ParallelCommandGroup(
-                        new DriveToBackBoardF(propToInt(position)),
+                        new DriveToBackBoardF(position),
                         new GoToHeight(Robot.lift, Robot.claw, Robot.level)
                 ),
                 new WaitCommand(2000),

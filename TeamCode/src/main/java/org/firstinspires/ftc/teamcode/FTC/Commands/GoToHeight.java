@@ -44,17 +44,18 @@ public class GoToHeight extends ParallelCommandGroup {
                 // 1
                 new ConditionalCommand(
                     new SequentialCommandGroup(
-                        new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
-                        new WaitCommand(700),
-                        new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                        new WaitCommand(700),
-                        new InstantCommand(() -> {
-                            lift.maxPower = 0.2;
-                            ClawSubsystem.clearPixelIntake.apply(claw);
-                            lift.setTargetPos(250);
-                        }),
-                        new WaitUntilCommand(lift.pid::atSetPoint),
-                        new InstantCommand(() -> lift.maxPower = 0.8)
+                            new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
+                            new WaitCommand(700),
+                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                            new WaitCommand(700),
+                            new InstantCommand(() -> {
+                                lift.maxPower = 0.25;
+                                ClawSubsystem.clearPixelIntake.apply(claw);
+                                lift.setTargetPos(350);
+                            }),
+                            new WaitUntilCommand(lift.pid::atSetPoint),
+                            new WaitCommand(200),
+                            new InstantCommand(() -> lift.maxPower = 0.8)
                     ),
                     new InstantCommand(),
                     () -> Robot.level == 0
