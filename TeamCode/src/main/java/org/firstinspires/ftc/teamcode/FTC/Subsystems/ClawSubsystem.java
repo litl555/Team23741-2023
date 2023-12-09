@@ -38,6 +38,7 @@ public class ClawSubsystem extends SubsystemBase {
     };
 
     public static ArmWristPos clearPixelIntake = new ArmWristPos(-0.01888, -0.075);
+    public ClawState currentState = ClawState.UNKNOWN;
 
 
     // TODO: remove
@@ -50,6 +51,8 @@ public class ClawSubsystem extends SubsystemBase {
 
 
     public void update(ClawState state) {
+        currentState = state;
+
         switch (state) {
             case OPEN:
                 Robot.clawBottom.setPosition(openPos);
@@ -100,6 +103,7 @@ public class ClawSubsystem extends SubsystemBase {
         CLOSED,
         OPENONE,
         OPEN,
-        HALFCLOSE
+        HALFCLOSE,
+        UNKNOWN
     }
 }
