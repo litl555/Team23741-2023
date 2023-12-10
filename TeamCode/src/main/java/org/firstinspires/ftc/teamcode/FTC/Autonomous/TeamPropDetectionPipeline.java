@@ -65,7 +65,7 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
         Imgproc.cvtColor(input, input, Imgproc.COLOR_RGB2YCrCb);
 
         if (isRed) Core.inRange(input, new Scalar(25, 160, 0), new Scalar(255, 255, 150), input);
-        else Core.inRange(input, new Scalar(10, 0, 150), new Scalar(255, 125, 255), input);
+        else Core.inRange(input, new Scalar(5, 0, 150), new Scalar(255, 125, 255), input);
 
         Imgproc.dilate(input, input, dilateKernel);
 

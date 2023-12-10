@@ -10,7 +10,7 @@ public class FollowerConstants {
     public static double aTolerance = Math.toRadians(5);
     public static double dxy = 0.005;
     public static double kvCorrect = 0.06;
-    public static double kvFollow = 0.007;
+    public static double kvFollow = 12;
     public static double ka = .006;
     public static double kpxy = .002;
     public static double ks = .0001;

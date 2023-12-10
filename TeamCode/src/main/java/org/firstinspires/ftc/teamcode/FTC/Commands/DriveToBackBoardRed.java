@@ -8,11 +8,10 @@ import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultipleTrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
-import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 @Config
-public class DriveToBackBoardF extends CommandBase {
+public class DriveToBackBoardRed extends CommandBase {
     Trajectory trajectory;
     boolean finished = false;
     TrajectoryRunner tr;
@@ -25,7 +24,7 @@ public class DriveToBackBoardF extends CommandBase {
     public static Pose2d end = new Pose2d(844, 1145);
     TeamPropPosition position; //1=left 2=center 3=right
 
-    public DriveToBackBoardF(TeamPropPosition position) {
+    public DriveToBackBoardRed(TeamPropPosition position) {
         this.position = position;
     }
 

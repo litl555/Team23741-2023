@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.FTC.Commands;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -13,7 +12,7 @@ public class PlacePixelOnBackboardF extends SequentialCommandGroup {
     public PlacePixelOnBackboardF(TeamPropPosition position) {
         addCommands(
                 new ParallelCommandGroup(
-                        new DriveToBackBoardF(position),
+                        new DriveToBackBoardRed(position),
                         new GoToHeight(Robot.lift, Robot.claw, Robot.level)
                 ),
                 new WaitCommand(2000),

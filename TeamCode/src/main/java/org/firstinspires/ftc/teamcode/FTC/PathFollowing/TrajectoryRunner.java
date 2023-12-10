@@ -124,14 +124,17 @@ public class TrajectoryRunner {
             double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
             Robot.t = closestT;
             //loggerTool.add("t",closestT);
+            if (closestT == 0.0) {
+                closestT = .1;
+            }
             Pose2d derivative = t.velocities(closestT);
+            derivative = derivative.div(Math.sqrt(derivative.getX() * derivative.getX() + derivative.getY() * derivative.getY()));
+
             //loggerTool.drawPoint(t.equation(closestT));
             Robot.telemetry.add("amgle", Constants.angle);
             Robot.telemetry.add("angleDes", angleDes);
             //loggerTool.add("der",derivative);
-            if (closestT == 0.0) {
-                closestT = .01;
-            }
+
             if (closestT == 1.0) {
                 derivative = new Pose2d(0, 0, 0);
             }

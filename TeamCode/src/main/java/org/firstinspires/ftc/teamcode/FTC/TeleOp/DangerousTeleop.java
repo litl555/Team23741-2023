@@ -105,9 +105,6 @@ public class DangerousTeleop extends CommandOpMode {
             })
         );
 
-        pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(
-            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED))
-        );
 
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
             new InstantCommand(() -> liftLevel = 3)

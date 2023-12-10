@@ -10,9 +10,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardF;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripF;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardBlue;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripBlue;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
+import org.firstinspires.ftc.teamcode.FTC.Commands.ParkBlue;
 import org.firstinspires.ftc.teamcode.FTC.Commands.ParkRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
@@ -28,9 +31,9 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
 @TeleOp
-public class Auto extends LinearOpMode {
+public class AutoBlue extends LinearOpMode {
     TeamPropPosition pos;
-    public static Pose2d startPos = new Pose2d(300, -1500, -Math.PI / 2.0);
+    public static Pose2d startPos = new Pose2d(300, 1500, Math.PI / 2.0);
 
     public static double liftControlSpeed = 0.3;
     public static long liftRiseTime = 1000;
@@ -55,9 +58,9 @@ public class Auto extends LinearOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
-        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
+        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
 
-
+        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.UP);
         waitForStart();
 
         GamepadEx pad1 = new GamepadEx(gamepad1);
@@ -76,7 +79,7 @@ public class Auto extends LinearOpMode {
         pad1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
         */
-        int similarityCount=0;
+        int similarityCount = 0;
         TeamPropPosition last = TeamPropPosition.undefined;
         while (similarityCount < 10) {
             if (last != pipeline.propPos || pipeline.propPos == TeamPropPosition.undefined) {
@@ -86,7 +89,14 @@ public class Auto extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripF(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardF(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkRed()));
+        if (pipeline.propPos == TeamPropPosition.middle) {
+            pipeline.propPos = TeamPropPosition.right;
+        } else if (pipeline.propPos == TeamPropPosition.left) {
+            pipeline.propPos = TeamPropPosition.middle;
+        } else {
+            pipeline.propPos = TeamPropPosition.left;
+        }
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripBlue(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardBlue(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkBlue()));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {

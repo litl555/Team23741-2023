@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.FTC.Commands;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
@@ -11,7 +10,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 @Config
-public class DriveToSpikeStripF extends CommandBase {
+public class DriveToSpikeStripRed extends CommandBase {
     TeamPropPosition pos;
     TrajectoryRunner tr = null;
     Trajectory trajectory;
@@ -24,7 +23,7 @@ public class DriveToSpikeStripF extends CommandBase {
     public Pose2d endPos2 = new Pose2d(840.479, 269.194, 90.0);
     public Pose2d endPos1 = new Pose2d(772.279 - leftOffset, 213.441 + leftYOffset, 2.0);
 
-    public DriveToSpikeStripF(TeamPropPosition pos) {
+    public DriveToSpikeStripRed(TeamPropPosition pos) {
         this.pos = pos;
     }
 

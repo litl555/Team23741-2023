@@ -35,7 +35,7 @@ public class Robot {
         l = _l;
         intakeRoller = hardwareMap.crservo.get("intakeRoller");
         //lift=_lift;
-        _intakeSubsystem = intakeSubsystem;
+        intakeSubsystem = _intakeSubsystem;
         liftEncoder = hardwareMap.dcMotor.get("rightFront");
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         claw = _claw;
