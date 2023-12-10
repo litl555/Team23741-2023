@@ -54,8 +54,7 @@ public class DangerousTeleop extends CommandOpMode {
 
         GamepadEx pad1 = new GamepadEx(gamepad1);
         GamepadEx pad2 = new GamepadEx(gamepad2);
-
-
+//        lift.offset=Robot.autoLiftPos;
         pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
             new InstantCommand(() -> {
                 liftLevel++;
@@ -69,6 +68,7 @@ public class DangerousTeleop extends CommandOpMode {
                 if (liftLevel < 0) liftLevel = LiftSubsystem.rowHeights.length - 1;
             })
         );
+        pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(()->Robot.drone.setPosition(1)));
 
         pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed( // go to current lift level
             new InstantCommand(() -> {
@@ -97,6 +97,10 @@ public class DangerousTeleop extends CommandOpMode {
                 ));
             })
         );
+        pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(()->Robot.forwardIsForward=true));
+        pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(()->Robot.forwardIsForward=false));
+        pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(()->intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
+        pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(()->intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
 
         pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed( // toggle open
             new InstantCommand(() -> {
@@ -121,11 +125,13 @@ public class DangerousTeleop extends CommandOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
+        Robot.drone.setPosition(.4);
     }
 
     @Override
     public void run() {
-        Robot.telemetry.add("CURRENT LIFT LEVEL", liftLevel);
+        Robot.telemetry.add("CURRENT LIFT LEVEL (0 based)", liftLevel);
+        Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
 
         Robot.l.update();

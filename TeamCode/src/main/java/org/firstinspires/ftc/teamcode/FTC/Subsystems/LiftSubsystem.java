@@ -39,6 +39,7 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
+    public int offset=0;
     public static double[] rowHeights = new double[]{20, 220, 350, 500, 794, 1357, 1357, 1884, 2365};
 
     public LiftSubsystem() {
@@ -89,7 +90,7 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
 
-    public double read() { return -1.0 * Robot.liftEncoder.getCurrentPosition(); }
+    public double read() { return -1 * Robot.liftEncoder.getCurrentPosition()-offset; }
 
     public static double inchesToTicks(double inches) { return PPR * inches / (circumfrence); }
 }

@@ -19,8 +19,10 @@ public class DriveToSpikeStripRed extends CommandBase {
     public static double leftYOffset = 80.0;
     public static double rightOff = -20.0;
     public static double rightYOff = 30.0;
+    public static double middleOffset=0.0;
+    public static double middleYOffset=0.0;
     public Pose2d endPos3 = new Pose2d(1106.858 - rightOff, 523.861 - rightYOff, 90.0);
-    public Pose2d endPos2 = new Pose2d(840.479, 269.194, 90.0);
+    public Pose2d endPos2 = new Pose2d(840.479+middleOffset, 269.194+middleYOffset, 90.0);
     public Pose2d endPos1 = new Pose2d(772.279 - leftOffset, 213.441 + leftYOffset, 2.0);
 
     public DriveToSpikeStripRed(TeamPropPosition pos) {

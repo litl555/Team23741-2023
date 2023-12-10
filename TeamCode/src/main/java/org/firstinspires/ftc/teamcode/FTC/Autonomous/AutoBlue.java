@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
+import static org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot.liftEncoder;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -9,6 +11,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardBlue;
@@ -46,8 +49,10 @@ public class AutoBlue extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         LoggerTool telemetry1 = new LoggerTool(telemetry);
+
         CommandScheduler.getInstance().reset();
         LiftSubsystem lift = new LiftSubsystem();
+
         ClawSubsystem claw = new ClawSubsystem();
         Robot.lift = lift;
 
@@ -58,10 +63,12 @@ public class AutoBlue extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
 
-        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.UP);
+        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
         waitForStart();
 
         GamepadEx pad1 = new GamepadEx(gamepad1);
@@ -101,6 +108,7 @@ public class AutoBlue extends LinearOpMode {
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
+            Robot.autoLiftPos=(int)lift.read();
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
             Robot.telemetry.add("pose", Constants.robotPose);
             Robot.l.update();

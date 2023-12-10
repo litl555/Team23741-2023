@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
+import static org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot.liftEncoder;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
@@ -9,6 +11,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
@@ -56,6 +59,10 @@ public class AutoRed extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
+
+
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
 
@@ -92,6 +99,8 @@ public class AutoRed extends LinearOpMode {
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
+            Robot.autoLiftPos=(int)lift.read();
+
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
             Robot.telemetry.add("pose", Constants.robotPose);
             Robot.l.update();

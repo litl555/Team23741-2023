@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 @Config
 public class Robot {
     public static DcMotor motor1, motor2, intakeMotor, liftEncoder;
-    public static Servo clawBottom, clawTop, intakeServo1, intakeServo2, wrist1, wrist2, arm1, arm2;
+    public static Servo clawBottom, clawTop, intakeServo1, intakeServo2, wrist1, wrist2, arm1, arm2,drone;
 
     public static CRServo intakeRoller;
     public static DistanceSensor distance;
@@ -24,20 +24,22 @@ public class Robot {
     public static HardwareMap hardwareMap;
     public static double distanceBetween = 96.0 * 2;
     public static double t = 0.0;
+    public static int autoLiftPos=0;
     public static boolean isBusy = false;
     public static LoggerTool telemetry;
     public static LiftSubsystem lift;
     public static ClawSubsystem claw;
+    public static boolean forwardIsForward=true;
     public static IntakeSubsystem intakeSubsystem;
     public static int level = 0; // this is automatically controlled by GoToHeight, so dont touch it!
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem _intakeSubsystem, ClawSubsystem _claw) {
         l = _l;
         intakeRoller = hardwareMap.crservo.get("intakeRoller");
+        drone=hardwareMap.servo.get("drone");
         //lift=_lift;
         intakeSubsystem = _intakeSubsystem;
         liftEncoder = hardwareMap.dcMotor.get("rightFront");
-        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         claw = _claw;
         telemetry = _telemetry;
         Robot.hardwareMap = hardwareMap;

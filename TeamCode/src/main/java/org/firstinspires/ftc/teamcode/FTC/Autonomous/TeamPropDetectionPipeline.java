@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.BoardDetectionPipeline;
@@ -25,11 +26,18 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Map;
 
+@Config
 public class TeamPropDetectionPipeline extends OpenCvPipeline {
     private OpenCvCamera cam;
     private LoggerTool telemetry;
     private boolean isRed;
     private Mat dilateKernel;
+
+    public static int blueY_lower = 5, blueCr_lower = 0, blueCb_lower = 150;
+    public static int blueY_upper = 255, blueCr_upper = 125, blueCb_upper = 255;
+
+    public static int redY_lower = 25, redCr_lower = 160, redCb_lower = 0;
+    public static int redY_upper = 255, redCr_upper = 255, redCb_upper = 150;
 
     public TeamPropPosition propPos = TeamPropPosition.undefined;
 
@@ -64,8 +72,12 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
     public Mat processFrame(Mat input) {
         Imgproc.cvtColor(input, input, Imgproc.COLOR_RGB2YCrCb);
 
-        if (isRed) Core.inRange(input, new Scalar(25, 160, 0), new Scalar(255, 255, 150), input);
-        else Core.inRange(input, new Scalar(5, 0, 150), new Scalar(255, 125, 255), input);
+        //if (isRed) Core.inRange(input, new Scalar(25, 160, 0), new Scalar(255, 255, 150), input);
+        //else Core.inRange(input, new Scalar(5, 0, 150), new Scalar(255, 125, 255), input);
+
+        if (isRed) Core.inRange(input, new Scalar(redY_lower, redCr_lower, redCb_lower), new Scalar(redY_upper, redCr_upper, redCb_upper), input);
+        else Core.inRange(input, new Scalar(blueY_lower, blueCr_lower, blueCb_lower), new Scalar(blueY_upper, blueCr_upper, blueCb_upper), input);
+
 
         Imgproc.dilate(input, input, dilateKernel);
 
@@ -100,16 +112,24 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
 
         telemetry.add("Biggest area", biggestArea);
 
+        int centerLine = 200;
+
         // so we dont detect lines
         if (biggestArea < 15_000) propPos = TeamPropPosition.left;
         else {
             Moments m = Imgproc.moments(bestCurve);
             Point p = new Point(m.m10 / (m.m00 + 1e-5), m.m01 / (m.m00 + 1e-5));
 
-            if (p.y < 150) propPos = TeamPropPosition.middle;
+            Imgproc.circle(input, p, 5, new Scalar(255, 0, 0));
+
+            if (p.y < centerLine) propPos = TeamPropPosition.middle;
             else propPos = TeamPropPosition.right;
             telemetry.add("y", p.y);
         }
+
+        Imgproc.line(input, new Point(0, centerLine), new Point(1280, centerLine), new Scalar(255, 255, 0));
+        Imgproc.putText(input, "middle", new Point(720, centerLine / 2), 1, 3, new Scalar(255, 255, 0));
+        Imgproc.putText(input, "right", new Point(720, centerLine + centerLine / 2), 1, 3, new Scalar(255, 255, 0));
 
         Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(input, bitmap);

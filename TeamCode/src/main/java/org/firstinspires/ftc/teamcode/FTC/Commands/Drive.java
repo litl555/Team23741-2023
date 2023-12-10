@@ -21,7 +21,13 @@ public class Drive extends CommandBase {
     @Override
     public void execute() {
         if (!Robot.isBusy) {
-            drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
+            if(Robot.forwardIsForward) {
+                drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
+            }
+            else{
+                drive.l.setWeightedDrivePowers(new Pose2d(-gamepad.left_stick_x, -gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
+
+            }
         }
     }
 }
