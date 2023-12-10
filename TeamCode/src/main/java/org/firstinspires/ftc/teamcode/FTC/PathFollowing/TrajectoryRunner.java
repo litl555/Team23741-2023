@@ -126,9 +126,12 @@ public class TrajectoryRunner {
             //loggerTool.add("t",closestT);
             Pose2d derivative = t.velocities(closestT);
             //loggerTool.drawPoint(t.equation(closestT));
-            Robot.telemetry.add("amgle",Constants.angle);
-            Robot.telemetry.add("angleDes",angleDes);
+            Robot.telemetry.add("amgle", Constants.angle);
+            Robot.telemetry.add("angleDes", angleDes);
             //loggerTool.add("der",derivative);
+            if (closestT == 0.0) {
+                closestT = .01;
+            }
             if (closestT == 1.0) {
                 derivative = new Pose2d(0, 0, 0);
             }
@@ -153,9 +156,7 @@ public class TrajectoryRunner {
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
-            if(closestT==0.0){
-                l.setWeightedDrivePowers(new Pose2d(.2,0.0,0.0));
-            }
+
             loggerTool.add("loop", getLoopTime());
             Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
             if (robot.distTo(t.getEnd().vec()) < 200) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)

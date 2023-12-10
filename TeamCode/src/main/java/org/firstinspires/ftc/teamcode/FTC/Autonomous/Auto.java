@@ -13,6 +13,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardF;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripF;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
+import org.firstinspires.ftc.teamcode.FTC.Commands.ParkRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
@@ -44,6 +45,7 @@ public class Auto extends LinearOpMode {
         CommandScheduler.getInstance().reset();
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
+        Robot.lift = lift;
 
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
 
@@ -54,6 +56,7 @@ public class Auto extends LinearOpMode {
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
+
 
         waitForStart();
 
@@ -83,7 +86,7 @@ public class Auto extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripF(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardF(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN)));
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripF(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardF(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkRed()));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
