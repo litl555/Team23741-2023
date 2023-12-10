@@ -39,7 +39,7 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
-    public static double[] rowHeights = new double[]{50, 250, 350, 500, 500, 980, 1774, 1774};
+    public static double[] rowHeights = new double[]{50, 220, 350, 500, 500, 980, 1774, 1774};
 
     public LiftSubsystem() {
         pid.setTolerance(10);
@@ -68,7 +68,7 @@ public class LiftSubsystem extends SubsystemBase {
         safeRegion = Math.abs(Robot.liftEncoder.getCurrentPosition()) > safetyThreshold;
         double controllerPower = -pid.calculate(targetPos, read());
         controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
-        //controllerPower = 0;
+        controllerPower = 0;
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
         Robot.telemetry.add("lift index", index1);

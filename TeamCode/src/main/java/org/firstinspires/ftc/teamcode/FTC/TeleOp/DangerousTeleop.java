@@ -109,10 +109,10 @@ public class DangerousTeleop extends CommandOpMode {
             new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED))
         );
 
-        pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(
-            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED))
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+            new InstantCommand(() -> liftLevel = 2)
         );
-
+        
         // intake controls
         schedule(new RunCommand(() -> {
             double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
