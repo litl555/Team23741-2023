@@ -91,7 +91,7 @@ public class GoToHeight extends ParallelCommandGroup {
                     else claw.updateArmWristPos(newLevel);
                 }),
                 new ConditionalCommand(
-                    new WaitCommand(400),
+                    new WaitCommand(600),
                     new InstantCommand(),
                     () -> Robot.level < 2 || newLevel < 2
                 ),

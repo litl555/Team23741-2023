@@ -30,11 +30,11 @@ public class ClawSubsystem extends SubsystemBase {
             new ArmWristPos(0.02122, -0.0338888),
             new ArmWristPos(-0.00611, 0.03611),
             new ArmWristPos(-0.07777, 0.066111),
-            new ArmWristPos(-0.09833, 0.066111),
-            new ArmWristPos(-0.06777, 0.066111),
-            new ArmWristPos(-0.08777, 0.066111),
-            new ArmWristPos(-0.03777, 0.066111),
-            new ArmWristPos(-0.07777, 0.066111),
+            new ArmWristPos(-0.08833, 0.056111),
+            new ArmWristPos(-0.04777, 0.056111),
+            new ArmWristPos(-0.08833, 0.056111),
+            new ArmWristPos(-0.04777, 0.056111),
+            new ArmWristPos(-0.04777, 0.056111),
     };
 
     public static ArmWristPos clearPixelIntake = new ArmWristPos(-0.01888, -0.075);

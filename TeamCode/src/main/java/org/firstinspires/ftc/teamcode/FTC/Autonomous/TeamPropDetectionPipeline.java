@@ -1,7 +1,12 @@
 package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
+import android.graphics.Bitmap;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.BoardDetectionPipeline;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -105,6 +110,10 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
             else propPos = TeamPropPosition.right;
             telemetry.add("y", p.y);
         }
+
+        Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(input, bitmap);
+        FtcDashboard.getInstance().sendImage(bitmap);
 
         for (int i = 0; i < cnts.size(); i++) cnts.get(i).release();
         hierarchy.release();

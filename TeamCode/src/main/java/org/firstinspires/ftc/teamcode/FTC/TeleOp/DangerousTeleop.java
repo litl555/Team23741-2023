@@ -110,7 +110,7 @@ public class DangerousTeleop extends CommandOpMode {
         );
 
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-            new InstantCommand(() -> liftLevel = 2)
+            new InstantCommand(() -> liftLevel = 3)
         );
         
         // intake controls
