@@ -64,6 +64,7 @@ public class AutoBlue extends LinearOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
@@ -97,14 +98,16 @@ public class AutoBlue extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        if (pipeline.propPos == TeamPropPosition.middle) {
-            pipeline.propPos = TeamPropPosition.right;
-        } else if (pipeline.propPos == TeamPropPosition.left) {
-            pipeline.propPos = TeamPropPosition.middle;
+
+        if (last == TeamPropPosition.middle) {
+            last = TeamPropPosition.left;
+        } else if (last == TeamPropPosition.right) {
+            last = TeamPropPosition.middle;
         } else {
-            pipeline.propPos = TeamPropPosition.left;
+            last = TeamPropPosition.right;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripBlue(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardBlue(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkBlue()));
+
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripBlue(last), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardBlue(last)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkBlue()));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {

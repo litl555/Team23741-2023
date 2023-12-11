@@ -12,7 +12,7 @@ public class RamBoard extends SequentialCommandGroup {
     public RamBoard() {
         addCommands(
                 new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(0.0, 0.20, 0))),
-                new WaitCommand(200),
+                new WaitCommand(700),
                 new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(0, 0, 0)))
         );
     }

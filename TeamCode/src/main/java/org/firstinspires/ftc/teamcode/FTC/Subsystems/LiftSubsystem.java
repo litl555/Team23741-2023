@@ -21,7 +21,7 @@ public class LiftSubsystem extends SubsystemBase {
     public static double safetyThreshold = inchesToTicks(3); //TODO: DON'T FORGET SAFETY THRESHOLD
     private static double circumfrence = 4;
     private static double PPR = 384.5; //ticks per revolution of the motor
-    public static double P = 0.0025, I = 0.145, D = 2, F = 0.0;
+    public static double P = 0.003, I = 0.145, D = 2, F = 0.0;
     double targetPos = 0;
     public static int index1 = 0;
     public double maxPower = 0.8;

@@ -60,6 +60,7 @@ public class AutoRed extends LinearOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
 
 

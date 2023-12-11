@@ -12,8 +12,11 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.apache.commons.math3.analysis.function.Log;
+import org.apache.commons.math3.distribution.GammaDistribution;
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixel;
@@ -68,7 +71,9 @@ public class DangerousTeleop extends CommandOpMode {
                 if (liftLevel < 0) liftLevel = LiftSubsystem.rowHeights.length - 1;
             })
         );
-        pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(()->Robot.drone.setPosition(1)));
+        pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(()->  {      Robot.drone=hardwareMap.servo.get("drone");
+        Robot.drone.setPosition(1);}
+));
 
         pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed( // go to current lift level
             new InstantCommand(() -> {
@@ -113,7 +118,17 @@ public class DangerousTeleop extends CommandOpMode {
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
             new InstantCommand(() -> liftLevel = 3)
         );
-        
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenHeld(
+            new InstantCommand(() -> lift.setTargetPos(lift.read() - 10))
+        );
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> {Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                })
+        );
+
         // intake controls
         schedule(new RunCommand(() -> {
             double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
@@ -124,8 +139,10 @@ public class DangerousTeleop extends CommandOpMode {
         }));
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
-        Robot.drone.setPosition(.4);
+
     }
 
     @Override

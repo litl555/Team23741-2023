@@ -33,7 +33,7 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
     private boolean isRed;
     private Mat dilateKernel;
 
-    public static int blueY_lower = 5, blueCr_lower = 0, blueCb_lower = 150;
+    public static int blueY_lower = 5, blueCr_lower = 0, blueCb_lower = 140;
     public static int blueY_upper = 255, blueCr_upper = 125, blueCb_upper = 255;
 
     public static int redY_lower = 25, redCr_lower = 160, redCb_lower = 0;

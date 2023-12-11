@@ -15,10 +15,11 @@ public class DriveToSpikeStripBlue extends CommandBase {
     TrajectoryRunner tr = null;
     Trajectory trajectory;
     private boolean finished = false;
-    public static double leftOffset = 50.0;
-    public static double leftYOffset = 80.0;
+    public static double leftOffset = 0.0;
+    public static double leftYOffset = 70.0;
     public static double rightOff = -20.0;
-    public static double rightYOff = 30.0;
+    public static double headingRight=-8.0;
+    public static double rightYOff = -30.0;
     public Pose2d endPos3 = new Pose2d(-(1106.858 - rightOff), 523.861 - rightYOff, -90.0);
     public Pose2d endPos2 = new Pose2d(-840.479, 269.194, -90.0);
     public Pose2d endPos1 = new Pose2d(-(772.279 - leftOffset), 213.441 + leftYOffset, -2.0);
@@ -43,7 +44,7 @@ public class DriveToSpikeStripBlue extends CommandBase {
                 break;
             case right:
                 trajectory = new Trajectory(startPose, endPos1, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos1.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos1.getHeading()+headingRight, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
             case undefined:
                 trajectory = new Trajectory(startPose, endPos1, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
