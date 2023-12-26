@@ -45,11 +45,11 @@ public class GoToHeight extends ParallelCommandGroup {
                 new ConditionalCommand(
                     new SequentialCommandGroup(
                             new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
-                            new WaitCommand(500),
+                            new WaitCommand(300),
                             new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                            new WaitCommand(500),
+                            new WaitCommand(300),
                             new InstantCommand(() -> {
-                                lift.maxPower = 0.25;
+                                lift.maxPower = 0.3;
                                 ClawSubsystem.clearPixelIntake.apply(claw);
                                 lift.setTargetPos(350);
                             }),
@@ -66,7 +66,7 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // if were going to 1, close
                         new ConditionalCommand(
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.HALFCLOSE)),
                             new InstantCommand(),
                             () -> newLevel == 1
                         ),
@@ -78,7 +78,7 @@ public class GoToHeight extends ParallelCommandGroup {
                             () -> (newLevel == 0 && Robot.level == 1)
                         ),
 
-                        new WaitCommand(400) // hopefully this allows claw to move
+                        new WaitCommand(300) // hopefully this allows claw to move
                     ),
                     new InstantCommand(),
                     () -> (newLevel == 0 || newLevel == 1)
@@ -91,7 +91,7 @@ public class GoToHeight extends ParallelCommandGroup {
                     else claw.updateArmWristPos(newLevel);
                 }),
                 new ConditionalCommand(
-                    new WaitCommand(600),
+                    new WaitCommand(300),
                     new InstantCommand(),
                     () -> Robot.level < 2 || newLevel < 2
                 ),
