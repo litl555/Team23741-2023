@@ -40,7 +40,7 @@ public class TrajectoryRunner {
         TangentHeading
     }
 
-    public static double speed = .25;
+    public static double speed = .6;
     public int ind;
 
     public static double angleDes = 90;
@@ -213,10 +213,10 @@ public class TrajectoryRunner {
     private void correctMode() {
         Pose2d positions = t.getEnd();
         double xerror = (positions.getX() + robotPose.getY());
-        double yerror = positions.getY() - robotPose.getX();
+        double yerror = (positions.getY() - robotPose.getX());
 
         double x = speed * trajRunnerSpeedMult * xerror + dxy * (xerror - xerrorLast);
-        double y = speed * -1.0 * trajRunnerSpeedMult * yerror + dxy * (yerror - yerrorLast);
+        double y = speed * -1.0 * trajRunnerSpeedMult * yerror - dxy * (yerror - yerrorLast);
         yerrorLast = yerror;
         xerrorLast = xerror;
         //l.setWeightedDrivePowers(new Pose2d(0,0,0));

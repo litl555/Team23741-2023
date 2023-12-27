@@ -107,11 +107,30 @@ public class AutoBlue extends LinearOpMode {
             last = TeamPropPosition.right;
         }
 
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripBlue(last), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardBlue(last)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkBlue()));
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(
+                        new ParallelCommandGroup(
+                                new DriveToSpikeStripBlue(last),
+                                new GoToHeight(lift, Robot.claw, 2)
+                        ),
+                        new WaitCommand(1000),
+                        new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE),
+                        new WaitCommand(500),
+                        new ParallelCommandGroup(
+                                new GoToHeight(lift, Robot.claw, 3),
+                                new DriveToBackBoardBlue(last)
+                        ),
+                        new RamBoard(),
+                        new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN),
+                        new WaitCommand(500),
+                        new ParkBlue()
+                )
+        );
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
-            Robot.autoLiftPos=(int)lift.read();
+//            Robot.telemetry.add("loop",(Constants.toSec(Constants.getTime())-Constants.lastTime1)*1000.0);
+//            Constants.lastTime1=Constants.toSec(Constants.getTime());
+            Robot.autoLiftPos = (int) lift.read();
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
             Robot.telemetry.add("pose", Constants.robotPose);
             Robot.l.update();

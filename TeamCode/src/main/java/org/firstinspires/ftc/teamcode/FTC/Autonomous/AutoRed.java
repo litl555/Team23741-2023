@@ -10,14 +10,13 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
-import org.firstinspires.ftc.teamcode.FTC.Commands.ParkRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
@@ -86,7 +85,7 @@ public class AutoRed extends LinearOpMode {
         pad1.getGamepadButton(GamepadKeys.Button.B)
                 .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
         */
-        int similarityCount=0;
+        int similarityCount = 0;
         TeamPropPosition last = TeamPropPosition.undefined;
         while (similarityCount < 10) {
             if (last != pipeline.propPos || pipeline.propPos == TeamPropPosition.undefined) {
@@ -96,11 +95,17 @@ public class AutoRed extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParkRed()));
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParallelCommandGroup(new DriveToStackRed(), new SequentialCommandGroup(
+                new GoToHeight(Robot.lift, Robot.claw, 1),
+                new WaitCommand(200),
+                new GoToHeight(Robot.lift, Robot.claw, 0)
+        ))));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
-            Robot.autoLiftPos=(int)lift.read();
+//            Robot.telemetry.add("loop",(Constants.toSec(Constants.getTime())-Constants.lastTime1)*1000.0);
+//            Constants.lastTime1=Constants.toSec(Constants.getTime());
+            Robot.autoLiftPos = (int) lift.read();
 
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
             Robot.telemetry.add("pose", Constants.robotPose);

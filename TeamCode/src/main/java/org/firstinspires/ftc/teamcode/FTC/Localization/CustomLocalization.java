@@ -29,12 +29,8 @@ public class CustomLocalization {
     double Y_MULTIPLER = (double) 1.00197;
     Pose2d start;
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
-        Constants.angle = 0;
         this.start=startPose;
-        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
-        for (LynxModule hub : allHubs) {
-            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-        }
+
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
         rightRear = hardwareMap.get(DcMotor.class, "rightRear");
@@ -72,7 +68,7 @@ public class CustomLocalization {
         rd = rightPod.getDelta();
         ld = leftPod.getDelta();
         bd = backPod.getDelta();
-        calculateDeltaPos(rd,ld,bd);
+        //calculateDeltaPos(rd,ld,bd);
 
         pose = pose.plus(calculateDeltaPos(rd, ld, bd));
         //pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 + (double) start.getX(), dr.getPoseEstimate().getY() * (double) 25.4 + (double) start.getY(), dr.getPoseEstimate().getHeading()+start.getHeading());
@@ -103,7 +99,7 @@ public class CustomLocalization {
         leftPod.update();
         backPod.update();
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
-        Constants.angle += dT / 2;
+        Constants.angle += dT;
         double T = Constants.robotPose.getHeading();
         dF = (R + L) / (double) 2.0;
         dS = (B - Constants.PERPENDICULAR_X * dT);

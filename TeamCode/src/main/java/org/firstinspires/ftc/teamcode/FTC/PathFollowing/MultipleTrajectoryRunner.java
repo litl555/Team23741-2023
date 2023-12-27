@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import java.util.ArrayList;
 
 public class MultipleTrajectoryRunner {
-    int currentT = 0;
+    public int currentT = 0;
     ArrayList<TrajectoryRunner> trajectoryRunners;
     public boolean finished = false;
 
