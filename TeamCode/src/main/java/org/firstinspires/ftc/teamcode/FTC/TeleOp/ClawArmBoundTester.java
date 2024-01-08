@@ -104,7 +104,6 @@ public class ClawArmBoundTester extends CommandOpMode {
         Robot.telemetry.add("Speed", speed);
 
         Robot.telemetry.add("lift level", lift.read());
-        Robot.telemetry.add("same power count", lift.samePowerCount);
         Robot.telemetry.update();
 
     }

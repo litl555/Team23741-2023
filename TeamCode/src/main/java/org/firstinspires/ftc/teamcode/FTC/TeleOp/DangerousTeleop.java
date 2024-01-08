@@ -42,6 +42,11 @@ import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.Inta
 public class DangerousTeleop extends CommandOpMode {
     private int liftLevel = 0;
 
+    private LiftSubsystem lift;
+    private ClawSubsystem claw;
+    private IntakeSubsystem intake;
+    private DriveSubsystem drive;
+
     @Override
     public void initialize() {
         // initialization
@@ -50,93 +55,113 @@ public class DangerousTeleop extends CommandOpMode {
 
         CustomLocalization l = new CustomLocalization(new Pose2d(300, -1500, -Math.PI / 2.0), hardwareMap);
 
-        LiftSubsystem lift = new LiftSubsystem();                   register(lift);
-        ClawSubsystem claw = new ClawSubsystem();                   register(claw);
-        IntakeSubsystem intake = new IntakeSubsystem(telemetry1);   register(intake);
-        DriveSubsystem drive = new DriveSubsystem(l, telemetry1);   register(drive);
+        lift = new LiftSubsystem();                   register(lift);
+        claw = new ClawSubsystem();                   register(claw);
+        intake = new IntakeSubsystem(telemetry1);   register(intake);
+        drive = new DriveSubsystem(l, telemetry1);   register(drive);
 
         GamepadEx pad1 = new GamepadEx(gamepad1);
         GamepadEx pad2 = new GamepadEx(gamepad2);
-//        lift.offset=Robot.autoLiftPos;
-        pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-            new InstantCommand(() -> {
-                liftLevel++;
-                if (liftLevel > LiftSubsystem.rowHeights.length - 1) liftLevel = 0;
-            })
-        );
 
-        pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-            new InstantCommand(() -> {
-                liftLevel--;
-                if (liftLevel < 0) liftLevel = LiftSubsystem.rowHeights.length - 1;
-            })
-        );
-        pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(()->  {      Robot.drone=hardwareMap.servo.get("drone");
-        Robot.drone.setPosition(1);}
-));
+        // GAMEPAD 1 CONTROLS
+        {
+            pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
+                Robot.drone = hardwareMap.servo.get("drone");
+                Robot.drone.setPosition(1);
+            }));
 
-        pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed( // go to current lift level
-            new InstantCommand(() -> {
-                if (liftLevel == Robot.level) return;
+            pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = true));
+            pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = false));
+            pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
+            pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
 
-                // if entering tray make sure to prepare to pick up pixel
-                if (liftLevel == 0 && Robot.level != 1) {
-                    schedule(new SequentialCommandGroup(
+            schedule(new RunCommand(() -> {
+                double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+
+                if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
+                else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
+            }));
+        }
+
+        // GAMEMPAD 2 CONTROLS
+        {
+            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new InstantCommand(() -> {
+                    liftLevel++;
+                    if (liftLevel > LiftSubsystem.rowHeights.length - 1) liftLevel = 0;
+                })
+            );
+
+            pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
+                new InstantCommand(() -> {
+                    liftLevel--;
+                    if (liftLevel < 0) liftLevel = LiftSubsystem.rowHeights.length - 1;
+                })
+            );
+
+            pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed( // go to current lift level
+                new InstantCommand(() -> {
+                    if (liftLevel == Robot.level) return;
+
+                    // if entering tray make sure to prepare to pick up pixel
+                    if (liftLevel == 0 && Robot.level != 1) {
+                        schedule(new SequentialCommandGroup(
+                            new GoToHeight(lift, claw, 1),
+                            new WaitCommand(300),
+                            new GoToHeight(lift, claw, 0)
+                        ));
+                    } else schedule(new GoToHeight(lift, claw, liftLevel));
+                })
+            );
+
+            pad2.getGamepadButton(GamepadKeys.Button.X).whenPressed( // go to tray
+                new InstantCommand(() -> {
+                    liftLevel = 0;
+                    if (Robot.level == 0) return;
+                    else if (Robot.level == 1) schedule(new GoToHeight(lift, claw, 0));
+                    else schedule(new SequentialCommandGroup(
                         new GoToHeight(lift, claw, 1),
-                        new WaitCommand(300),
+                        new WaitCommand(1000),
                         new GoToHeight(lift, claw, 0)
                     ));
-                } else schedule(new GoToHeight(lift, claw, liftLevel));
-            })
-        );
-
-        pad2.getGamepadButton(GamepadKeys.Button.X).whenPressed( // go to tray
-            new InstantCommand(() -> {
-                liftLevel = 0;
-                if (Robot.level == 0) return;
-                else if (Robot.level == 1) schedule(new GoToHeight(lift, claw, 0));
-                else schedule(new SequentialCommandGroup(
-                    new GoToHeight(lift, claw, 1),
-                    new WaitCommand(1000),
-                    new GoToHeight(lift, claw, 0)
-                ));
-            })
-        );
-        pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(()->Robot.forwardIsForward=true));
-        pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(()->Robot.forwardIsForward=false));
-        pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(()->intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
-        pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(()->intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
-
-        pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed( // toggle open
-            new InstantCommand(() -> {
-                if (claw.currentState == ClawSubsystem.ClawState.OPENONE) claw.update(ClawSubsystem.ClawState.OPEN);
-                else claw.update(ClawSubsystem.ClawState.OPENONE);
-            })
-        );
-
-
-        pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-            new InstantCommand(() -> liftLevel = 3)
-        );
-
-        pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenHeld(
-            new InstantCommand(() -> lift.setTargetPos(lift.read() - 10))
-        );
-
-        pad2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> {Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 })
-        );
+            );
 
-        // intake controls
-        schedule(new RunCommand(() -> {
-            double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-            double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+            pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed( // toggle open
+                new InstantCommand(() -> {
+                    if (claw.currentState == ClawSubsystem.ClawState.OPENONE) claw.update(ClawSubsystem.ClawState.OPEN);
+                    else claw.update(ClawSubsystem.ClawState.OPENONE);
+                })
+            );
 
-            if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
-            else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
-        }));
+            // toggling how strong the lift should be during hang
+            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> LiftSubsystem.hangOverride = true));
+            pad2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> LiftSubsystem.hangOverride = false));
+
+            schedule(new RunCommand(() -> {
+                if (!LiftSubsystem.hangOverride) return;
+
+                double y = pad2.getLeftY();
+                if (Math.abs(y) > 0.2) lift.setPower(y);
+                else lift.setPower(0);
+            }));
+
+            /*
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
+                new InstantCommand(() -> liftLevel = 3)
+            );
+
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenHeld(
+                new InstantCommand(() -> lift.setTargetPos(lift.read() - 10))
+            );
+
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
+                new InstantCommand(() -> {Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                })
+            );*/
+        }
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
         Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -150,6 +175,8 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("CURRENT LIFT LEVEL (0 based)", liftLevel);
         Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
+        Robot.telemetry.add("LIFT IS OVERRIDDEN", LiftSubsystem.hangOverride);
+        Robot.telemetry.add("LIFT POSITION", lift.read());
 
         Robot.l.update();
         CommandScheduler.getInstance().run();
