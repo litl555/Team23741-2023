@@ -6,7 +6,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -26,10 +25,8 @@ public class LiftSubsystem extends SubsystemBase {
     double targetPos = 0;
     public static int index1 = 0;
     public double maxPower = 0.8;
-    public int samePowerCount = 0;
-    DcMotor motor1, motor2;
-    private Queue<Double> averagePowerQueue = new ArrayDeque<>();
-    public double averagePower;
+    public static boolean hangOverride = false;
+
 
     public PIDFController pid = new PIDFController(P, I, D, F);
 
@@ -40,14 +37,13 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
-    public int offset=0;
+    public int offset = 0;
     public static double[] rowHeights = new double[]{20, 220, 350, 500, 794, 1357, 1357, 1884, 2365};
 
     public LiftSubsystem() {
         pid.setTolerance(10);
         index1 = 0;
         safeRegion = false;
-
     }
 
     public int updateRow(int index) { // returns new the level
@@ -68,28 +64,21 @@ public class LiftSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        if (hangOverride) return;
+
         safeRegion = Math.abs(Robot.liftEncoder.getCurrentPosition()) > safetyThreshold;
         double controllerPower = -pid.calculate(targetPos, read());
         controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
-        //controllerPower = 0;
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
         Robot.telemetry.add("lift index", index1);
-        Robot.telemetry.add("ticks", Robot.liftEncoder.getCurrentPosition());
+
         setPower(Range.clip(controllerPower + F, -1, 1));
     }
 
     public void setPower(double power) {
-        if (averagePowerQueue.size() == 5) averagePower -= averagePowerQueue.remove() / 5.0;
-        averagePowerQueue.add(power);
-        averagePower += power / 5.0;
-
-        if (averagePower == power) samePowerCount++;
-        else samePowerCount = 0;
-
         Robot.motor1.setPower(power);
-        Robot.motor2.setPower(power);
-        Robot.telemetry.add("power1", power);
+        Robot.motor2.setPower(-power);
     }
 
 

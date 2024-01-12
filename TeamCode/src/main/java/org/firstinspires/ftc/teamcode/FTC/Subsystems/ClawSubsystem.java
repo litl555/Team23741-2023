@@ -37,6 +37,8 @@ public class ClawSubsystem extends SubsystemBase {
             new ArmWristPos(-0.04777, 0.056111),
     };
 
+    public static ArmWristPos hangDelta = new ArmWristPos(-0.15833255, 0.166111);
+
     public static ArmWristPos clearPixelIntake = new ArmWristPos(-0.01888, -0.075);
     public ClawState currentState = ClawState.UNKNOWN;
 
@@ -98,6 +100,8 @@ public class ClawSubsystem extends SubsystemBase {
         updateWristRow(index);
         updateArmRow(index);
     }
+
+    public void enableHang() { hangDelta.apply(this); }
 
     public enum ClawState {
         CLOSED,
