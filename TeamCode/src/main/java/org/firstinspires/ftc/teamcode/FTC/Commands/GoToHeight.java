@@ -49,11 +49,14 @@ public class GoToHeight extends ParallelCommandGroup {
                             new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
                             new WaitCommand(500),
                             new InstantCommand(() -> {
-                                lift.maxPower = 0.25;
+                                lift.maxPower = 0.4;
                                 ClawSubsystem.clearPixelIntake.apply(claw);
-                                lift.setTargetPos(350);
+                                lift.setTargetPos(275);
                             }),
                             new WaitUntilCommand(lift.pid::atSetPoint),
+                            new InstantCommand(() -> {
+                                new ArmWristPos(ClawSubsystem.clearPixelIntake.arm, -0.035).apply(claw); // only kinda scuffed
+                            }),
                             new WaitCommand(200),
                             new InstantCommand(() -> lift.maxPower = 0.8)
                     ),

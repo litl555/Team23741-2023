@@ -8,8 +8,6 @@ import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
-import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
-import org.firstinspires.ftc.teamcode.FTC.Commands.RetractLift;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateLift;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
@@ -18,7 +16,6 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 public class LiftTesting extends CommandOpMode {
     private int levelCount = 0;

@@ -11,6 +11,7 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
@@ -45,19 +46,27 @@ public class ClawArmBoundTester extends CommandOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, tele);
         Robot.robotInit(hardwareMap, l, tele, intake, claw);
 
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new InstantCommand(() -> armPos += speed).andThen(new InstantCommand(() -> claw.setArm(armPos))));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(new InstantCommand(() -> armPos -= speed).andThen(new InstantCommand(() -> claw.setArm(armPos))));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whileHeld(new InstantCommand(() -> clawPos += speed).andThen(new InstantCommand(() -> claw.setWrist(clawPos))));
-        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whileHeld(new InstantCommand(() -> clawPos -= speed).andThen(new InstantCommand(() -> claw.setWrist(clawPos))));
+        //Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> armPos -= speed).andThen(new InstantCommand(() -> claw.setArm(armPos))));
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> armPos += speed).andThen(new InstantCommand(() -> claw.setArm(armPos))));
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> clawPos += speed).andThen(new InstantCommand(() -> claw.setWrist(clawPos))));
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(new InstantCommand(() -> clawPos -= speed).andThen(new InstantCommand(() -> claw.setWrist(clawPos))));
 
         gamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> {
             claw.setWrist(0.5);
             claw.setArm(0.5);
+
+            armPos = 0.5;
+            clawPos = 0.5;
         }));
 
         gamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> {
             claw.setWrist(ClawSubsystem.zero.wrist);
-            claw.setArm(ClawSubsystem.zero.wrist);
+            claw.setArm(ClawSubsystem.zero.arm);
+
+            armPos = ClawSubsystem.zero.arm;
+            clawPos = ClawSubsystem.zero.wrist;
         }));
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new InstantCommand(() -> speed += 0.0005));
@@ -66,8 +75,8 @@ public class ClawArmBoundTester extends CommandOpMode {
         gamepad.getGamepadButton(GamepadKeys.Button.X).whenPressed(
                 new InstantCommand(() -> {
                     newLevel = Robot.level - 1;
-                    if (newLevel < 0) newLevel = LiftSubsystem.rowHeights.length - 1;
-                    else if (newLevel > LiftSubsystem.rowHeights.length - 1) newLevel = 0;
+                    if (newLevel < 0) newLevel = lift.rowHeights.length - 1;
+                    else if (newLevel > lift.rowHeights.length - 1) newLevel = 0;
 
                     schedule(new GoToHeight(lift, claw, newLevel));
                 })
@@ -76,8 +85,8 @@ public class ClawArmBoundTester extends CommandOpMode {
         gamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
                 new InstantCommand(() -> {
                     newLevel = Robot.level + 1;
-                    if (newLevel < 0) newLevel = LiftSubsystem.rowHeights.length - 1;
-                    else if (newLevel > LiftSubsystem.rowHeights.length - 1) newLevel = 0;
+                    if (newLevel < 0) newLevel = lift.rowHeights.length - 1;
+                    else if (newLevel > lift.rowHeights.length - 1) newLevel = 0;
 
                     schedule(new GoToHeight(lift, claw, newLevel));
                 })
@@ -87,6 +96,11 @@ public class ClawArmBoundTester extends CommandOpMode {
 
         pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
         pad2.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
+
+        pad2.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(claw::enableHang));
+        pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> ClawSubsystem.clearPixelIntake.apply(claw)));
+
+        pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> lift.hangOverride = !lift.hangOverride));
     }
 
     @Override
@@ -104,6 +118,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         Robot.telemetry.add("Speed", speed);
 
         Robot.telemetry.add("lift level", lift.read());
+        Robot.telemetry.add("lift override", lift.hangOverride);
         Robot.telemetry.update();
 
     }

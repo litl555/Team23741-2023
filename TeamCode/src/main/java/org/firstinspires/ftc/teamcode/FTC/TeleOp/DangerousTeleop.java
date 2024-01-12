@@ -3,9 +3,7 @@ package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.ConditionalCommand;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -13,30 +11,16 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.apache.commons.math3.analysis.function.Log;
-import org.apache.commons.math3.distribution.GammaDistribution;
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
-import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixel;
-import org.firstinspires.ftc.teamcode.FTC.Commands.RetractLift;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
-import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-
-import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.IntakePowerSetting.IDLE;
-import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.IntakePowerSetting.INTAKE;
-import static org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem.IntakePowerSetting.OUTTAKE;
 
 @TeleOp
 public class DangerousTeleop extends CommandOpMode {
@@ -89,14 +73,14 @@ public class DangerousTeleop extends CommandOpMode {
             pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new InstantCommand(() -> {
                     liftLevel++;
-                    if (liftLevel > LiftSubsystem.rowHeights.length - 1) liftLevel = 0;
+                    if (liftLevel > lift.rowHeights.length - 1) liftLevel = 0;
                 })
             );
 
             pad2.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
                 new InstantCommand(() -> {
                     liftLevel--;
-                    if (liftLevel < 0) liftLevel = LiftSubsystem.rowHeights.length - 1;
+                    if (liftLevel < 0) liftLevel = lift.rowHeights.length - 1;
                 })
             );
 
@@ -136,14 +120,14 @@ public class DangerousTeleop extends CommandOpMode {
             );
 
             // toggling how strong the lift should be during hang
-            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> LiftSubsystem.hangOverride = true));
-            pad2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> LiftSubsystem.hangOverride = false));
+            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> lift.hangOverride = true));
+            pad2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> lift.hangOverride = false));
 
             schedule(new RunCommand(() -> {
-                if (!LiftSubsystem.hangOverride) return;
+                if (!lift.hangOverride) return;
 
                 double y = pad2.getLeftY();
-                if (Math.abs(y) > 0.2) lift.setPower(y);
+                if (Math.abs(y) > 0.2) lift.setPower(-y);
                 else lift.setPower(0);
             }));
 
@@ -175,7 +159,7 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("CURRENT LIFT LEVEL (0 based)", liftLevel);
         Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
-        Robot.telemetry.add("LIFT IS OVERRIDDEN", LiftSubsystem.hangOverride);
+        Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
         Robot.telemetry.add("LIFT POSITION", lift.read());
 
         Robot.l.update();

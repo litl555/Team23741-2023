@@ -39,6 +39,10 @@ public class Robot {
         //lift=_lift;
         intakeSubsystem = _intakeSubsystem;
         liftEncoder = hardwareMap.dcMotor.get("rightFront");
+
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         claw = _claw;
         telemetry = _telemetry;
         Robot.hardwareMap = hardwareMap;
