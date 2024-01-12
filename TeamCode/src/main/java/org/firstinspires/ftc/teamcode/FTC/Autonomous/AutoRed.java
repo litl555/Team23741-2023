@@ -15,7 +15,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedStageDoor;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
@@ -95,11 +96,11 @@ public class AutoRed extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new WaitCommand(1000), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(500), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(500), new ParallelCommandGroup(new DriveToStackRed(), new SequentialCommandGroup(
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(250), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(250), new ParallelCommandGroup(new DriveToStackRedStageDoor(), new SequentialCommandGroup(
                 new GoToHeight(Robot.lift, Robot.claw, 1),
                 new WaitCommand(200),
                 new GoToHeight(Robot.lift, Robot.claw, 0)
-        ))));
+        )), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor()));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {

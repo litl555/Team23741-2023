@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
 
@@ -26,7 +27,7 @@ public class LiftSubsystem extends SubsystemBase {
     public static int index1 = 0;
     public double maxPower = 0.8;
     public int samePowerCount = 0;
-
+    DcMotor motor1, motor2;
     private Queue<Double> averagePowerQueue = new ArrayDeque<>();
     public double averagePower;
 
@@ -46,6 +47,7 @@ public class LiftSubsystem extends SubsystemBase {
         pid.setTolerance(10);
         index1 = 0;
         safeRegion = false;
+
     }
 
     public int updateRow(int index) { // returns new the level
@@ -73,7 +75,7 @@ public class LiftSubsystem extends SubsystemBase {
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
         Robot.telemetry.add("lift index", index1);
-
+        Robot.telemetry.add("ticks", Robot.liftEncoder.getCurrentPosition());
         setPower(Range.clip(controllerPower + F, -1, 1));
     }
 
@@ -86,7 +88,8 @@ public class LiftSubsystem extends SubsystemBase {
         else samePowerCount = 0;
 
         Robot.motor1.setPower(power);
-        Robot.motor2.setPower(-power);
+        Robot.motor2.setPower(power);
+        Robot.telemetry.add("power1", power);
     }
 
 

@@ -32,11 +32,12 @@ public class TOTHEGOODOLDAYS extends LinearOpMode {
         double gly = 0;
         double grx = 0;
         long lastTime = 0;
+        TelemetryPacket packet;
         //SampleMecanumDrive driver=new SampleMecanumDrive(hardwareMap);
         WISHWECOULDTURNBACKTIME customLocalization = new WISHWECOULDTURNBACKTIME(new Pose2d(0, 0, 0), hardwareMap);
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
-            TelemetryPacket packet = new TelemetryPacket();
+            packet = new TelemetryPacket();
             //double y=(double)-1*gamepad1.left_stick_y;
             //double x=(double)-1*gamepad1.left_stick_x;
             //driver.setWeightedDrivePower(new Pose2d((double)-1*x * Math.sin((double)-1*driver.getExternalHeading()) + y * Math.cos((double)-1*driver.getExternalHeading()), x * Math.cos((double)-1*driver.getExternalHeading()) + y * Math.sin((double)-1*driver.getExternalHeading()),(double)-1*gamepad1.right_stick_x));
@@ -45,7 +46,7 @@ public class TOTHEGOODOLDAYS extends LinearOpMode {
             grx = gamepad1.right_stick_x;
             gly = gamepad1.left_stick_y;
             //driver.update();
-            if (Math.abs(glx - glxp) > .01 || Math.abs(grx - grxp) > .01 || Math.abs(gly - glyp) > .01) {
+            if (Math.abs(glx - glxp) > .05 || Math.abs(grx - grxp) > .05 || Math.abs(gly - glyp) > .05) {
                 customLocalization.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
                 glxp = glx;
                 glyp = gly;
@@ -58,11 +59,11 @@ public class TOTHEGOODOLDAYS extends LinearOpMode {
 //            packet.put("arcLength",trajectory.length);
             packet.put("X", Constants.robotPose.getX());
             packet.put("Y", Constants.robotPose.getY());
-//            packet.put("Heading", Constants.robotPose.getHeading());
+            packet.put("Heading", Constants.robotPose.getHeading());
             packet.put("loop time", (Constants.getTime() - lastTime) / 1000000);
 
             lastTime = Constants.getTime();
-            DashboardUtil.drawRobot(packet.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
+//            DashboardUtil.drawRobot(packet.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
             dashboard.sendTelemetryPacket(packet);
 
             for (LynxModule hub : allHubs) {

@@ -82,9 +82,9 @@ public class DangerousTeleop extends CommandOpMode {
                 // if entering tray make sure to prepare to pick up pixel
                 if (liftLevel == 0 && Robot.level != 1) {
                     schedule(new SequentialCommandGroup(
-                        new GoToHeight(lift, claw, 1),
-                        new WaitCommand(300),
-                        new GoToHeight(lift, claw, 0)
+                            new GoToHeight(lift, claw, 1),
+                            new WaitCommand(200),
+                            new GoToHeight(lift, claw, 0)
                     ));
                 } else schedule(new GoToHeight(lift, claw, liftLevel));
             })
@@ -96,10 +96,10 @@ public class DangerousTeleop extends CommandOpMode {
                 if (Robot.level == 0) return;
                 else if (Robot.level == 1) schedule(new GoToHeight(lift, claw, 0));
                 else schedule(new SequentialCommandGroup(
-                    new GoToHeight(lift, claw, 1),
-                    new WaitCommand(1000),
-                    new GoToHeight(lift, claw, 0)
-                ));
+                            new GoToHeight(lift, claw, 1),
+                            new WaitCommand(200),
+                            new GoToHeight(lift, claw, 0)
+                    ));
             })
         );
         pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(()->Robot.forwardIsForward=true));
@@ -131,8 +131,8 @@ public class DangerousTeleop extends CommandOpMode {
 
         // intake controls
         schedule(new RunCommand(() -> {
-            double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-            double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+            double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+            double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
             if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
             else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);

@@ -25,6 +25,7 @@ public class LocalizationTest extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
+
             drive.setWeightedDrivePower(
                     new Pose2d(
                             -gamepad1.left_stick_y,

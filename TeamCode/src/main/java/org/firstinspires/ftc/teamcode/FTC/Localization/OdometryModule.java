@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 public class OdometryModule {
     private final DcMotor encoder;
-    private int ticks;
+    private int ticks, ticksTemp;
     int currentTicks;
 
     public OdometryModule(DcMotor encoder) {
@@ -21,8 +21,9 @@ public class OdometryModule {
 
     public double getDelta() {
         currentTicks = encoder.getCurrentPosition();
-
-        return (Constants.ticksToMM(currentTicks - ticks));
+        ticksTemp = ticks;
+        ticks = currentTicks;
+        return (Constants.ticksToMM(currentTicks - ticksTemp));
 
     }
 

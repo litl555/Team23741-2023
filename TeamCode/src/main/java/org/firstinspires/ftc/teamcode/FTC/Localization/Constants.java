@@ -20,7 +20,7 @@ public class Constants {
     public static double maxAcceleration = 400;
     public static final double PERPENDICULAR_Y = 0; //left to right
     public static final float X_OFFSET = 40.608f; //Offset of parallel wheels forward
-    public static double LATERAL_DISTANCE = 329.7;//150.552*2.0//284.84 //Distance beween odometry wheels 151.425f*2f
+    public static double LATERAL_DISTANCE = 327.626;//150.552*2.0//284.84 //Distance beween odometry wheels 151.425f*2f
     public static final float ODO_WHEEL_RADIUS = 17.5f;
     public static Pose2d velocity = new Pose2d(0, 0, 0);
     public static double lastTime1 = 0.0;
@@ -34,7 +34,7 @@ public class Constants {
     }
 
     public static double ticksToMM(int ticks) {
-        return (ticks / (double) 8192 * ODO_WHEEL_RADIUS * 2 * Math.PI);
+        return ((double) ticks / (double) 8192 * ODO_WHEEL_RADIUS * (double) 2 * Math.PI);
     }
 
     public static double toSec(long nano) {

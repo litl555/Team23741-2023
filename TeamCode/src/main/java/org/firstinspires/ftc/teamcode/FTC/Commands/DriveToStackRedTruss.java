@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import java.util.ArrayList;
 
 @Config
-public class DriveToStackRed extends CommandBase {
+public class DriveToStackRedTruss extends CommandBase {
     TrajectoryRunner tr, tr1;
     MultipleTrajectoryRunner mtr;
     boolean first = false;

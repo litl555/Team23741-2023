@@ -24,12 +24,18 @@ public class CustomLocalization {
     DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
     double rightTotal = 0;
+    int counter = 0;
     double leftTotal = 0;
+    double loopStart = 0.0;
+    double lastTime = 0.0;
+    double startTime;
+    double backT = 0;
     double X_MULTIPLIER = 1.00551;
     double Y_MULTIPLER = (double) 1.00197;
     Pose2d start;
+
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
-        this.start=startPose;
+        this.start = startPose;
 
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -42,7 +48,7 @@ public class CustomLocalization {
         pose = startPose;
         Constants.robotPose = startPose;
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
-        rightPod = new OdometryModule(hardwareMap.dcMotor.get("lift2"));
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("back"));
         rightPod.reverse();
 
         backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
@@ -58,6 +64,15 @@ public class CustomLocalization {
     }
 
     public void update() {
+        if (counter == 0) {
+            startTime = Constants.toSec(Constants.getTime());
+
+        }
+        Robot.telemetry.add("running loop", Constants.toSec(Constants.getTime()) - loopStart);
+        loopStart = Constants.toSec(Constants.getTime());
+        counter++;
+        Robot.telemetry.add("loopTime", (Constants.toSec(Constants.getTime()) - startTime) / (double) counter);
+
         //dr.updatePoseEstimate();
         //rightTotal += rightPod.getDelta() / 25.4;
         //rightPod.update();
@@ -66,15 +81,19 @@ public class CustomLocalization {
         //Robot.telemetry.add("rightTotal",rightTotal);
         //Robot.telemetry.add("leftTotal",leftTotal);
         rd = rightPod.getDelta();
+        rightTotal += rd;
+
         ld = leftPod.getDelta();
+        leftTotal += ld;
         bd = backPod.getDelta();
+        backT += bd;
         //calculateDeltaPos(rd,ld,bd);
 
         pose = pose.plus(calculateDeltaPos(rd, ld, bd));
         //pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 + (double) start.getX(), dr.getPoseEstimate().getY() * (double) 25.4 + (double) start.getY(), dr.getPoseEstimate().getHeading()+start.getHeading());
 
-        Pose2d veloVec = (pose.minus(Constants.robotPose)).div(Constants.toSec(Constants.getTime()) - Constants.lastTime1);
-        Constants.lastTime1 = Constants.toSec(Constants.getTime());
+        Pose2d veloVec = (pose.minus(Constants.robotPose)).div(Constants.toSec(Constants.getTime()) - lastTime);
+        lastTime = Constants.toSec(Constants.getTime());
         Constants.velocity = veloVec;
 
         Constants.robotPose = pose;
@@ -89,15 +108,16 @@ public class CustomLocalization {
 //            }
 //        }
         Constants.lastPose = pose;
+        Robot.telemetry.add("ld", leftTotal);
+        Robot.telemetry.add("rd", rightTotal);
+        Robot.telemetry.add("bd", backT);
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {
         R *= X_MULTIPLIER;
         L *= X_MULTIPLIER;
         B *= Y_MULTIPLER;
-        rightPod.update();
-        leftPod.update();
-        backPod.update();
+
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
         Constants.angle += dT;
         double T = Constants.robotPose.getHeading();

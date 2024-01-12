@@ -45,11 +45,11 @@ public class GoToHeight extends ParallelCommandGroup {
                 new ConditionalCommand(
                     new SequentialCommandGroup(
                             new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
-                            new WaitCommand(300),
+                            new WaitCommand(500),
                             new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
-                            new WaitCommand(300),
+                            new WaitCommand(500),
                             new InstantCommand(() -> {
-                                lift.maxPower = 0.3;
+                                lift.maxPower = 0.25;
                                 ClawSubsystem.clearPixelIntake.apply(claw);
                                 lift.setTargetPos(350);
                             }),
@@ -66,19 +66,19 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // if were going to 1, close
                         new ConditionalCommand(
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.HALFCLOSE)),
-                            new InstantCommand(),
-                            () -> newLevel == 1
+                                new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                                new InstantCommand(),
+                                () -> newLevel == 1
                         ),
 
-                        // 3
-                        new ConditionalCommand( // were at one are were trying to go to 0, so open the claw since were now in the tray
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)),
-                            new InstantCommand(),
-                            () -> (newLevel == 0 && Robot.level == 1)
-                        ),
+                            // 3
+                            new ConditionalCommand( // were at one are were trying to go to 0, so open the claw since were now in the tray
+                                    new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)),
+                                    new InstantCommand(),
+                                    () -> (newLevel == 0 && Robot.level == 1)
+                            ),
 
-                        new WaitCommand(300) // hopefully this allows claw to move
+                            new WaitCommand(400) // hopefully this allows claw to move
                     ),
                     new InstantCommand(),
                     () -> (newLevel == 0 || newLevel == 1)
@@ -91,9 +91,9 @@ public class GoToHeight extends ParallelCommandGroup {
                     else claw.updateArmWristPos(newLevel);
                 }),
                 new ConditionalCommand(
-                    new WaitCommand(300),
-                    new InstantCommand(),
-                    () -> Robot.level < 2 || newLevel < 2
+                        new WaitCommand(600),
+                        new InstantCommand(),
+                        () -> Robot.level < 2 || newLevel < 2
                 ),
                 new InstantCommand(() -> {
                     if (Robot.level == 0 && newLevel == 1) {

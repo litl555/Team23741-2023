@@ -28,7 +28,7 @@ public class Robotcentric2 extends LinearOpMode {
         Robot.telemetry = telemetry1;
         waitForStart();
         while (opModeIsActive() && !isStopRequested()) {
-            l.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x));
+            l.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, Math.pow(gamepad1.right_stick_x, 3)));
             l.update();
             Robot.telemetry.add("angle", Constants.angle);
             Robot.telemetry.add("angle1", Constants.robotPose.getHeading());

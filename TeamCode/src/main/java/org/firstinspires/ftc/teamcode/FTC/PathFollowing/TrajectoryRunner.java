@@ -120,7 +120,8 @@ public class TrajectoryRunner {
 
     private void runningMode() {
         count++;
-        if (count % 5 == 0) {
+        if (count % 10 == 0) {
+            double start = Constants.toSec(Constants.getTime());
             double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
             Robot.t = closestT;
             //loggerTool.add("t",closestT);
@@ -160,15 +161,16 @@ public class TrajectoryRunner {
 
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
 
-            loggerTool.add("loop", getLoopTime());
+            loggerTool.add("loop", start - Constants.toSec(Constants.getTime()));
             Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
-            if (robot.distTo(t.getEnd().vec()) < 200) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)
+            if (robot.distTo(t.getEnd().vec()) < 500) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)
                 if (!t.getEndStopped()) {
                     currentState = State.FINISHED;
                 } else {
                     loggerTool.add("set to correcting", indexRunTime);
                     indexRunTime++;
                     currentState = State.CORRECTING;
+                    count = 0;
 
                 }
             }
@@ -211,41 +213,62 @@ public class TrajectoryRunner {
     }
 
     private void correctMode() {
-        Pose2d positions = t.getEnd();
-        double xerror = (positions.getX() + robotPose.getY());
-        double yerror = (positions.getY() - robotPose.getX());
-
-        double x = speed * trajRunnerSpeedMult * xerror + dxy * (xerror - xerrorLast);
-        double y = speed * -1.0 * trajRunnerSpeedMult * yerror - dxy * (yerror - yerrorLast);
-        yerrorLast = yerror;
-        xerrorLast = xerror;
-        //l.setWeightedDrivePowers(new Pose2d(0,0,0));
-
-        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
-        Constants.lastPose = Constants.robotPose;
-
-        //loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
-        //loggerTool.add("end", this.t.getEnd());
-        //loggerTool.add("pos", robotPose);
-        Robot.telemetry.add("error", Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)));
-        Robot.telemetry.add("end", t.getEnd());
-        Robot.telemetry.add("pose", robotPose);
-        Robot.telemetry.add("headingError", angle + angleDes);
-        if (Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle + Math.toRadians(angleDes)) < aTolerance) {
-
-            if (counter > 10) {
-                currentState = State.FINISHED;
+        if (count % 3 == 0) {
+            Pose2d positions = t.getEnd();
+            double xerror = (positions.getX() + robotPose.getY());
+            double yerror = (positions.getY() - robotPose.getX());
+            double px = trajRunnerSpeedMult * xerror;
+            double py = -1.0 * trajRunnerSpeedMult * yerror;
+            if (px > 1.0) {
+                px = 1.0;
+            } else if (px < -1.0) {
+                px = -1.0;
+            }
+            if (py > 1.0) {
+                py = 1.0;
+            } else if (py < -1.0) {
+                py = -1.0;
             }
 
-            counter++;
-            l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
-            loggerTool.setCurrentTrajectoryNull();
 
-        } else {
-            counter = 0;
+            double x = px + dxy * (xerror - xerrorLast);
+            double y = py - dxy * (yerror - yerrorLast);
+            Robot.telemetry.add("y", y);
+            Robot.telemetry.add("yD", dxy * (yerror - yerrorLast) * -1.0);
+            Robot.telemetry.add("x", x);
+            Robot.telemetry.add("xD", dxy * (xerror - xerrorLast));
+
+            yerrorLast = yerror;
+            xerrorLast = xerror;
+            //l.setWeightedDrivePowers(new Pose2d(0,0,0));
+
+            l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * x - Math.sin(Constants.angle) * y, x * Math.sin(Constants.angle) + y * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
+            Constants.lastPose = Constants.robotPose;
+
+            //loggerTool.add("error", Math.sqrt(Math.pow(robotPose.getX() - this.t.getEnd().getY(), 2) + Math.pow(robotPose.getY() - this.t.getEnd().getX(), 2)));
+            //loggerTool.add("end", this.t.getEnd());
+            //loggerTool.add("pos", robotPose);
+            Robot.telemetry.add("error", Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)));
+            Robot.telemetry.add("end", t.getEnd());
+            Robot.telemetry.add("pose", robotPose);
+            Robot.telemetry.add("headingError", angle + angleDes);
+            if (Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle + Math.toRadians(angleDes)) < aTolerance) {
+
+                if (counter > 10) {
+                    currentState = State.FINISHED;
+                    loggerTool.setCurrentTrajectoryNull();
+                }
+
+                counter++;
+                l.setWeightedDrivePowers(new Pose2d(0, 0, 0));
+
+            } else {
+                counter = 0;
+            }
+
+            loggerTool.add("last correct mode run", System.currentTimeMillis());
         }
-
-        loggerTool.add("last correct mode run", System.currentTimeMillis());
+        count++;
     }
 
     private double getAngleValue(Pose2d velocityNormalized) {
