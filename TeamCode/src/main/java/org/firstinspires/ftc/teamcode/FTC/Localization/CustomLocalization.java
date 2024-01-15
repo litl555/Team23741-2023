@@ -47,11 +47,11 @@ public class CustomLocalization {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pose = startPose;
         Constants.robotPose = startPose;
-        leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
-        rightPod = new OdometryModule(hardwareMap.dcMotor.get("back"));
+        leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));// con 0
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("back")); // con 3
         rightPod.reverse();
 
-        backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
+        backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear")); // con 1
 
         backPod.reset();
         rightPod.reset();

@@ -44,7 +44,7 @@ public class ClawSubsystem extends SubsystemBase {
 
     public ClawState currentState = ClawState.UNKNOWN;
 
-    private final double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .63;
+    private final double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .7;
     public void update(ClawState state) {
         currentState = state;
 
