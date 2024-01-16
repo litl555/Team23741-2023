@@ -99,6 +99,9 @@ public class DangerousTeleop extends CommandOpMode {
                             new GoToHeight(lift, claw, 0)
                         ));
                     } else schedule(new GoToHeight(lift, claw, liftLevel));
+
+                    // currently we have a preset to go straight to ground level when picking up from tray, so update liftLevel to reflect that change
+                    if (Robot.level == 0 && liftLevel == 1) liftLevel = 2;
                 })
             );
 

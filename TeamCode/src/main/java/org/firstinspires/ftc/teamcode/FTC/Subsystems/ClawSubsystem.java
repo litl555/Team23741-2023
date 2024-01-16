@@ -13,21 +13,22 @@ public class ClawSubsystem extends SubsystemBase {
     // 4 -> board row 2
     // 5 -> board row 3...
     private static final ArmWristPos[] rowDelta = new ArmWristPos[] {
-            new ArmWristPos(0.025, -0.0070555),
-            new ArmWristPos(0.025, -0.0070555),
-            new ArmWristPos(-0.02055, 0.039444),
+            new ArmWristPos(0, -0.010555),
+            new ArmWristPos(0, -0.010555),
+            new ArmWristPos(-0.03055, 0.043),
         // ----
-            new ArmWristPos(-0.07777, 0.066111),
-            new ArmWristPos(-0.08833, 0.056111),
-            new ArmWristPos(-0.04777, 0.056111),
-            new ArmWristPos(-0.08833, 0.056111),
-            new ArmWristPos(-0.04777, 0.056111),
-            new ArmWristPos(-0.04777, 0.056111),
+            new ArmWristPos(-0.07777, 0.083333), // --- 0.083333
+            new ArmWristPos(-0.08833, 0.083333),
+            new ArmWristPos(-0.07777, 0.083333),
+            new ArmWristPos(-0.08833, 0.083333),
+            new ArmWristPos(-0.07777, 0.083333),
+            new ArmWristPos(-0.08833, 0.083333),
     };
 
     public static final ArmWristPos hangDelta = new ArmWristPos(-0.1549999, 0.205);
-    public static final ArmWristPos clearPixelIntake = new ArmWristPos(0.03, 0);
-    public static final ArmWristPos zero = new ArmWristPos(0.5777777, 0.3577777);
+    public static final ArmWristPos clearPixelIntake = new ArmWristPos(0, -0.02055);
+    //public static final ArmWristPos zero = new ArmWristPos(0.5777777, 0.3577777);
+    public static final ArmWristPos zero = new ArmWristPos(0.5777777, 0.33666);
 
     public ClawState currentState = ClawState.UNKNOWN;
 
