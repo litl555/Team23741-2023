@@ -1,20 +1,9 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.BasicPID;
-import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficients;
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.controller.PIDFController;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.Range;
-
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 
 @Config
 public class LiftSubsystem extends SubsystemBase {
@@ -66,8 +55,8 @@ public class LiftSubsystem extends SubsystemBase {
     }
 
     public void setPower(double power) {
-        Robot.motor1.setPower(power);
-        Robot.motor2.setPower(power);
+        Robot.liftLeft.setPower(-power);
+        Robot.liftRight.setPower(power);
     }
 
     public double read() { return Robot.liftEncoder.getCurrentPosition(); }

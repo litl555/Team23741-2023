@@ -49,15 +49,12 @@ public class DangerousTeleop extends CommandOpMode {
 
         // GAMEPAD 1 CONTROLS
         {
-            pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
-                Robot.drone = hardwareMap.servo.get("drone");
-                Robot.drone.setPosition(1);
-            }));
-
             pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = true));
             pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = false));
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
+
+
 
             schedule(new RunCommand(() -> {
                 double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
@@ -65,6 +62,12 @@ public class DangerousTeleop extends CommandOpMode {
 
                 if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
                 else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
+
+                double rt1 = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double lt1 = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+
+                if (rt1 != 0.0 || lt1 != 0.0) Robot.drone.setPower(lt1 - rt1);
+                else if (Robot.drone.getPower() != 0) Robot.drone.setPower(0);
             }));
         }
 
@@ -120,7 +123,10 @@ public class DangerousTeleop extends CommandOpMode {
             );
 
             // toggling how strong the lift should be during hang
-            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> lift.hangOverride = true));
+            pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> {
+                lift.hangOverride = true;
+                claw.enableHang();
+            }));
             pad2.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> lift.hangOverride = false));
 
             schedule(new RunCommand(() -> {
@@ -147,7 +153,7 @@ public class DangerousTeleop extends CommandOpMode {
             );*/
         }
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         drive.setDefaultCommand(new Drive(drive, gamepad1));
@@ -161,8 +167,10 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
         Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
         Robot.telemetry.add("LIFT POSITION", lift.read());
+        Robot.telemetry.add("LIFT POWER LEFT", Robot.liftLeft.getPower());
+        Robot.telemetry.add("LIFT POWER RIGHT", Robot.liftRight.getPower());
 
-        Robot.l.update();
+        Robot.customLocalization.update();
         CommandScheduler.getInstance().run();
         Robot.telemetry.update();
     }

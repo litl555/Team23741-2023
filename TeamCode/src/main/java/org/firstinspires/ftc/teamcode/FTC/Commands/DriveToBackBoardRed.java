@@ -33,22 +33,22 @@ public class DriveToBackBoardRed extends CommandBase {
     @Override
     public void initialize() {
         trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX(), end.getY()), new Pose2d(-1540, -10), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
         switch (position) {
             case left:
                 trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + leftPos, end.getY() + leftClose), new Pose2d(0, 0), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, 180.0 + angleLeft, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0 + angleLeft, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
                 break;
             case middle:
                 trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + middleOffsetRight, end.getY()), new Pose2d(500, 0), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
                 break;
             case right:
                 trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + rightPos, end.getY()), new Pose2d(0, 00), new Pose2d(-1900, 1600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
                 break;
 

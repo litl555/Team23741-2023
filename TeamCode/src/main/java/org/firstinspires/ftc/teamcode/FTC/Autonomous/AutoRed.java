@@ -50,7 +50,7 @@ public class AutoRed extends LinearOpMode {
         CommandScheduler.getInstance().reset();
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
-        Robot.lift = lift;
+        Robot.liftSubsystem = lift;
 
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
 
@@ -58,7 +58,7 @@ public class AutoRed extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
@@ -96,21 +96,20 @@ public class AutoRed extends LinearOpMode {
             }
             last = pipeline.propPos;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.claw, 2)), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPENONE), new WaitCommand(250), new ParallelCommandGroup(new GoToHeight(lift, Robot.claw, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.claw, ClawSubsystem.ClawState.OPEN), new WaitCommand(250), new ParallelCommandGroup(new DriveToStackRedStageDoor(), new SequentialCommandGroup(
-                new GoToHeight(Robot.lift, Robot.claw, 1),
+        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.clawSubsystem, 2)), new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE), new WaitCommand(250), new ParallelCommandGroup(new GoToHeight(lift, Robot.clawSubsystem, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN), new WaitCommand(250), new ParallelCommandGroup(new DriveToStackRedStageDoor(), new SequentialCommandGroup(
+                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                 new WaitCommand(200),
-                new GoToHeight(Robot.lift, Robot.claw, 0)
+                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0)
         )), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor()));
         pipeline.destroy();
 
         while (opModeIsActive() && !isStopRequested()) {
 //            Robot.telemetry.add("loop",(Constants.toSec(Constants.getTime())-Constants.lastTime1)*1000.0);
 //            Constants.lastTime1=Constants.toSec(Constants.getTime());
-            Robot.autoLiftPos = (int) lift.read();
 
             Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
             Robot.telemetry.add("pose", Constants.robotPose);
-            Robot.l.update();
+            Robot.customLocalization.update();
             Robot.telemetry.update();
 
             CommandScheduler.getInstance().run();

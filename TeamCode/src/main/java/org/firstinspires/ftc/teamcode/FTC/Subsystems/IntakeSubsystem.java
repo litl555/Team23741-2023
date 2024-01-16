@@ -1,13 +1,10 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
-import android.util.Log;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
@@ -68,19 +65,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
             case INTAKE:
                 Robot.setIntakePower(intakePower);
-                Robot.intakeRoller.setPower(-1.0);
+                Robot.bottomRoller.setPower(-1.0);
                 break;
             case IDLE:
                 telemetry.add("powering off", "yes");
                 Robot.setIntakePower(0.0);
-                Robot.intakeRoller.setPower(0.0);
+                Robot.bottomRoller.setPower(0.0);
                 telemetry.add("power2", Robot.intakeMotor.getPower());
                 break;
             case OUTTAKE:
                 telemetry.add("powerset1", powerset);
                 telemetry.add("outtaking", "outtaking");
                 Robot.setIntakePower(outtakePower);
-                Robot.intakeRoller.setPower(1.0);
+                Robot.bottomRoller.setPower(1.0);
                 break;
 
         }
@@ -88,7 +85,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void setPower(double power) {
         Robot.intakeMotor.setPower(power);
-        Robot.intakeRoller.setPower(power);
+        Robot.bottomRoller.setPower(power);
 
     }
 
@@ -97,18 +94,18 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public double getDistance() {
-        return (Robot.distance.getDistance(DistanceUnit.MM));
+        return (Robot.intakeDist.getDistance(DistanceUnit.MM));
     }
 
     public void setIntakePosition(IntakePosition pos) {
         switch (pos) {
             case UP:
-                Robot.intakeServo1.setPosition(1.0 - intakeUpPosition);
-                Robot.intakeServo2.setPosition(intakeUpPosition);
+                Robot.droptakeRight.setPosition(1.0 - intakeUpPosition);
+                Robot.droptakeLeft.setPosition(intakeUpPosition);
                 break;
             case DOWN:
-                Robot.intakeServo1.setPosition(1.0 - intakeDownPosition);
-                Robot.intakeServo2.setPosition(intakeDownPosition);
+                Robot.droptakeRight.setPosition(1.0 - intakeDownPosition);
+                Robot.droptakeLeft.setPosition(intakeDownPosition);
                 break;
         }
     }

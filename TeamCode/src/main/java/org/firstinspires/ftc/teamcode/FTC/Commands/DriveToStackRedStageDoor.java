@@ -16,8 +16,8 @@ public class DriveToStackRedStageDoor extends CommandBase {
     public void initialize() {
         Trajectory t = new Trajectory(new Pose2d(800, 1145), new Pose2d(250, -1500), new Pose2d(-2000, -0), new Pose2d(0, -00), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
         Trajectory t1 = new Trajectory(new Pose2d(250, -1500), new Pose2d(800, 1145), new Pose2d(0, 0), new Pose2d(2000, -0), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-        tr1 = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t1, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        tr1 = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t1, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
         tr.start();
     }
 

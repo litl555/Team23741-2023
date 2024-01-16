@@ -17,19 +17,19 @@ public class ParkBlue extends SequentialCommandGroup {
         addCommands(
                 new ParallelCommandGroup(
                         new SequentialCommandGroup(
-                                new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(0.0, -.3, 0))),
+                                new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0.0, -.3, 0))),
                                 new WaitCommand(200),
-                                new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(.3, 0.0, 0))),
+                                new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(.3, 0.0, 0))),
                                 new WaitCommand(4000),
-                                new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(0.0, .3, 0.0))),
+                                new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0.0, .3, 0.0))),
                                 new WaitCommand(2000),
-                                new InstantCommand(() -> Robot.l.setWeightedDrivePowers(new Pose2d(0.0, 0.0, 0.0)))
+                                new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0.0, 0.0, 0.0)))
 
                         ),
                         new SequentialCommandGroup(
-                                new GoToHeight(Robot.lift, Robot.claw, 1),
+                                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                                 new WaitCommand(200),
-                                new GoToHeight(Robot.lift, Robot.claw, 0)
+                                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0)
                         )
 
 

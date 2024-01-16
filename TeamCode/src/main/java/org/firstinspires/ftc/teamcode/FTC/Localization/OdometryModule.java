@@ -11,6 +11,7 @@ public class OdometryModule {
 
     public OdometryModule(DcMotor encoder) {
         this.encoder = encoder;
+        encoder.setDirection((DcMotorSimple.Direction.FORWARD));
 
         this.ticks = 0;
     }

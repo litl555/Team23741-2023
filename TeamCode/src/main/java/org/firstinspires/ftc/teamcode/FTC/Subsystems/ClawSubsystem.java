@@ -1,21 +1,8 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armGround;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armIntake;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armPlace1;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.armPlace2;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristClearing;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristGround;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristIntake;
-import static org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants.wristPlacing;
-
 import com.arcrobotics.ftclib.command.SubsystemBase;
 
 import org.firstinspires.ftc.teamcode.FTC.TeleOp.ArmWristPos;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class ClawSubsystem extends SubsystemBase {
     // this matches LiftSubsystem values
@@ -50,20 +37,20 @@ public class ClawSubsystem extends SubsystemBase {
 
         switch (state) {
             case OPEN:
-                Robot.clawBottom.setPosition(openPos);
-                Robot.clawTop.setPosition(openPos);
+                Robot.clawBlack.setPosition(openPos);
+                Robot.clawWhite.setPosition(openPos);
                 break;
             case CLOSED:
-                Robot.clawTop.setPosition(closedPosTop);
-                Robot.clawBottom.setPosition(closedPosBot);
+                Robot.clawWhite.setPosition(closedPosTop);
+                Robot.clawBlack.setPosition(closedPosBot);
                 break;
             case OPENONE:
-                Robot.clawBottom.setPosition(openPos);
-                Robot.clawTop.setPosition(closedPosBot);
+                Robot.clawBlack.setPosition(openPos);
+                Robot.clawWhite.setPosition(closedPosBot);
                 break;
             case HALFCLOSE:
-                Robot.clawTop.setPosition(halfPos);
-                Robot.clawBottom.setPosition(halfPos);
+                Robot.clawWhite.setPosition(halfPos);
+                Robot.clawBlack.setPosition(halfPos);
                 break;
         }
 
@@ -72,13 +59,13 @@ public class ClawSubsystem extends SubsystemBase {
     public void updateArmWristPos(int index) { rowDelta[index].apply(this); }
 
     public void setWrist(double angle) {
-        Robot.wrist1.setPosition(angle);
-        Robot.wrist2.setPosition(angle);
+        Robot.wristRed.setPosition(angle);
+        Robot.wristBlue.setPosition(angle);
     }
 
     public void setArm(double angle) {
-        Robot.arm1.setPosition(angle);
-        Robot.arm2.setPosition(angle);
+        Robot.armYellow.setPosition(angle);
+        Robot.armGreen.setPosition(angle);
     }
 
     public void enableHang() { hangDelta.apply(this); }

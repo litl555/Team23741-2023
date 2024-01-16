@@ -4,15 +4,9 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
@@ -22,7 +16,6 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @TeleOp
 public class ClawArmBoundTester extends CommandOpMode {
@@ -44,7 +37,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         IntakeSubsystem intake = new IntakeSubsystem(tele);
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, tele);
-        Robot.robotInit(hardwareMap, l, tele, intake, claw);
+        Robot.robotInit(hardwareMap, l, tele, intake, claw, lift);
 
         //Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -106,15 +99,15 @@ public class ClawArmBoundTester extends CommandOpMode {
     @Override
     public void run() {
         CommandScheduler.getInstance().run();
-        Robot.telemetry.add("Arm1", Robot.arm1.getPosition());
-        Robot.telemetry.add("Arm2", Robot.arm2.getPosition());
-        Robot.telemetry.add("Wrist1", Robot.wrist1.getPosition());
-        Robot.telemetry.add("Wrist2", Robot.wrist2.getPosition());
+        Robot.telemetry.add("Arm1", Robot.armYellow.getPosition());
+        Robot.telemetry.add("Arm2", Robot.armGreen.getPosition());
+        Robot.telemetry.add("Wrist1", Robot.wristRed.getPosition());
+        Robot.telemetry.add("Wrist2", Robot.wristBlue.getPosition());
 
-        Robot.telemetry.add("delta Arm1", Robot.arm1.getPosition() - ClawSubsystem.zero.arm);
-        Robot.telemetry.add("delta Arm2", Robot.arm2.getPosition() - ClawSubsystem.zero.arm);
-        Robot.telemetry.add("delta Wrist1", Robot.wrist1.getPosition() - ClawSubsystem.zero.wrist);
-        Robot.telemetry.add("delta Wrist2", Robot.wrist2.getPosition() - ClawSubsystem.zero.wrist);
+        Robot.telemetry.add("delta Arm1", Robot.armYellow.getPosition() - ClawSubsystem.zero.arm);
+        Robot.telemetry.add("delta Arm2", Robot.armGreen.getPosition() - ClawSubsystem.zero.arm);
+        Robot.telemetry.add("delta Wrist1", Robot.wristRed.getPosition() - ClawSubsystem.zero.wrist);
+        Robot.telemetry.add("delta Wrist2", Robot.wristBlue.getPosition() - ClawSubsystem.zero.wrist);
         Robot.telemetry.add("Speed", speed);
 
         Robot.telemetry.add("lift level", lift.read());

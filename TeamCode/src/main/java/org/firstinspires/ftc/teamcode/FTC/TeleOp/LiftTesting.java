@@ -34,7 +34,7 @@ public class LiftTesting extends CommandOpMode {
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
         register(drive);
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         GamepadEx gamepadEx2 = new GamepadEx(gamepad2);
         gamepadEx2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(new ParallelCommandGroup(
                 new InstantCommand(() -> levelCount--),

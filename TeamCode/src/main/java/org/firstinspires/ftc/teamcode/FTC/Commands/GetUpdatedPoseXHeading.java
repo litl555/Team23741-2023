@@ -12,7 +12,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 public class GetUpdatedPoseXHeading extends InstantCommand {
 
     public GetUpdatedPoseXHeading(CustomLocalization l) {
-        super(
+        /*super(
                 () -> {
                     double backDropPos = 1500;
                     double angle = Math.atan2(Robot.distance2.getDistance(DistanceUnit.MM) - Robot.distance1.getDistance(DistanceUnit.MM), Robot.distanceBetween);
@@ -21,7 +21,7 @@ public class GetUpdatedPoseXHeading extends InstantCommand {
                     Constants.angle = angle;
                     l.pose = new Pose2d(backDropPos - x, l.pose.getY(), angle);
                 }
-        );
+        );*/
     }
 
 }

@@ -27,7 +27,7 @@ public class TestAuto extends CommandOpMode {
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         schedule(new PlacePixelOnBackboardF(TeamPropPosition.left));
     }
 }

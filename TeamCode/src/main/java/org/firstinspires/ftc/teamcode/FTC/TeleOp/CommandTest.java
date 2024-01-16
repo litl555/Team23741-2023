@@ -36,6 +36,7 @@ public class CommandTest extends CommandOpMode {
     SampleMecanumDrive dr;
     @Override
     public void initialize() {
+        /*
         telemetry1 = new LoggerTool(telemetry);
         Constants.angle = 0;
         IntakeSubsystem intakeSubsystem = new IntakeSubsystem(telemetry1);
@@ -58,7 +59,7 @@ public class CommandTest extends CommandOpMode {
 //        intakeSubsystem.setDefaultCommand(new RunCommand(()->intakeSubsystem.update(IntakeSubsystem.IntakePowerSetting.IDLE),intakeSubsystem));
         gamepadEx1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(() -> schedule(new DriveToBackdrop(driveSubsystem, telemetry1).interruptOn(() -> gamepad1.b).whenFinished(() -> Robot.isBusy = false)));
         driveSubsystem.setDefaultCommand(new Drive(driveSubsystem, gamepad1));
-
+        */
     }
 
     @Override

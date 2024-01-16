@@ -12,60 +12,97 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 
 @Config
 public class Robot {
-    public static DcMotor motor1, motor2, intakeMotor, liftEncoder;
-    public static Servo clawBottom, clawTop, intakeServo1, intakeServo2, wrist1, wrist2, arm1, arm2,drone;
+    // ==============================================================
+    // +                           CONFIG                           =
+    // ==============================================================
+    // main 4 movement motors are controlled by CustomLocalization
 
-    public static CRServo intakeRoller;
-    public static DistanceSensor distance;
-    public static DistanceSensor distance1;
-    public static DistanceSensor distance2;//this is left of robot
+    // lift
+    public static DcMotor liftLeft, liftRight;
+    public static DcMotor liftEncoder;
+
+    // intake
+    public static CRServo bottomRoller;
+    public static DistanceSensor intakeDist;
+    public static DcMotor intakeMotor;
+    public static Servo droptakeRight, droptakeLeft;
+
+    // arm
+    public static Servo armYellow, armGreen;
+
+    // wrist
+    public static Servo wristRed, wristBlue;
+
+    // claw
+    public static Servo clawBlack, clawWhite;
+
+    public static DcMotor drone;
+
+    // ==============================================================
+    // +                       SHARED VALUES                        =
+    // ==============================================================
+    public static int level = 0; // this is automatically controlled by GoToHeight, so dont touch it!
+    public static boolean forwardIsForward = true;
     public static boolean pastTruss = false;
-    public static CustomLocalization l;
-    public static HardwareMap hardwareMap;
     public static double distanceBetween = 96.0 * 2;
     public static double t = 0.0;
-    public static int autoLiftPos=0;
     public static boolean isBusy = false;
-    public static LoggerTool telemetry;
-    public static LiftSubsystem lift;
-    public static ClawSubsystem claw;
-    public static boolean forwardIsForward=true;
-    public static IntakeSubsystem intakeSubsystem;
-    public static int level = 0; // this is automatically controlled by GoToHeight, so dont touch it!
 
-    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem _intakeSubsystem, ClawSubsystem _claw) {
-        l = _l;
-        intakeRoller = hardwareMap.crservo.get("intakeRoller");
-        //lift=_lift;
-        intakeSubsystem = _intakeSubsystem;
-        liftEncoder = hardwareMap.dcMotor.get("rightFront");
+    // ==============================================================
+    // +                         SUBSYSTEMS                         =
+    // ==============================================================
+    public static CustomLocalization customLocalization;
+    public static LoggerTool telemetry;
+    public static HardwareMap hardwareMap;
+    public static ClawSubsystem clawSubsystem;
+    public static LiftSubsystem liftSubsystem; // TODO
+    public static IntakeSubsystem intakeSubsystem;
+
+
+    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
+        customLocalization = _l;
+        clawSubsystem = _claw;
+        liftSubsystem = _lift;
+        intakeSubsystem = intake;
+        telemetry = _telemetry;
+        Robot.hardwareMap = hardwareMap;
+
+        // lift
+        liftEncoder = hardwareMap.dcMotor.get("liftLeft");
+        liftLeft = hardwareMap.dcMotor.get("liftLeft");
+        liftRight = hardwareMap.dcMotor.get("liftRight");
+
+        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        claw = _claw;
-        telemetry = _telemetry;
-        Robot.hardwareMap = hardwareMap;
-        distance1 = hardwareMap.get(DistanceSensor.class, "dist1");
-        distance2 = hardwareMap.get(DistanceSensor.class, "dist2");
-
+        // intake
+        bottomRoller = hardwareMap.crservo.get("bottomRoller");
+        intakeDist = hardwareMap.get(DistanceSensor.class, "intakeDist");
         intakeMotor = Robot.hardwareMap.dcMotor.get("intake");
-        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        arm1 = Robot.hardwareMap.servo.get("arm1");
-        arm2 = Robot.hardwareMap.servo.get("arm2");
-        wrist1 = Robot.hardwareMap.servo.get("wrist1");
-        wrist2 = Robot.hardwareMap.servo.get("wrist2");
-        intakeServo1 = hardwareMap.servo.get("intakeServo1");
-        intakeServo2 = hardwareMap.servo.get("intakeServo2");
-        motor1 = hardwareMap.dcMotor.get("lift1"); // control 2
-        motor2 = hardwareMap.dcMotor.get("lift2"); // expansion 3
-        motor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        motor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        clawTop = hardwareMap.get(Servo.class, "clawTop");
-        clawBottom = hardwareMap.get(Servo.class, "clawBottom");
-        //distance = hardwareMap.get(DistanceSensor.class, "distance");
 
-        // have to manually reset values because ftc dashboard (i think?) causes static vars to stay across runs
+        droptakeRight = hardwareMap.servo.get("droptakeRight");
+        droptakeLeft = hardwareMap.servo.get("droptakeLeft");
+
+        intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        // arm
+        armYellow = Robot.hardwareMap.servo.get("armYellow");
+        armGreen = Robot.hardwareMap.servo.get("armGreen");
+
+        // wrist
+        wristRed = Robot.hardwareMap.servo.get("wristRed");
+        wristBlue = Robot.hardwareMap.servo.get("wristBlue");
+
+        // claw
+        clawWhite = hardwareMap.servo.get("clawWhite");
+        clawBlack = hardwareMap.servo.get("clawBlack");
+
+        drone = hardwareMap.dcMotor.get("drone");
+
+        // reset static variables where needed
         level = 0;
     }
 

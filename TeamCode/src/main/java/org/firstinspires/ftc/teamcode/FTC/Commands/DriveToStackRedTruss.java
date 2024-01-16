@@ -30,11 +30,11 @@ public class DriveToStackRedTruss extends CommandBase {
         Trajectory t3 = new Trajectory(new Pose2d(800, -1500 - stackClose), new Pose2d(900, 900), new Pose2d(-2270, 00), new Pose2d(2490, -00), new Pose2d(0, 0), new Pose2d(0, 0), false, false);
         Trajectory t4 = new Trajectory(new Pose2d(900, 900), new Pose2d(864, 1145), new Pose2d(0, 00), new Pose2d(0, -00), new Pose2d(0, 0), new Pose2d(0, 0), false, true);
 
-        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-        tr1 = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t1, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-        TrajectoryRunner tr2 = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t2, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-        TrajectoryRunner tr3 = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t3, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-        TrajectoryRunner tr4 = new TrajectoryRunner(Robot.hardwareMap, Robot.l, t4, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        tr1 = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t1, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        TrajectoryRunner tr2 = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t2, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        TrajectoryRunner tr3 = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t3, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        TrajectoryRunner tr4 = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, t4, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
         ArrayList<TrajectoryRunner> trs = new ArrayList<>();
         trs.add(tr);
@@ -51,7 +51,7 @@ public class DriveToStackRedTruss extends CommandBase {
 
         mtr.update();
         if (mtr.currentT == 4 && !first) {
-            CommandScheduler.getInstance().schedule(new GoToHeight(Robot.lift, Robot.claw, 4));
+            CommandScheduler.getInstance().schedule(new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 4));
             first = true;
         }
         if (mtr.finished) {

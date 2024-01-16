@@ -31,24 +31,24 @@ public class DriveToSpikeStripBlue extends CommandBase {
     @Override
     public void initialize() {
 
-        Pose2d startPose = new Pose2d(Robot.l.getPoseEstimate().getY() * -1.0, Robot.l.getPoseEstimate().getX(), 0);
+        Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
 
         switch (pos) {
             case left:
                 trajectory = new Trajectory(startPose, endPos3, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos3.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos3.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
             case middle:
                 trajectory = new Trajectory(startPose, endPos2, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos2.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos2.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
             case right:
                 trajectory = new Trajectory(startPose, endPos1, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos1.getHeading()+headingRight, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos1.getHeading()+headingRight, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
             case undefined:
                 trajectory = new Trajectory(startPose, endPos1, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.l, trajectory, endPos1.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos1.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
         }
         tr.start();
