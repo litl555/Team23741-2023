@@ -69,15 +69,15 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
     }
 
     @Override
-    public Mat processFrame(Mat input) {
-        Imgproc.cvtColor(input, input, Imgproc.COLOR_RGB2YCrCb);
+    public Mat processFrame(Mat _input) {
+        Mat input = new Mat();
+        Imgproc.cvtColor(_input, input, Imgproc.COLOR_RGB2YCrCb);
 
         //if (isRed) Core.inRange(input, new Scalar(25, 160, 0), new Scalar(255, 255, 150), input);
         //else Core.inRange(input, new Scalar(5, 0, 150), new Scalar(255, 125, 255), input);
 
         if (isRed) Core.inRange(input, new Scalar(redY_lower, redCr_lower, redCb_lower), new Scalar(redY_upper, redCr_upper, redCb_upper), input);
         else Core.inRange(input, new Scalar(blueY_lower, blueCr_lower, blueCb_lower), new Scalar(blueY_upper, blueCr_upper, blueCb_upper), input);
-
 
         Imgproc.dilate(input, input, dilateKernel);
 
@@ -105,12 +105,13 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
             ArrayList<MatOfPoint> toDraw = new ArrayList<>();
 
             toDraw.add(cnts.get(bestCntInd));
-            Imgproc.drawContours(input, toDraw, -1, new Scalar(255, 0, 0));
+            Imgproc.drawContours(_input, toDraw, -1, new Scalar(0, 0, 0), -1);
 
             telemetry.add("Detected prop", "true");
         } else telemetry.add("Detected prop", "false");
 
         telemetry.add("Biggest area", biggestArea);
+        telemetry.add("Detecting", isRed ? "red" : "blue");
 
         int centerLine = 200;
 
@@ -120,25 +121,27 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
             Moments m = Imgproc.moments(bestCurve);
             Point p = new Point(m.m10 / (m.m00 + 1e-5), m.m01 / (m.m00 + 1e-5));
 
-            Imgproc.circle(input, p, 5, new Scalar(255, 0, 0));
+            Imgproc.circle(_input, p, 7, new Scalar(255, 255, 255), -1);
 
             if (p.y < centerLine) propPos = TeamPropPosition.middle;
             else propPos = TeamPropPosition.right;
             telemetry.add("y", p.y);
         }
 
-        Imgproc.line(input, new Point(0, centerLine), new Point(1280, centerLine), new Scalar(255, 255, 0));
-        Imgproc.putText(input, "middle", new Point(720, centerLine / 2), 1, 3, new Scalar(255, 255, 0));
-        Imgproc.putText(input, "right", new Point(720, centerLine + centerLine / 2), 1, 3, new Scalar(255, 255, 0));
+        Imgproc.line(_input, new Point(0, centerLine), new Point(1280, centerLine), new Scalar(255, 255, 0));
+        Imgproc.putText(_input, "middle", new Point(720, centerLine / 2), 1, 3, new Scalar(255, 255, 0));
+        Imgproc.putText(_input, "right", new Point(720, centerLine + centerLine / 2), 1, 3, new Scalar(255, 255, 0));
 
-        Bitmap bitmap = Bitmap.createBitmap(input.cols(), input.rows(), Bitmap.Config.RGB_565);
-        Utils.matToBitmap(input, bitmap);
+        Bitmap bitmap = Bitmap.createBitmap(_input.cols(), _input.rows(), Bitmap.Config.RGB_565);
+        Utils.matToBitmap(_input, bitmap);
         FtcDashboard.getInstance().sendImage(bitmap);
 
         for (int i = 0; i < cnts.size(); i++) cnts.get(i).release();
         hierarchy.release();
 
-        return input;
+        input.release();
+
+        return _input;
     }
 
     public void destroy() {
