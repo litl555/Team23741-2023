@@ -31,7 +31,9 @@ public class Robotcentric2 extends LinearOpMode {
             l.setWeightedDrivePowers(new Pose2d(gamepad1.left_stick_x, gamepad1.left_stick_y, Math.pow(gamepad1.right_stick_x, 3)));
             l.update();
             Robot.telemetry.add("angle", Constants.angle);
-            Robot.telemetry.add("angle1", Constants.robotPose.getHeading());
+            Robot.telemetry.add("heading", Constants.robotPose.getHeading());
+            Robot.telemetry.add("x", l.getPoseEstimate().getX());
+            Robot.telemetry.add("y", l.getPoseEstimate().getY());
 
             Robot.telemetry.update();
             for (LynxModule hub : allHubs) {

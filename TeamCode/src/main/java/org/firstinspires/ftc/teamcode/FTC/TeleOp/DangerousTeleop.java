@@ -54,8 +54,6 @@ public class DangerousTeleop extends CommandOpMode {
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
 
-
-
             schedule(new RunCommand(() -> {
                 double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
                 double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
@@ -139,21 +137,6 @@ public class DangerousTeleop extends CommandOpMode {
                 if (Math.abs(y) > 0.2) lift.setPower(-y);
                 else lift.setPower(0);
             }));
-
-            /*
-            pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(
-                new InstantCommand(() -> liftLevel = 3)
-            );
-
-            pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenHeld(
-                new InstantCommand(() -> lift.setTargetPos(lift.read() - 10))
-            );
-
-            pad2.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whenPressed(
-                new InstantCommand(() -> {Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                })
-            );*/
         }
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);

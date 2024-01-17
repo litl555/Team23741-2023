@@ -47,8 +47,8 @@ public class CustomLocalization {
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         pose = startPose;
         Constants.robotPose = startPose;
-        leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
-        rightPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
+        leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("drone"));
         rightPod.reverse();
 
         backPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
@@ -147,9 +147,14 @@ public class CustomLocalization {
     }
 
     public void setMotorPowers(double fl, double fr, double bl, double br) {
-        leftRear.setPower(bl);
-        leftFront.setPower(fl);
-        rightFront.setPower(fr);
-        rightRear.setPower(br);
+        //leftRear.setPower(bl);
+        //leftFront.setPower(fl);
+        //rightFront.setPower(fr);
+        //rightRear.setPower(br);
+
+        rightRear.setPower(bl);
+        rightFront.setPower(fl);
+        leftFront.setPower(fr);
+        leftRear.setPower(br);
     }
 }

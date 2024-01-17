@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot.liftEncoder;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -45,75 +46,92 @@ public class AutoRed extends LinearOpMode {
     // RED BACKBOARD SIDE
     @Override
     public void runOpMode() throws InterruptedException {
+        CommandScheduler.getInstance().reset();
 
         LoggerTool telemetry1 = new LoggerTool(telemetry);
-        CommandScheduler.getInstance().reset();
         LiftSubsystem lift = new LiftSubsystem();
         ClawSubsystem claw = new ClawSubsystem();
-        Robot.liftSubsystem = lift;
-
         IntakeSubsystem intake = new IntakeSubsystem(telemetry1);
-
-        //SampleMecanumDrive dr = new SampleMecanumDrive(hardwareMap);
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
-        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
-
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
 
-
         waitForStart();
 
-        GamepadEx pad1 = new GamepadEx(gamepad1);
+        //Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
 
-        /*
-        pad1.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new liftUpTime(lift, claw, liftRiseTime, liftRiseSpeed));
-        pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP)
-                .whenPressed(new InstantCommand(() -> lift.setPower(liftControlSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
-        pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN)
-                .whenPressed(new InstantCommand(() -> lift.setPower(-liftControlSpeed)))
-                .whenReleased(new InstantCommand(() -> lift.setPower(0)));
-
-        pad1.getGamepadButton(GamepadKeys.Button.A)
-                .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
-        pad1.getGamepadButton(GamepadKeys.Button.B)
-                .whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.OPEN)));
-        */
+        // detect team prop
+        int totalCount = 0;
         int similarityCount = 0;
         TeamPropPosition last = TeamPropPosition.undefined;
         while (similarityCount < 10) {
-            if (last != pipeline.propPos || pipeline.propPos == TeamPropPosition.undefined) {
-                similarityCount = 0;
-            } else {
-                similarityCount++;
-            }
+            if (last != pipeline.propPos || pipeline.propPos == TeamPropPosition.undefined) similarityCount = 0;
+            else similarityCount++;
+
             last = pipeline.propPos;
+
+            totalCount++;
+
+            if (totalCount > 250) break;
         }
-        CommandScheduler.getInstance().schedule(new SequentialCommandGroup(new ParallelCommandGroup(new DriveToSpikeStripRed(pipeline.propPos), new GoToHeight(lift, Robot.clawSubsystem, 2)), new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE), new WaitCommand(250), new ParallelCommandGroup(new GoToHeight(lift, Robot.clawSubsystem, 3), new DriveToBackBoardRed(pipeline.propPos)), new RamBoard(), new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN), new WaitCommand(250), new ParallelCommandGroup(new DriveToStackRedStageDoor(), new SequentialCommandGroup(
-                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
-                new WaitCommand(200),
-                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0)
-        )), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor(), new DriveToStackRedStageDoor()));
-        pipeline.destroy();
+
+        last = TeamPropPosition.middle;
+
+        CommandScheduler.getInstance().schedule(
+            new SequentialCommandGroup(
+                // go to spike strip
+                new ParallelCommandGroup(
+                    new DriveToSpikeStripRed(last),
+                    new GoToHeight(lift, Robot.clawSubsystem, 1)),
+                // drop pixel
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
+                new WaitCommand(250),
+                // go to board
+                new ParallelCommandGroup(
+                    new GoToHeight(lift, Robot.clawSubsystem, 3),
+                    new DriveToBackBoardRed(last)),
+                // put pixel on board
+                new RamBoard(),
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                new WaitCommand(250),
+                // park
+                new ParallelCommandGroup(
+                    new DriveToStackRedStageDoor(),
+                    new InstantCommand(pipeline::destroy),
+                    // reset lift
+                    new SequentialCommandGroup(
+                        new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
+                        new WaitCommand(200),
+                        new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
+                // make sure were in the fucking corner
+                new SequentialCommandGroup(
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor(),
+                    new DriveToStackRedStageDoor()
+                ))
+        );
 
         while (opModeIsActive() && !isStopRequested()) {
-//            Robot.telemetry.add("loop",(Constants.toSec(Constants.getTime())-Constants.lastTime1)*1000.0);
-//            Constants.lastTime1=Constants.toSec(Constants.getTime());
-
-            Robot.telemetry.add("Detected prop pos from auto", pipeline.propPos);
+            Robot.telemetry.add("Detected prop pos from auto", last);
             Robot.telemetry.add("pose", Constants.robotPose);
             Robot.customLocalization.update();
             Robot.telemetry.update();
 
             CommandScheduler.getInstance().run();
-            //lift.periodic();
         }
     }
 }

@@ -25,6 +25,10 @@ public class DriveToSpikeStripRed extends CommandBase {
     public Pose2d endPos2 = new Pose2d(840.479 + middleOffset, 269.194 + middleYOffset, 90.0);
     public Pose2d endPos1 = new Pose2d(772.279 - leftOffset, 213.441 + leftYOffset, 2.0);
 
+    public static double _middle_x_offset = 0;
+    public static double _middle_y_offset = 0;
+    public static double _middle_rot_offset = 0;
+
     public DriveToSpikeStripRed(TeamPropPosition pos) {
         this.pos = pos;
     }
@@ -39,7 +43,7 @@ public class DriveToSpikeStripRed extends CommandBase {
                 trajectory = new Trajectory(startPose, endPos3, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
                 tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos3.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
-            case middle:
+            case middle: // -730 4
                 trajectory = new Trajectory(startPose, endPos2, new Pose2d(0.0, 400.0), new Pose2d(-400.0, -500.0), new Pose2d(0.0, 0.0), new Pose2d(0.0, 0.0), true, true);
                 tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, endPos2.getHeading(), TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
