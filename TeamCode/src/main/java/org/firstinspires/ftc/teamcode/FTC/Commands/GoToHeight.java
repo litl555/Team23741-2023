@@ -72,7 +72,6 @@ public class GoToHeight extends ParallelCommandGroup {
                     new InstantCommand(),
                     () -> Robot.level == 0
                 ),
-
                 // 2
                 new ConditionalCommand(
                     new SequentialCommandGroup(
@@ -95,10 +94,9 @@ public class GoToHeight extends ParallelCommandGroup {
                     new InstantCommand(),
                     () -> (newLevel == 0 || newLevel == 1)
                 ),
-
                 // 4
                 new InstantCommand(() -> {
-                    // hack, if were picking up pixel we dont want to stop at top of tray
+                    // if were picking up pixel we dont want to stop at top of tray
                     if (Robot.level == 0 && newLevel == 1) claw.updateArmWristPos(2);
                     else claw.updateArmWristPos(newLevel);
                 }),

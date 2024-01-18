@@ -48,11 +48,12 @@ public class LoggerTool {
 
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
-        dash.sendTelemetryPacket(p);
+
+        FtcDashboard.getInstance().sendTelemetryPacket(p);
 
         p = new TelemetryPacket();
+        telemetry.addData("updated on", System.currentTimeMillis());
         telemetry.update();
-
     }
 
     public void setCurrentTrajectory(TrajectoryInterface trajectory) {
@@ -68,13 +69,14 @@ public class LoggerTool {
     }
 
     private void drawRobot(Pose2d pose) {
+        if (true) return; // for some reason this breaks everything?
         pose = new Pose2d(pose.getY() / 25.4, -pose.getX() / 25.4, pose.getHeading());
         p.fieldOverlay().setStroke("red");
         DashboardUtil.drawRobot(p.fieldOverlay(), pose);
-
     }
 
     private void drawRobot() {
+        if (true) return;
         p.fieldOverlay().setStroke("blue");
         DashboardUtil.drawRobot(p.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
     }

@@ -54,7 +54,6 @@ public class DriveToSpikeStripRed extends CommandBase {
                 break;
         }
         tr.start();
-
     }
 
     @Override

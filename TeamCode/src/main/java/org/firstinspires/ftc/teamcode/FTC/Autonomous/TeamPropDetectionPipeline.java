@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.BoardDetectionPipeline;
