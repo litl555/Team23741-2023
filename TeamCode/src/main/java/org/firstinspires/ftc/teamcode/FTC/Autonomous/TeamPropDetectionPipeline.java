@@ -132,6 +132,8 @@ public class TeamPropDetectionPipeline extends OpenCvPipeline {
         Imgproc.putText(_input, "middle", new Point(720, centerLine / 2), 1, 3, new Scalar(255, 255, 0));
         Imgproc.putText(_input, "right", new Point(720, centerLine + centerLine / 2), 1, 3, new Scalar(255, 255, 0));
 
+        Imgproc.putText(_input, "Detected " + (isRed ? "red" : "blue") + " at " + propPos.toString(), new Point(50, 600), 1, 3, isRed ? new Scalar(255, 0, 0) : new Scalar(0, 0, 255), 7);
+
         Bitmap bitmap = Bitmap.createBitmap(_input.cols(), _input.rows(), Bitmap.Config.RGB_565);
         Utils.matToBitmap(_input, bitmap);
         FtcDashboard.getInstance().sendImage(bitmap);

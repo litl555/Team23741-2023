@@ -14,7 +14,7 @@ public class ClawSubsystem extends SubsystemBase {
     // 5 -> board row 3...
     private static final ArmWristPos[] rowDelta = new ArmWristPos[] {
             new ArmWristPos(0, -0.010555),
-            new ArmWristPos(0, -0.010555),
+            new ArmWristPos(0, -0.02),
             new ArmWristPos(-0.03055, 0.043),
         // ----
             new ArmWristPos(-0.07777, 0.083333), // --- 0.083333

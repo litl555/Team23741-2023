@@ -47,6 +47,8 @@ public class Robot {
     public static double distanceBetween = 96.0 * 2;
     public static double t = 0.0;
     public static boolean isBusy = false;
+    public static final double width = 412.7; // mm, drivetrain plate to other drivetrain plate
+    public static final double length = 440.63; // mm, intake roller to back odo pod u channel
 
     // ==============================================================
     // +                         SUBSYSTEMS                         =

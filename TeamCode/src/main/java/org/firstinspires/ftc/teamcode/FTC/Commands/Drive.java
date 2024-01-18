@@ -21,12 +21,14 @@ public class Drive extends CommandBase {
     @Override
     public void execute() {
         if (!Robot.isBusy) {
-            if(Robot.forwardIsForward) {
-                drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
-            }
-            else{
-                drive.l.setWeightedDrivePowers(new Pose2d(-gamepad.left_stick_x, -gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
-
+            if (gamepad.left_bumper || gamepad.right_bumper) {
+                if (gamepad.right_bumper) drive.l.setMotorPowers(0.5, -0.5, -0.5, 0.5);
+                else if (gamepad.left_bumper) drive.l.setMotorPowers(-0.5, 0.5, 0.5, -0.5);
+                //if (gamepad.left_bumper) drive.l.setWeightedDrivePowers(new Pose2d(1, 0, 0));
+                //else if (gamepad.right_bumper) drive.l.setWeightedDrivePowers(new Pose2d(-1, 0, 0));
+            } else {
+                if (Robot.forwardIsForward) drive.l.setWeightedDrivePowers(new Pose2d(gamepad.left_stick_x, gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
+                else drive.l.setWeightedDrivePowers(new Pose2d(-gamepad.left_stick_x, -gamepad.left_stick_y, Math.signum(gamepad.right_stick_x) * Math.pow(gamepad.right_stick_x, 4) / 3.0 * 2.0));
             }
         }
     }

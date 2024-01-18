@@ -14,6 +14,12 @@ import org.firstinspires.ftc.teamcode.FTC.TeleOp.ArmWristPos;
 import org.firstinspires.ftc.teamcode.FTC.TeleOp.TeleOpConstants;
 
 public class GoToHeight extends ParallelCommandGroup {
+
+    // _{general structure id}_{nth appearance of statement}_{type of command/value}
+    public static double _1_1_wait = 500;
+    public static double _1_2_wait = 500;
+    public static double _1_1_liftPos = 400;
+
     // this will automatically sync robot.level, so dont touch it!
     public GoToHeight(LiftSubsystem lift, ClawSubsystem claw, int newLevel) { // why are we passing these in? Robot.lift and Robot.claw?
         /*
@@ -84,7 +90,7 @@ public class GoToHeight extends ParallelCommandGroup {
                             () -> (newLevel == 0 && Robot.level == 1)
                         ),
 
-                        new WaitCommand(400) // hopefully this allows claw to move
+                        new WaitCommand(600) // hopefully this allows claw to move
                     ),
                     new InstantCommand(),
                     () -> (newLevel == 0 || newLevel == 1)

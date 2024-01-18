@@ -49,28 +49,29 @@ public class DangerousTeleop extends CommandOpMode {
 
         // GAMEPAD 1 CONTROLS
         {
+            drive.setDefaultCommand(new Drive(drive, gamepad1));
+
             pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = true));
             pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = false));
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
             pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
 
+            //pad1.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> Robot.drone.setPower(1)));
+
             schedule(new RunCommand(() -> {
-                double rt = pad2.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-                double lt = pad2.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
+                double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
+                double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
                 if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
                 else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
-
-                double rt1 = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
-                double lt1 = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
-
-                if (rt1 != 0.0 || lt1 != 0.0) Robot.drone.setPower(lt1 - rt1);
-                else if (Robot.drone.getPower() != 0) Robot.drone.setPower(0);
             }));
         }
 
         // GAMEMPAD 2 CONTROLS
         {
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new InstantCommand(() -> Robot.drone.setPower(1)));
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenInactive(new InstantCommand(() -> Robot.drone.setPower(0)));
+
             pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new InstantCommand(() -> {
                     liftLevel++;
@@ -140,10 +141,6 @@ public class DangerousTeleop extends CommandOpMode {
         }
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
-        Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Robot.liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        drive.setDefaultCommand(new Drive(drive, gamepad1));
-
     }
 
     @Override

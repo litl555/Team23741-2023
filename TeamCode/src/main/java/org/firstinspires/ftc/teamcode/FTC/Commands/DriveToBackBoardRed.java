@@ -16,13 +16,13 @@ public class DriveToBackBoardRed extends CommandBase {
     Trajectory trajectory;
     boolean finished = false;
     TrajectoryRunner tr;
-    public static double leftPos = -200.0;
-    public static double leftClose = 20.0;
-    public static double angleLeft = 0;
-    public static double rightPos = 180.0;
-    public static double rightClose = -10.0;
-    public static double middleOffsetRight = 20.0;
-    MultipleTrajectoryRunner mtr;
+    public static double leftXOffset = -230, leftYOffset = 0;
+    public static double middleXOffset = 20, middleYOffset = 0;
+    public static double rightXOffset = 120, rightYOffset = 0;
+    // THESE ARE NOT OFFSETS!
+    public static double vel_leftX = 0, vel_leftY = 600;
+    public static double vel_middleX = 0, vel_middleY = 600;
+    public static double vel_rightX = -1117, vel_rightY = 564;
     public static Pose2d end = new Pose2d(844, 1145);
     TeamPropPosition position; //1=left 2=center 3=right
 
@@ -32,28 +32,23 @@ public class DriveToBackBoardRed extends CommandBase {
 
     @Override
     public void initialize() {
-        trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX(), end.getY()), new Pose2d(-1540, -10), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        Pose2d initPos = new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX());
 
         switch (position) {
             case left:
-                trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + leftPos, end.getY() + leftClose), new Pose2d(0, 0), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0 + angleLeft, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-
-                break;
-            case middle:
-                trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + middleOffsetRight, end.getY()), new Pose2d(500, 0), new Pose2d(0, 600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
+                trajectory = new Trajectory(initPos, new Pose2d(end.getX() + leftXOffset, end.getY() + leftYOffset), new Pose2d(0, 0), new Pose2d(vel_leftX, vel_leftY), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
                 tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-
+                break;
+            case undefined:
+            case middle:
+                trajectory = new Trajectory(initPos, new Pose2d(end.getX() + middleXOffset, end.getY() + middleYOffset), new Pose2d(500, 0), new Pose2d(vel_middleX, vel_middleY), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
+                tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
                 break;
             case right:
-                trajectory = new Trajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(end.getX() + rightPos, end.getY()), new Pose2d(0, 00), new Pose2d(-1900, 1600), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
+                trajectory = new Trajectory(initPos, new Pose2d(end.getX() + rightXOffset, end.getY() + rightYOffset), new Pose2d(0, 0), new Pose2d(vel_rightX, vel_rightY), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
                 tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, trajectory, 180.0, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
-
                 break;
-
         }
-
 
         tr.start();
 

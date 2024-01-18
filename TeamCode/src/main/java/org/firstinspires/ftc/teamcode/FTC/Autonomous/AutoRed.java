@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToParkingRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedStageDoor;
 import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedTruss;
@@ -29,19 +30,18 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.R;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
 @Autonomous
 public class AutoRed extends LinearOpMode {
-    TeamPropPosition pos;
+    // TODO: implement below
+    //public static Pose2d startPos = new Pose2d(609.6 - Robot.width / 2.0, -1828.8 + Robot.length / 2.0, -Math.PI / 2.0);
+    // center of tile (field coords): 60 in, 12 in
+    // corner (towards backboard, aligning wall): 72 in, 24 in
+
     public static Pose2d startPos = new Pose2d(300, -1500, -Math.PI / 2.0);
-
-    public static double liftControlSpeed = 0.3;
-    public static long liftRiseTime = 1000;
-    public static double liftRiseSpeed = 0.3;
-
-    private boolean hasStartedAuto = false;
 
     // RED BACKBOARD SIDE
     @Override
@@ -59,6 +59,8 @@ public class AutoRed extends LinearOpMode {
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
+
+        telemetry1.add("Initialization", "done");
 
         waitForStart();
 
@@ -79,14 +81,15 @@ public class AutoRed extends LinearOpMode {
             if (totalCount > 250) break;
         }
 
-        last = TeamPropPosition.middle;
+        pipeline.destroy();
+        cam.stopStreaming();
 
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
                 // go to spike strip
                 new ParallelCommandGroup(
                     new DriveToSpikeStripRed(last),
-                    new GoToHeight(lift, Robot.clawSubsystem, 1)),
+                    new GoToHeight(lift, Robot.clawSubsystem, 2)),
                 // drop pixel
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(250),
@@ -96,33 +99,18 @@ public class AutoRed extends LinearOpMode {
                     new DriveToBackBoardRed(last)),
                 // put pixel on board
                 new RamBoard(),
+                new WaitCommand(250),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
                 new WaitCommand(250),
-                // park
                 new ParallelCommandGroup(
-                    new DriveToStackRedStageDoor(),
-                    new InstantCommand(pipeline::destroy),
                     // reset lift
                     new SequentialCommandGroup(
-                        new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
-                        new WaitCommand(200),
-                        new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                // make sure were in the fucking corner
-                new SequentialCommandGroup(
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor(),
-                    new DriveToStackRedStageDoor()
-                ))
+                        new WaitCommand(1_000),
+                        new SequentialCommandGroup(
+                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
+                            new WaitCommand(200),
+                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
+                    new DriveToParkingRed()))
         );
 
         while (opModeIsActive() && !isStopRequested()) {
