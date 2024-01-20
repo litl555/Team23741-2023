@@ -41,6 +41,7 @@ public class IntakeSubsystem extends SubsystemBase {
         if (Constants.robotPose.getY() > 100) Robot.pastTruss = true;
         else Robot.pastTruss = false;
 
+        /*
         double distance = Robot.intakeDist.getDistance(DistanceUnit.MM);
 
         if (distance < intakeDistThreshold) intakeDistFrameCount++;
@@ -54,6 +55,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
         telemetry.add("intake distance", distance);
         telemetry.add("intake pixel pass count", pixelPassCount);
+         */
     }
 
     public void update(IntakePowerSetting powerset) { // TODO: remove, just call setPower()
