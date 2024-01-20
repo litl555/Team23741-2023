@@ -156,8 +156,7 @@ public class TrajectoryRunner {
             if (Math.sqrt(sum.dot(sum)) > 1.0) {
                 sum = sum.div(Math.sqrt(sum.dot(sum)));
             }
-            //sum = sum.times(speed);
-            sum = sum.times(0.6);
+            sum = sum.times(speed);
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));

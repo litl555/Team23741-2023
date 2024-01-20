@@ -49,6 +49,7 @@ public class Robot {
     public static boolean isBusy = false;
     public static final double width = 412.7; // mm, drivetrain plate to other drivetrain plate
     public static final double length = 440.63; // mm, intake roller to back odo pod u channel
+    public static boolean onlyLogImportant = false;
 
     // ==============================================================
     // +                         SUBSYSTEMS                         =
@@ -62,6 +63,7 @@ public class Robot {
 
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
+        onlyLogImportant = true;
         isBusy = false;
 
         customLocalization = _l;

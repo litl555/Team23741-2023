@@ -34,6 +34,13 @@ public class LoggerTool {
     }
 
     public void add(String name, Object output) {
+        if (!Robot.onlyLogImportant) {
+            p.put(name, output);
+            telemetry.addData(name, output);
+        }
+    }
+
+    public void addImportant(String name, Object output) {
         p.put(name, output);
         telemetry.addData(name, output);
     }
@@ -41,7 +48,6 @@ public class LoggerTool {
     public void update() {
         drawPoseHistory();
         if (!getTrajectoryNull()) drawTrajectory();
-        drawRobot();
         if (current != null) {
             drawRobot(current.equation(Robot.t));
             Vector2d vec = current.getCentripetalForceVector(Robot.t);

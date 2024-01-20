@@ -118,10 +118,13 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
                     new DriveToParkingRed(-180))
         ));
+        double lastTime = System.currentTimeMillis();
 
         while (opModeIsActive() && !isStopRequested()) {
-            Robot.telemetry.add("Detected prop pos from auto", last);
-            Robot.telemetry.add("pose", Constants.robotPose);
+            double currentTime = System.currentTimeMillis() + 0.1; // dont question it
+            Robot.telemetry.addImportant("Detected prop pos from auto", last);
+            Robot.telemetry.addImportant("FPS", 1.0 / (currentTime - lastTime));
+
             Robot.customLocalization.update();
             Robot.telemetry.update();
 
