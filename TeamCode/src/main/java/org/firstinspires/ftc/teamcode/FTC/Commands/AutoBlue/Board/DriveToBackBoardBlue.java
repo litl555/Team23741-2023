@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FTC.Commands;
+package org.firstinspires.ftc.teamcode.FTC.Commands.AutoBlue.Board;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -22,7 +22,7 @@ public class DriveToBackBoardBlue extends CommandBase {
     public static double rightCloseBlue = -10.0;
     public static double angleRight=-8.0;
     MultipleTrajectoryRunner mtr;
-    public static Pose2d end = new Pose2d(844, 1145);
+    public static Pose2d end = new Pose2d(844, 1145); // TODO
     TeamPropPosition position; //1=left 2=center 3=right
 
     public DriveToBackBoardBlue(TeamPropPosition position) {

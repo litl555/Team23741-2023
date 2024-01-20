@@ -1,6 +1,5 @@
-package org.firstinspires.ftc.teamcode.FTC.Commands;
+package org.firstinspires.ftc.teamcode.FTC.Commands.AutoBlue;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -9,21 +8,20 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
-@Config
-public class DriveToParkingRed extends CommandBase {
+public class DriveToParkingBlue extends CommandBase {
     private boolean finished = false;
     private Trajectory traj = null;
     private TrajectoryRunner tr = null;
 
-    public static double xOffset = -50, yOffset = -50;
-    public static double vel_x = 500, vel_y = 2397;
+    public static double xOffset = 50, yOffset = -50;
+    public static double vel_x = -500, vel_y = 2397;
     @Override
     public void initialize() {
         Pose2d initPos = new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX());
 
         // were moving to the same destination so just use the same start pos for all of them
-        traj = new Trajectory(initPos, new Pose2d(1500 + xOffset, 1500 + yOffset), new Pose2d(0, 0), new Pose2d(vel_x, vel_y), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
-        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, traj, 180, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
+        traj = new Trajectory(initPos, new Pose2d(-1500 + xOffset, 1500 + yOffset), new Pose2d(0, 0), new Pose2d(vel_x, vel_y), new Pose2d(0, 0), new Pose2d(0, 0), true, true);
+        tr = new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, traj, -180, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
 
         tr.start();
     }

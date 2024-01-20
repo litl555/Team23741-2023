@@ -156,7 +156,8 @@ public class TrajectoryRunner {
             if (Math.sqrt(sum.dot(sum)) > 1.0) {
                 sum = sum.div(Math.sqrt(sum.dot(sum)));
             }
-            sum = sum.times(speed);
+            //sum = sum.times(speed);
+            sum = sum.times(0.6);
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
@@ -252,6 +253,7 @@ public class TrajectoryRunner {
             Robot.telemetry.add("end", t.getEnd());
             Robot.telemetry.add("pose", robotPose);
             Robot.telemetry.add("headingError", angle + angleDes);
+            Robot.telemetry.add("angle heading error", Math.abs(Constants.angle + Math.toRadians(angleDes)));
             if (Math.sqrt(Math.pow(-robotPose.getX() + t.getEnd().getY(), 2) + Math.pow(robotPose.getY() + t.getEnd().getX(), 2)) < xyTolerance && Math.abs(Constants.angle + Math.toRadians(angleDes)) < aTolerance) {
 
                 if (counter > 10) {

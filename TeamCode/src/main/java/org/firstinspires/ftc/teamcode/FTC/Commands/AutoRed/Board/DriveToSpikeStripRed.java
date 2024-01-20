@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.FTC.Commands;
+package org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -24,11 +24,6 @@ public class DriveToSpikeStripRed extends CommandBase {
     public Pose2d rightPos = new Pose2d(1106.858 + rightXOffset, 523.861 + rightYOffset, 90.0);
     public Pose2d middlePos = new Pose2d(840.479 + middleXOffset, 269.194 + middleYOffset, 90.0);
     public Pose2d leftPos = new Pose2d(772.279 + leftXOffset, 213.441 + leftYOffset, 2.0);
-
-    //private final double inToMm = 25.4;
-    //public static double _middle_x_offset = 20;
-    //public static double _middle_y_offset = 60;
-    //public Pose2d middlePos = new Pose2d(25 * inToMm + Robot.length / 2.0 + 40 + _middle_x_offset, 16 * inToMm + _middle_y_offset, 90);
 
     public DriveToSpikeStripRed(TeamPropPosition pos) {
         this.pos = pos;

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
@@ -9,14 +10,12 @@ import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRedTruss;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToParkingRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRedTruss;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToBackBoardRedTruss;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveToParkingRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToSpikeStripRedTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
+import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
@@ -78,16 +77,28 @@ public class AutoRedTruss extends LinearOpMode {
         pipeline.destroy();
         cam.stopStreaming();
 
+        intake.pixelPassCount = 2;
+        // TODO: add back in two distance sensors, then during board side auto after we place the pixel on board and
+        // and prepare to cycle, use the distance sensors to check if there is still a robot on the wall side of the truss
+
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
-                // go to spike strip
+                // go to spike strip and place
                 new ParallelCommandGroup(
-                    new DriveToSpikeStripRedTruss(last),
-                    new GoToHeight(lift, Robot.clawSubsystem, 2)),
-                // drop pixel
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
-                new WaitCommand(250),
+                    new DriveToSpikeStripRedTruss(last,
+                        new SequentialCommandGroup(
+                            new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                            new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
+                    new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE)),
+                // now pick up an extra pixel
+                new ParallelCommandGroup(
+                    new SequentialCommandGroup(
+                        new GoToHeight(lift, claw, 1),
+                        new WaitCommand(250),
+                        new GoToHeight(lift, claw, 0)),
+                    new IntakePixelFromStack(1, 5_000, -180)),
                 // move to back board
+                new InstantCommand(() -> lift.setTargetPos(100)),
                 new ParallelCommandGroup(
                     new DriveToBackBoardRedTruss(last),
                     new SequentialCommandGroup(
@@ -105,7 +116,7 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                             new WaitCommand(200),
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                    new DriveToParkingRed())
+                    new DriveToParkingRed(-180))
         ));
 
         while (opModeIsActive() && !isStopRequested()) {

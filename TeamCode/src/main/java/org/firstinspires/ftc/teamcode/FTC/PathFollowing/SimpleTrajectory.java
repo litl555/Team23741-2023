@@ -22,4 +22,6 @@ public class SimpleTrajectory {
     public TrajectoryRunner getTrajectoryRunner(Trajectory traj) {
         return new TrajectoryRunner(Robot.hardwareMap, Robot.customLocalization, traj, heading, TrajectoryRunner.HeadingType.ConstantHeadingVelo, Robot.telemetry);
     }
+
+    public double getHeading() { return heading; }
 }

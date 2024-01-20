@@ -20,8 +20,18 @@ public class GoToHeight extends ParallelCommandGroup {
     public static double _1_2_wait = 500;
     public static double _1_1_liftPos = 400;
 
+    private ClawSubsystem.ClawState pickupStateOverride = ClawSubsystem.ClawState.CLOSED;
+    public GoToHeight(LiftSubsystem lift, ClawSubsystem claw, int newLevel) {
+        initialize(lift, claw, newLevel);
+    }
+    public GoToHeight(LiftSubsystem lift, ClawSubsystem claw, int newLevel, ClawSubsystem.ClawState pickupStateOverride) {
+        // java doesnt have default parameters??????????????
+        this.pickupStateOverride = pickupStateOverride;
+        initialize(lift, claw, newLevel);
+    }
+
     // this will automatically sync robot.level, so dont touch it!
-    public GoToHeight(LiftSubsystem lift, ClawSubsystem claw, int newLevel) { // why are we passing these in? Robot.lift and Robot.claw?
+    private void initialize(LiftSubsystem lift, ClawSubsystem claw, int newLevel) {
         /*
          * general structure
          * (1)
@@ -53,7 +63,7 @@ public class GoToHeight extends ParallelCommandGroup {
                         // grab pixel
                         new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
                         new WaitCommand(500),
-                        new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                        new InstantCommand(() -> claw.update(pickupStateOverride)),
                         new WaitCommand(500),
 
                         // extract pixel

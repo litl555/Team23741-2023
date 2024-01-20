@@ -1,12 +1,36 @@
 package org.firstinspires.ftc.teamcode.FTC.PathFollowing;
 
+import com.arcrobotics.ftclib.command.Command;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+
+import java.util.HashMap;
+
 public class ActualMultiTrajRunner {
     private Trajectory[] trajectories;
     private TrajectoryRunner[] trajectoryRunners;
-    private boolean finished = false, started = false;
+    private SimpleTrajectory[] trajectoryMetadata;
+    private HashMap<Integer, MultiTrajEvent> events = new HashMap<>();
+    private boolean finished = false, started = false, paused = false;
     private int currentlyRunningIndex = 0;
 
     public ActualMultiTrajRunner(SimpleTrajectory[] traj) {
+        initialize(traj);
+    }
+
+    // checkpoint system to allow us to run arbitrary commands once the robot completes a certain amount of trajectories
+    // note that the scheduled checkpoint will run after the respective trajectory finishes
+    // ie command at checkpoint 0 runs after the first (0 based index due to arrays) trajectory finishes
+    // | tr 0 | cp 0 | tr 1 | cp 1 ...
+    public ActualMultiTrajRunner(SimpleTrajectory[] traj, MultiTrajEvent[] events) {
+        for (MultiTrajEvent event : events) this.events.put(event.checkpoint, event);
+        initialize(traj);
+    }
+
+    private void initialize(SimpleTrajectory[] traj) {
         trajectories = new Trajectory[traj.length];
         trajectoryRunners = new TrajectoryRunner[traj.length];
 
@@ -14,29 +38,37 @@ public class ActualMultiTrajRunner {
             SimpleTrajectory st = traj[i];
 
             // true false | false false | false true
-            Trajectory t = st.getTrajectory(i == 0, i == traj.length - 1);
-            TrajectoryRunner tr = st.getTrajectoryRunner(t);
+            boolean start = (i == 0) || events.containsKey(i - 1);
+            boolean end = (i == traj.length - 1) || events.containsKey(i);
+            Trajectory t = st.getTrajectory(start, end);
 
             trajectories[i] = t;
-            trajectoryRunners[i] = tr;
         }
+
+        this.trajectoryMetadata = traj;
     }
 
     public void update() {
-        if (finished || !started) return;
+        if (finished || !started || paused) return;
 
         TrajectoryRunner currentTr = trajectoryRunners[currentlyRunningIndex];
-        currentTr.update();
+        if (currentTr.currentState != TrajectoryRunner.State.PRESTART) currentTr.update();
 
         if (currentTr.currentState == TrajectoryRunner.State.FINISHED) {
             if (currentlyRunningIndex == trajectoryRunners.length - 1) {
                 finished = true;
-                return;
+                Robot.isBusy = false;
             } else {
                 currentTr.currentState = TrajectoryRunner.State.PRESTART;
                 currentlyRunningIndex++;
 
-                trajectoryRunners[currentlyRunningIndex].start();
+                if (events.containsKey(currentlyRunningIndex - 1)) {
+                    CommandScheduler.getInstance().schedule(
+                        new SequentialCommandGroup(
+                            events.get(currentlyRunningIndex - 1).event,
+                            new InstantCommand(this::notifyUnpause)));
+                    paused = true;
+                } else startTrajectoryRunner(currentlyRunningIndex);
             }
         }
     }
@@ -44,10 +76,22 @@ public class ActualMultiTrajRunner {
     public void start() {
         if (started || finished) return;
 
+        Robot.isBusy = true;
         started = true;
-        trajectoryRunners[currentlyRunningIndex].start();
+        paused = false;
+        startTrajectoryRunner(currentlyRunningIndex);
     }
 
     public boolean hasFinished() { return finished; }
     public boolean isRunning() { return started && !finished; }
+    public boolean isPaused() { return paused; }
+    public void notifyUnpause() {
+        startTrajectoryRunner(currentlyRunningIndex);
+        paused = false;
+    }
+
+    private void startTrajectoryRunner(int id) {
+        trajectoryRunners[id] = trajectoryMetadata[id].getTrajectoryRunner(trajectories[id]);
+        trajectoryRunners[id].start();
+    }
 }

@@ -53,10 +53,8 @@ public class DangerousTeleop extends CommandOpMode {
 
             pad1.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = true));
             pad1.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> Robot.forwardIsForward = false));
-            pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
-            pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
-
-            //pad1.getGamepadButton(GamepadKeys.Button.B).whenPressed(new InstantCommand(() -> Robot.drone.setPower(1)));
+            pad1.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.UP)));
+            pad1.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(new InstantCommand(() -> intake.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN)));
 
             schedule(new RunCommand(() -> {
                 double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);

@@ -62,6 +62,8 @@ public class Robot {
 
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
+        isBusy = false;
+
         customLocalization = _l;
         clawSubsystem = _claw;
         liftSubsystem = _lift;

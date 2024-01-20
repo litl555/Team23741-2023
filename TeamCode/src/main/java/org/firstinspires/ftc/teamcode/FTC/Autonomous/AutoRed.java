@@ -1,24 +1,17 @@
 package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
-import static org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot.liftEncoder;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackBoardRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToParkingRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToSpikeStripRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedStageDoor;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToStackRedTruss;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToBackBoardRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveToParkingRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToSpikeStripRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
@@ -30,7 +23,6 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.R;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
@@ -110,7 +102,7 @@ public class AutoRed extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                             new WaitCommand(200),
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                    new DriveToParkingRed()))
+                    new DriveToParkingRed(180)))
         );
 
         while (opModeIsActive() && !isStopRequested()) {
