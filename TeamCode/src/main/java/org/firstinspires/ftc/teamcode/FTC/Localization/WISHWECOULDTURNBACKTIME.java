@@ -39,17 +39,16 @@ public class WISHWECOULDTURNBACKTIME {
     }
 
     public void updateMethod() {
-        rd = rightPod.getDelta();
-        ld = leftPod.getDelta();
-        bd = backPod.getDelta();
+        rightPod.getDelta();
+        leftPod.getDelta();
+        backPod.getDelta();
+        rd = rightPod.tickDeltaMm;
+        ld = leftPod.tickDeltaMm;
+        bd = backPod.tickDeltaMm;
         pose = pose.plus(calculateDeltaPos(rd, ld, bd));
 
 
         Constants.robotPose = pose;
-
-        //rightPod.getPosition();
-
-
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {

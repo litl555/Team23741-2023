@@ -64,9 +64,12 @@ public class CustomLocalization {
     }
 
     public void update() {
+        rd = rightPod.tickDeltaMm;
+        ld = leftPod.tickDeltaMm;
+        bd = backPod.tickDeltaMm;
+
         if (counter == 0) {
             startTime = Constants.toSec(Constants.getTime());
-
         }
         Robot.telemetry.add("running loop", Constants.toSec(Constants.getTime()) - loopStart);
         loopStart = Constants.toSec(Constants.getTime());
@@ -80,12 +83,9 @@ public class CustomLocalization {
         //leftPod.update();
         //Robot.telemetry.add("rightTotal",rightTotal);
         //Robot.telemetry.add("leftTotal",leftTotal);
-        rd = rightPod.getDelta();
-        rightTotal += rd;
 
-        ld = leftPod.getDelta();
+        rightTotal += rd;
         leftTotal += ld;
-        bd = backPod.getDelta();
         backT += bd;
         //calculateDeltaPos(rd,ld,bd);
 
@@ -147,14 +147,6 @@ public class CustomLocalization {
     }
 
     public void setMotorPowers(double fl, double fr, double bl, double br) {
-        //leftRear.setPower(bl);
-        //leftFront.setPower(fl);
-        //rightFront.setPower(fr);
-        //rightRear.setPower(br);
-
-        rightRear.setPower(bl);
-        rightFront.setPower(fl);
-        leftFront.setPower(fr);
-        leftRear.setPower(br);
+        Robot.hardware.setDrivetrain(fl, fr, bl, br);
     }
 }

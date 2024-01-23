@@ -138,7 +138,8 @@ public class DangerousTeleop extends CommandOpMode {
             }));
         }
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift, this);
+        Robot.onlyLogImportant = true;
     }
 
     @Override
@@ -147,11 +148,12 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
         Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
-        Robot.telemetry.add("LIFT POSITION", lift.read());
+        Robot.telemetry.add("LIFT POSITION", Robot.liftEncoder.getCurrentPosition());
         Robot.telemetry.add("LIFT POWER LEFT", Robot.liftLeft.getPower());
         Robot.telemetry.add("LIFT POWER RIGHT", Robot.liftRight.getPower());
 
-        Robot.customLocalization.update();
+        //Robot.customLocalization.update();
+        Robot.updateHardwareThread();
         CommandScheduler.getInstance().run();
         Robot.telemetry.update();
     }

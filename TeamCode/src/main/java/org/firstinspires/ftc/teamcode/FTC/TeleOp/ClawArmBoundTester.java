@@ -37,7 +37,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         IntakeSubsystem intake = new IntakeSubsystem(tele);
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, tele);
-        Robot.robotInit(hardwareMap, l, tele, intake, claw, lift);
+        Robot.robotInit(hardwareMap, l, tele, intake, claw, lift, this);
 
         //Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -110,7 +110,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         Robot.telemetry.add("delta Wrist2", Robot.wristBlue.getPosition() - ClawSubsystem.zero.wrist);
         Robot.telemetry.add("Speed", speed);
 
-        Robot.telemetry.add("lift level", lift.read());
+        Robot.telemetry.add("lift level", Robot.liftEncoder.getCurrentPosition());
         Robot.telemetry.add("lift override", lift.hangOverride);
         Robot.telemetry.update();
 

@@ -32,42 +32,17 @@ public class ClawSubsystem extends SubsystemBase {
 
     public ClawState currentState = ClawState.UNKNOWN;
 
-    private final double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .7;
+    public static final double closedPosTop = 1.0, closedPosBot = 1.0, halfPos = .85, openPos = .7;
     public void update(ClawState state) {
         currentState = state;
-
-        switch (state) {
-            case OPEN:
-                Robot.clawBlack.setPosition(openPos);
-                Robot.clawWhite.setPosition(openPos);
-                break;
-            case CLOSED:
-                Robot.clawWhite.setPosition(closedPosTop);
-                Robot.clawBlack.setPosition(closedPosBot);
-                break;
-            case OPENONE:
-                Robot.clawBlack.setPosition(openPos);
-                Robot.clawWhite.setPosition(closedPosBot);
-                break;
-            case HALFCLOSE:
-                Robot.clawWhite.setPosition(halfPos);
-                Robot.clawBlack.setPosition(halfPos);
-                break;
-        }
-
+        Robot.hardware.setClaw(state);
     }
 
     public void updateArmWristPos(int index) { rowDelta[index].apply(this); }
 
-    public void setWrist(double angle) {
-        Robot.wristRed.setPosition(angle);
-        Robot.wristBlue.setPosition(angle);
-    }
+    public void setWrist(double angle) { Robot.hardware.setWrist(angle); }
 
-    public void setArm(double angle) {
-        Robot.armYellow.setPosition(angle);
-        Robot.armGreen.setPosition(angle);
-    }
+    public void setArm(double angle) { Robot.hardware.setArm(angle); }
 
     public void enableHang() { hangDelta.apply(this); }
 

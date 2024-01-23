@@ -33,19 +33,21 @@ public class LoggerTool {
         this.telemetry = telemetry;
     }
 
-    public void add(String name, Object output) {
+    public synchronized void add(String name, Object output) {
         if (!Robot.onlyLogImportant) {
             p.put(name, output);
             telemetry.addData(name, output);
         }
     }
 
-    public void addImportant(String name, Object output) {
+    public synchronized void addImportant(String name, Object output) {
         p.put(name, output);
         telemetry.addData(name, output);
     }
 
-    public void update() {
+    public synchronized void update() {
+        if (Robot.onlyLogImportant) addImportant("LOGGING INFO", "onlyLogImportant is active");
+
         drawPoseHistory();
         if (!getTrajectoryNull()) drawTrajectory();
         if (current != null) {
@@ -62,7 +64,7 @@ public class LoggerTool {
         telemetry.update();
     }
 
-    public void setCurrentTrajectory(TrajectoryInterface trajectory) {
+    public synchronized void setCurrentTrajectory(TrajectoryInterface trajectory) {
         current = trajectory;
         xvals = new double[100];
         yvals = new double[100];
@@ -91,28 +93,28 @@ public class LoggerTool {
         p.fieldOverlay().fillCircle(pose.getY() / 25.4, -pose.getX() / 25.4, 1);
     }
 
-    private void drawTrajectory() {
+    private synchronized void drawTrajectory() {
         p.fieldOverlay().setStroke("green");
         p.fieldOverlay().strokePolyline(xvals, yvals);
     }
 
-    public void setCurrentTrajectoryNull() {
+    public synchronized void setCurrentTrajectoryNull() {
         xvals = null;
         yvals = null;
     }
 
-    private boolean getTrajectoryNull() {
+    private synchronized boolean getTrajectoryNull() {
         return (xvals == null);
     }
 
-    private void drawPoseHistory() {
+    private synchronized void drawPoseHistory() {
         Canvas c = p.fieldOverlay();
         c.setStroke("red");
         updatePreviousPoseValsList();
         c.strokePolyline(convertListToArray(xPosVals), convertListToArray(yPosVals));
     }
 
-    private void updatePreviousPoseValsList() {
+    private synchronized void updatePreviousPoseValsList() {
         Pose2d rp = new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading()));
         xPosVals.add(0, (double) rp.getX());
         if (xPosVals.size() > 50000) {
@@ -124,6 +126,7 @@ public class LoggerTool {
         }
     }
 
+    // lol .toArray()
     private double[] convertListToArray(ArrayList<Double> list) {
         double[] xArray = new double[list.size()];
 

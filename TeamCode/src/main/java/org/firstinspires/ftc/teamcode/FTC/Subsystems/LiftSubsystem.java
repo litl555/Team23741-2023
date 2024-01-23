@@ -46,7 +46,7 @@ public class LiftSubsystem extends SubsystemBase {
     public void periodic() {
         if (hangOverride) return;
 
-        double controllerPower = pid.calculate(targetPos, read());
+        double controllerPower = pid.calculate(targetPos, Robot.hardware.lastLiftPosition);
         controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
@@ -54,10 +54,5 @@ public class LiftSubsystem extends SubsystemBase {
         setPower(Range.clip(controllerPower + F, -1, 1));
     }
 
-    public void setPower(double power) {
-        Robot.liftLeft.setPower(-power);
-        Robot.liftRight.setPower(power);
-    }
-
-    public double read() { return Robot.liftEncoder.getCurrentPosition(); }
+    public void setPower(double power) { Robot.hardware.setLiftPower(power); }
 }

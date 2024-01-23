@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
+import org.firstinspires.ftc.teamcode.FTC.Threading.HardwareThread;
 
 @Config
 public class Robot {
@@ -17,14 +21,20 @@ public class Robot {
     // ==============================================================
     // main 4 movement motors are controlled by CustomLocalization
 
+    // note that these are made public just in case, but you should really go through .hardware to read/write
+
+    // drivetrain
+    public static DcMotorEx leftFront, leftRear, rightFront, rightRear;
+    public static OdometryModule leftPod, rightPod, backPod;
+
     // lift
-    public static DcMotor liftLeft, liftRight;
-    public static DcMotor liftEncoder;
+    public static DcMotorEx liftLeft, liftRight;
+    public static DcMotorEx liftEncoder;
 
     // intake
     public static CRServo bottomRoller;
     public static DistanceSensor intakeDist;
-    public static DcMotor intakeMotor;
+    public static DcMotorEx intakeMotor;
     public static Servo droptakeRight, droptakeLeft;
 
     // arm
@@ -36,7 +46,7 @@ public class Robot {
     // claw
     public static Servo clawBlack, clawWhite;
 
-    public static DcMotor drone;
+    public static DcMotorEx drone;
 
     // ==============================================================
     // +                       SHARED VALUES                        =
@@ -60,9 +70,12 @@ public class Robot {
     public static ClawSubsystem clawSubsystem;
     public static LiftSubsystem liftSubsystem; // TODO
     public static IntakeSubsystem intakeSubsystem;
+    public static HardwareThread hardware;
+    private static Thread hardwareThread;
+    public static LinearOpMode caller;
 
 
-    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
+    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift, LinearOpMode _caller) {
         onlyLogImportant = true;
         isBusy = false;
 
@@ -73,10 +86,30 @@ public class Robot {
         telemetry = _telemetry;
         Robot.hardwareMap = hardwareMap;
 
+        // drivetrain
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
+        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        leftFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFront.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("drone"));
+        backPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
+
+        rightPod.reverse();
+
+        backPod.reset();
+        rightPod.reset();
+        leftPod.reset();
+
         // lift
-        liftEncoder = hardwareMap.dcMotor.get("liftLeft");
-        liftLeft = hardwareMap.dcMotor.get("liftLeft");
-        liftRight = hardwareMap.dcMotor.get("liftRight");
+        liftEncoder = hardwareMap.get(DcMotorEx.class,"liftLeft");
+        liftLeft = hardwareMap.get(DcMotorEx.class,"liftLeft");
+        liftRight = hardwareMap.get(DcMotorEx.class,"liftRight");
 
         liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -87,7 +120,7 @@ public class Robot {
         // intake
         bottomRoller = hardwareMap.crservo.get("bottomRoller");
         intakeDist = hardwareMap.get(DistanceSensor.class, "intakeDist");
-        intakeMotor = Robot.hardwareMap.dcMotor.get("intake");
+        intakeMotor = hardwareMap.get(DcMotorEx.class,"intake");
 
         droptakeRight = hardwareMap.servo.get("droptakeRight");
         droptakeLeft = hardwareMap.servo.get("droptakeLeft");
@@ -106,10 +139,18 @@ public class Robot {
         clawWhite = hardwareMap.servo.get("clawWhite");
         clawBlack = hardwareMap.servo.get("clawBlack");
 
-        drone = hardwareMap.dcMotor.get("drone");
+        // drone
+        drone = hardwareMap.get(DcMotorEx.class, "drone");
+
+        hardware = new HardwareThread(hardwareMap);
+        hardwareThread = new Thread(hardware, "Hardware Thread");
 
         // reset static variables where needed
         level = 0;
+    }
+
+    public static void updateHardwareThread() {
+        hardwareThread.start();
     }
 
     public static void setIntakePower(double power) {

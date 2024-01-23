@@ -44,7 +44,7 @@ public class AutoRedTruss extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift, this);
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
