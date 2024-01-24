@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
+import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -31,9 +32,8 @@ public class HardwareThread implements Runnable {
     private boolean hasErroredOut = false;
     public AtomicBoolean isRunning = new AtomicBoolean();
 
-    private final ArrayList<Double> avgFps = new ArrayList<>();
+    private final ArrayList<Double> hardawareFps = new ArrayList<>();
     private final double avgFpsLength = 100;
-    private double avgFpsValue = 0;
     private long runCount = 0;
 
     public long timeAtHardwareReadStart = 0, timeAtHardwareReadEnd = 0;
@@ -97,31 +97,14 @@ public class HardwareThread implements Runnable {
             applyQueues();
 
             // timing stuff
-            long endTime = System.currentTimeMillis();
-            long delta = endTime - startTime;
-
             if (runCount % 20 == 0) {
-                double fps = (1000.0 / delta) / avgFpsLength;
-
-                // saturate at start
-                if (avgFps.size() == 0) {
-                    for (int i = 0; i < avgFpsLength; i++) avgFps.add(fps);
-                    avgFpsValue = (1000.0 / delta);
-                }
-
-                avgFpsValue += fps;
-                if (avgFps.size() >= avgFpsLength) {
-                    avgFpsValue -= avgFps.get(0);
-                    avgFps.remove(0);
-                }
-                avgFps.add(fps);
+                long endTime = System.currentTimeMillis();
+                long delta = endTime - startTime;
+                Robot.telemetry.addImportant(new LoggerData("Hardware", formatFps(delta, hardawareFps), "THREAD LENGTH"));
             }
 
-            Robot.telemetry.addImportant(new LoggerData("Hardware",
-                truncate((int) delta, 3) + " ms (" + truncate((int) avgFpsValue, 3) + " Avg FPS)", "THREAD LENGTH"));
-
             if (!isRunning.get()) {
-                Robot.telemetry.addImportant("BIG ERROR", "detected multiple hardware threads running");
+                Robot.telemetry.addImportant("BIG ERROR", "detected multiple hardware threads running " + System.currentTimeMillis());
             }
 
             isRunning.set(false);
@@ -133,6 +116,30 @@ public class HardwareThread implements Runnable {
             Robot.telemetry.addImportant("HARDWARE ERROR STACKTRACE 1", e.getStackTrace()[1]);
             hasErroredOut = true;
         }
+    }
+
+    private double getAverageFps(ArrayList<Double> arr, Double fps) {
+        // first value in arr is the current fps average
+        Double a = fps / avgFpsLength;
+        if (arr.size() != avgFpsLength) {
+            arr.clear();
+            Robot.telemetry.addImportant("cleared", System.currentTimeMillis());
+            arr.add(fps);
+            for (int i = 1; i < avgFpsLength; i++) arr.add(a);
+
+            return fps;
+        } else {
+            arr.set(0, arr.get(0) + a - arr.get(1));
+            arr.remove(1);
+            arr.add(a);
+
+            return arr.get(0);
+        }
+    }
+
+    private String formatFps(double delta, ArrayList<Double> arr) {
+        delta = Math.max(1, delta);
+        return truncate((int) delta, 3) + " ms (" + truncate((int) getAverageFps(arr, 1000.0 / delta), 4) + " FPS)";
     }
 
     private String truncate(int d, int n) { return (d + "").substring(0, Math.min(n, (d + "").length())); }
@@ -201,18 +208,25 @@ public class HardwareThread implements Runnable {
         }
     }
 
+    private ArrayList<Double> hrs = new ArrayList<>();
+    private ArrayList<Double> hre = new ArrayList<>();
+    private ArrayList<Double> ots = new ArrayList<>();
+    private ArrayList<Double> ome = new ArrayList<>();
+
     private void applyDrivetrain(Double[] d) {
         Robot.rightFront.setPower(d[0]);
         Robot.leftFront.setPower(d[1]);
         Robot.rightRear.setPower(d[2]);
         Robot.leftRear.setPower(d[3]);
-        
+
+        // TODO: this is slow (having to sync 4 times), only do this for debugging
         if (Robot.math.isUpdatingOdometry && Robot.isBusy) {
             long t = System.currentTimeMillis();
-            Robot.telemetry.addImportant(new LoggerData("Hardware read start", t - timeAtHardwareReadStart, "ODOMETRY TIMING"));
-            Robot.telemetry.addImportant(new LoggerData("Hardware read end", t - timeAtHardwareReadEnd, "ODOMETRY TIMING"));
-            Robot.telemetry.addImportant(new LoggerData("Odo thread start", t - Robot.math.timeAtThreadCalled, "ODOMETRY TIMING"));
-            Robot.telemetry.addImportant(new LoggerData("Odo math end", t - Robot.math.timeAtCalculationFinished, "ODOMETRY TIMING"));
+
+            Robot.telemetry.addImportant(new LoggerData("Hardware read start", formatFps(t - timeAtHardwareReadStart, hrs), "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Hardware read end",  formatFps(t - timeAtHardwareReadEnd, hre), "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Odo thread start", formatFps(t - Robot.math.timeAtThreadCalled, ots), "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Odo math end", formatFps(t - Robot.math.timeAtCalculationFinished, ome), "ODOMETRY TIMING"));
         }
     }
 

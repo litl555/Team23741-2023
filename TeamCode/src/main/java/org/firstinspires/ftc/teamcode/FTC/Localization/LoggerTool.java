@@ -15,7 +15,10 @@ import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
 
@@ -29,8 +32,8 @@ public class LoggerTool {
     private final ArrayList<Double> yPosVals = new ArrayList<>();
     private double[] xvals;
     private double[] yvals;
-    private TreeMap<String, Object> unsortedData = new TreeMap<>();
-    private TreeMap<String, ArrayList<LoggerData>> sortedData = new TreeMap<>();
+    private HashMap<String, Object> unsortedData = new HashMap<>();
+    private TreeMap<String, HashSet<LoggerData>> sortedData = new TreeMap<>();
     TrajectoryInterface current = null;
     Telemetry telemetry;
 
@@ -54,15 +57,17 @@ public class LoggerTool {
 
     public synchronized void add(LoggerData data) {
         if (!Robot.onlyLogImportant) {
-            if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new ArrayList<>());
-            sortedData.get(data.section).add(data);
+            if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
+            HashSet<LoggerData> s = sortedData.get(data.section);
+            s.remove(data); s.add(data);
             telemetry.addData(data.name, data.value);
         }
     }
 
     public synchronized void addImportant(LoggerData data) {
-        if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new ArrayList<>());
-        sortedData.get(data.section).add(data);
+        if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
+        HashSet<LoggerData> s = sortedData.get(data.section);
+        s.remove(data); s.add(data);
         telemetry.addData(data.name, data.value);
     }
 
@@ -79,25 +84,27 @@ public class LoggerTool {
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
 
-        int lineCount = 30;
+        StringBuilder out = new StringBuilder("<br><br><tt>");
+
+        int lineCount = 60;
         for (String section : sortedData.keySet()) {
             int marker = (lineCount - section.length()) / 2 - 1; // off by one error on odd strings but who cares
-            String header = repeat("=", marker) + " " + section + " " + repeat("=", marker);
-            p.addLine(header);
+            out.append(repeat("=", marker)).append(" ").append(section).append(" ").append(repeat("=", marker)).append("<br>");
 
-            ArrayList<LoggerData> data = sortedData.get(section);
-            data.sort(Comparator.comparingInt(a -> a.order));
-
-            for (LoggerData ld : data) p.put(ld.name, ld.value);
+            HashSet<LoggerData> data = sortedData.get(section);
+            for (LoggerData ld : data) out.append(ld.name).append(": ").append(ld.value).append("<br>");
         }
 
-        p.addLine(repeat("+", lineCount));
-        p.putAll(unsortedData);
+        out.append(repeat("+", lineCount)).append("<br>");
+        for (String key : unsortedData.keySet()) out.append(key).append(": ").append(unsortedData.get(key)).append("<br>");
+
+        out.append("</tt>");
+
+        p.put("DATA", out.toString());
 
         FtcDashboard.getInstance().sendTelemetryPacket(p);
 
         p = new TelemetryPacket();
-        sortedData = new TreeMap<>();
 
         telemetry.addData("Telemetry updated on", System.currentTimeMillis());
         telemetry.update();
