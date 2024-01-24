@@ -12,6 +12,7 @@ public class LiftSubsystem extends SubsystemBase {
 
     public double maxPower = 0.8;
     public boolean hangOverride = false;
+    public double controllerPower = 0;
 
     // in ticks
     // 0 -> intake
@@ -46,12 +47,17 @@ public class LiftSubsystem extends SubsystemBase {
     public void periodic() {
         if (hangOverride) return;
 
-        double controllerPower = pid.calculate(targetPos, Robot.hardware.lastLiftPosition);
-        controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
         Robot.telemetry.add("lift pid power", controllerPower);
         Robot.telemetry.add("lift target pos", targetPos);
 
         setPower(Range.clip(controllerPower + F, -1, 1));
+    }
+
+    public void calculateControllerPower() {
+        if (hangOverride) return;
+
+        controllerPower = pid.calculate(targetPos, Robot.hardware.lastLiftPosition);
+        controllerPower = Math.signum(controllerPower) * Math.min(Math.abs(controllerPower), maxPower);
     }
 
     public void setPower(double power) { Robot.hardware.setLiftPower(power); }

@@ -20,8 +20,8 @@ public class CustomLocalization {
 
     public Pose2d pose = new Pose2d(0, 0, 0);
 
-    OdometryModule leftPod, rightPod, backPod;
-    DcMotor leftFront, leftRear, rightFront, rightRear;
+    // OdometryModule leftPod, rightPod, backPod;
+    // DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
     double rightTotal = 0;
     int counter = 0;
@@ -36,6 +36,10 @@ public class CustomLocalization {
 
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
         this.start = startPose;
+        pose = startPose;
+        Constants.robotPose = startPose;
+        // this has all been moved to hardware thread
+        /*
 
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -56,6 +60,7 @@ public class CustomLocalization {
         backPod.reset();
         rightPod.reset();
         leftPod.reset();
+        */
         Constants.angle=start.getHeading();
     }
 
@@ -63,10 +68,10 @@ public class CustomLocalization {
         return (Constants.robotPose);
     }
 
-    public void update() {
-        rd = rightPod.tickDeltaMm;
-        ld = leftPod.tickDeltaMm;
-        bd = backPod.tickDeltaMm;
+    public synchronized void update() {
+        rd = Robot.rightPod.tickDeltaMm;
+        ld = Robot.leftPod.tickDeltaMm;
+        bd = Robot.backPod.tickDeltaMm;
 
         if (counter == 0) {
             startTime = Constants.toSec(Constants.getTime());
@@ -108,9 +113,9 @@ public class CustomLocalization {
 //            }
 //        }
         Constants.lastPose = pose;
-        Robot.telemetry.add("ld", leftTotal);
-        Robot.telemetry.add("rd", rightTotal);
-        Robot.telemetry.add("bd", backT);
+        Robot.telemetry.addImportant("ld", leftTotal);
+        Robot.telemetry.addImportant("rd", rightTotal);
+        Robot.telemetry.addImportant("bd", backT);
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {

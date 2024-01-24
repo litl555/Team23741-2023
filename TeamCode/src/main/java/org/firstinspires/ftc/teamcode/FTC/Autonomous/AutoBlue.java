@@ -56,7 +56,7 @@ public class AutoBlue extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift, this);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 

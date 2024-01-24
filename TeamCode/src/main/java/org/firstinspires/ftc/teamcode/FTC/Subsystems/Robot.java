@@ -13,15 +13,15 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
 import org.firstinspires.ftc.teamcode.FTC.Threading.HardwareThread;
+import org.firstinspires.ftc.teamcode.FTC.Threading.MathThread;
 
 @Config
 public class Robot {
     // ==============================================================
     // +                           CONFIG                           =
     // ==============================================================
-    // main 4 movement motors are controlled by CustomLocalization
-
     // note that these are made public just in case, but you should really go through .hardware to read/write
+    // (also setting up a whole ass hierarchy would be very painful)
 
     // drivetrain
     public static DcMotorEx leftFront, leftRear, rightFront, rightRear;
@@ -68,14 +68,15 @@ public class Robot {
     public static LoggerTool telemetry;
     public static HardwareMap hardwareMap;
     public static ClawSubsystem clawSubsystem;
-    public static LiftSubsystem liftSubsystem; // TODO
+    public static LiftSubsystem liftSubsystem;
     public static IntakeSubsystem intakeSubsystem;
     public static HardwareThread hardware;
-    private static Thread hardwareThread;
-    public static LinearOpMode caller;
+
+    public static MathThread math;
+    public static Thread hardwareThread, mathThread;
 
 
-    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift, LinearOpMode _caller) {
+    public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
         onlyLogImportant = true;
         isBusy = false;
 
@@ -142,15 +143,20 @@ public class Robot {
         // drone
         drone = hardwareMap.get(DcMotorEx.class, "drone");
 
+        // threads
         hardware = new HardwareThread(hardwareMap);
+        math = new MathThread();
         hardwareThread = new Thread(hardware, "Hardware Thread");
+        mathThread = new Thread(math, "Math Thread");
 
         // reset static variables where needed
         level = 0;
     }
 
     public static void updateHardwareThread() {
-        hardwareThread.start();
+        // calling it this way makes sure that the thread still has access to the hardwareThread class itself
+        // and the instance variables stored within
+        if (!hardware.isRunning.get()) hardwareThread.start();
     }
 
     public static void setIntakePower(double power) {

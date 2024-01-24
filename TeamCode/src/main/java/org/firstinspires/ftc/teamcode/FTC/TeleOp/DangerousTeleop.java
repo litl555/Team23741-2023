@@ -138,7 +138,7 @@ public class DangerousTeleop extends CommandOpMode {
             }));
         }
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift, this);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.onlyLogImportant = true;
     }
 
@@ -152,7 +152,6 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("LIFT POWER LEFT", Robot.liftLeft.getPower());
         Robot.telemetry.add("LIFT POWER RIGHT", Robot.liftRight.getPower());
 
-        //Robot.customLocalization.update();
         Robot.updateHardwareThread();
         CommandScheduler.getInstance().run();
         Robot.telemetry.update();

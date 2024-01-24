@@ -44,7 +44,7 @@ public class AutoRedTruss extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
-        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift, this);
+        Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
@@ -121,11 +121,9 @@ public class AutoRedTruss extends LinearOpMode {
         double lastTime = System.currentTimeMillis();
 
         while (opModeIsActive() && !isStopRequested()) {
-            double currentTime = System.currentTimeMillis() + 0.1; // dont question it
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
-            Robot.telemetry.addImportant("FPS", 1.0 / (currentTime - lastTime));
 
-            Robot.customLocalization.update();
+            Robot.updateHardwareThread();
             Robot.telemetry.update();
 
             CommandScheduler.getInstance().run();

@@ -59,8 +59,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
             case undefined: // if undefined go to middle
             case middle:
                 toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 530), middlePos.getHeading());
-                // odo gets stuck in the "stays in the same place" thingy if it is -180, so have to give it a bit extra movement :/
-                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(0, 0), new Pose2d(0, 0), 180);
+                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(0, 0), new Pose2d(0, 0), -180);
                 break;
             case left:
                 toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0.0, 0), new Pose2d(-870, 85), leftPos.getHeading());

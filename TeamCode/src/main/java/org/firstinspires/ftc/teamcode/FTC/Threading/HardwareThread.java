@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.FTC.Threading;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
+import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
@@ -12,8 +14,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-// this will run on the main thread, so no need to thread this
 public class HardwareThread implements Runnable {
     private List<LynxModule> lynxModules;
 
@@ -23,7 +25,15 @@ public class HardwareThread implements Runnable {
     private final Deque<Double> liftQueue, wristQueue, armQueue;
     private final Deque<Double[]> drivetrainQueue;
     private final Deque<ClawSubsystem.ClawState> clawQueue;
-    private boolean isRunning = false, hasErroredOut = false;
+    private boolean hasErroredOut = false;
+    public AtomicBoolean isRunning = new AtomicBoolean();
+
+    private final ArrayList<Double> avgFps = new ArrayList<>();
+    private final double avgFpsLength = 100;
+    private double avgFpsValue = 0;
+    private long runCount = 0;
+
+    public static long initialEncoderReadTime = 0;
 
     public HardwareThread(HardwareMap map) {
         lynxModules = map.getAll(LynxModule.class);
@@ -40,8 +50,9 @@ public class HardwareThread implements Runnable {
     @Override
     public void run() {
         try {
-            if (isRunning || hasErroredOut) return;
-            isRunning = true;
+            if (isRunning.get() || hasErroredOut) return;
+            isRunning.set(true);
+            runCount++;
 
             long startTime = System.currentTimeMillis();
             Robot.telemetry.addImportant("Hardware Thread Last Update", startTime);
@@ -60,7 +71,10 @@ public class HardwareThread implements Runnable {
                 }
             }
 
+            initialEncoderReadTime = System.currentTimeMillis();
+
             lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
+
             // TODO: read sensor values via photonFTC
 
             // note that we cannot read and write values at the same time (at least i dont think so)
@@ -68,20 +82,38 @@ public class HardwareThread implements Runnable {
             // instead just call write at every possible opportunity lol
             applyQueues();
 
+            // if were not currently do calculations queue them up
+            if (!Robot.math.isRunning.get()) Robot.mathThread.start();
 
-            // TODO
-            // check if robot is currently running calculations, if not start them
-            // write to queues
+            applyQueues();
 
+            // timing stuff
             long endTime = System.currentTimeMillis();
             long delta = endTime - startTime;
-            Robot.telemetry.addImportant("Hardware Thread",
-                truncate((int) delta, 3) + " ms (" + truncate((int) (1000.0 / delta), 3) + " FPS)");
 
-            isRunning = false;
+            if (runCount % 20 == 0) {
+                double fps = (1000.0 / delta) / avgFpsLength;
+
+                // saturate at start
+                if (avgFps.size() == 0) {
+                    for (int i = 0; i < avgFpsLength; i++) avgFps.add(fps);
+                }
+
+                avgFpsValue += fps;
+                if (avgFps.size() >= avgFpsLength) {
+                    avgFpsValue -= avgFps.get(0);
+                    avgFps.remove(0);
+                }
+                avgFps.add(fps);
+            }
+
+            Robot.telemetry.addImportant("Hardware Thread",
+                truncate((int) delta, 3) + " ms (" + truncate((int) avgFpsValue, 3) + " Avg FPS)");
+
+            isRunning.set(false);
         } catch (Exception e) {
             // TODO: remove/get better error handling, this is only for testing
-            Robot.telemetry.addImportant("ERROR", e);
+            Robot.telemetry.addImportant("HARDWARE ERROR", e);
             hasErroredOut = true;
         }
     }
@@ -133,6 +165,14 @@ public class HardwareThread implements Runnable {
     }
 
     private void applyDrivetrain(Double[] d) {
+        if (TrajectoryRunner.initialMotorWriteTime != 0 && initialEncoderReadTime != 0) {
+            long t = System.currentTimeMillis();
+            Robot.telemetry.addImportant("Time between calculation and write", t - TrajectoryRunner.initialMotorWriteTime);
+            Robot.telemetry.addImportant("Time between read and write", t - initialEncoderReadTime);
+        } else {
+            Robot.telemetry.addImportant("Time between calculation and write", "NA");
+            Robot.telemetry.addImportant("Time between read and write", "NA");
+        }
         Robot.rightFront.setPower(d[0]);
         Robot.leftFront.setPower(d[1]);
         Robot.rightRear.setPower(d[2]);

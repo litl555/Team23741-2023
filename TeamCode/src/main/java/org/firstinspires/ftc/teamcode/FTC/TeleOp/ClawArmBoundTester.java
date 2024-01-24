@@ -37,7 +37,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         IntakeSubsystem intake = new IntakeSubsystem(tele);
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, tele);
-        Robot.robotInit(hardwareMap, l, tele, intake, claw, lift, this);
+        Robot.robotInit(hardwareMap, l, tele, intake, claw, lift);
 
         //Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 

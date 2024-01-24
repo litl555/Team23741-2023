@@ -43,7 +43,7 @@ public class TrajectoryRunner {
     public static double speed = .6;
     public int ind;
 
-    public static double angleDes = 90;
+    public static double angleDes = 90; // TODO: this should be instance not static
     public State currentState = State.PRESTART;
     int count = 0;
 
@@ -89,7 +89,7 @@ public class TrajectoryRunner {
 
     }
 
-    public void update() {
+    public void _update() {
         if (Math.toRadians(angleDes) - startAngle > 0.0) {
             if (angleDes1 + angleSpeed > Math.toRadians(angleDes)) {
                 angleDes1 = Math.toRadians(angleDes);
@@ -116,7 +116,22 @@ public class TrajectoryRunner {
         }
     }
 
+    public void update() { TrajectoryRunner.syncUpdate(this); }
+
+    public synchronized static void syncUpdate(TrajectoryRunner tr) {
+        // update() registers this tr as needing to run at the next opportunity
+        // _update() actually updates the tr and does math and shit
+
+        // syncUpdate exists to ensure that we only set trajectoryRunner one at a time
+
+        // only set if new tr is different
+        TrajectoryRunner old = Robot.math.trajectoryRunner.get();
+        if (old == null || old.hashCode() != tr.hashCode()) Robot.math.trajectoryRunner.set(tr);
+    }
+
     public int indexRunTime = 0;
+
+    public static long initialMotorWriteTime = 0;
 
     private void runningMode() {
         count++;
@@ -159,6 +174,7 @@ public class TrajectoryRunner {
             sum = sum.times(speed);
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
+            initialMotorWriteTime = System.currentTimeMillis();
             l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
 
             loggerTool.add("loop", start - Constants.toSec(Constants.getTime()));
@@ -316,4 +332,7 @@ public class TrajectoryRunner {
         }
         return masterIndex;
     }
+
+    @Override
+    public int hashCode() { return t.hashCode(); }
 }

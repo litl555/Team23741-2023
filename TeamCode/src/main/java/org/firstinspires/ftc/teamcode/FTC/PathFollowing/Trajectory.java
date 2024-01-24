@@ -564,4 +564,20 @@ public class Trajectory implements TrajectoryInterface {
         ));
     }
 
+    @Override
+    public int hashCode() {
+        // based on unitys vec4 hash function -> this should be good enough
+        // this is also assuming pose2D has an actual hash function and when i looked at the source code they didnt....
+        return hashPose2D(start) ^ (hashPose2D(end) << 2) ^ (hashPose2D(startVelo) >> 2) ^ (hashPose2D(endVelo) >> 1);
+    }
+
+    private int hashPose2D(Pose2d p) {
+        // again based on unity vec2 hash
+        // idk if pose2d has an actual hash function and when i looked at the source code they didnt....
+        // int cause double hashing is a nightmare (add java doesnt allow double << int?????)
+        int x = (int) p.getX();
+        int y = (int) p.getY();
+
+        return x ^ (y << 2);
+    }
 }

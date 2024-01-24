@@ -31,6 +31,7 @@ public class LoggerTool {
 
     public LoggerTool(Telemetry telemetry) {
         this.telemetry = telemetry;
+        dash.setTelemetryTransmissionInterval(200);
     }
 
     public synchronized void add(String name, Object output) {
