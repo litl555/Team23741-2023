@@ -122,10 +122,8 @@ public class AutoRedTruss extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 
-            Robot.update();
-            Robot.telemetry.update();
-
             CommandScheduler.getInstance().run();
+            Robot.update();
         }
     }
 }

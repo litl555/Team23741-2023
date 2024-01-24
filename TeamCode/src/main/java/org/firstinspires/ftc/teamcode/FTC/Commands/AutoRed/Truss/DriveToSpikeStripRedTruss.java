@@ -4,20 +4,11 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
-import com.outoftheboxrobotics.photoncore.HAL.Motors.PhotonDcMotor;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.ActualMultiTrajRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultiTrajEvent;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.SimpleTrajectory;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
-import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 

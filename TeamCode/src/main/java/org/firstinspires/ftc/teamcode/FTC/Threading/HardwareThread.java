@@ -4,6 +4,7 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -35,9 +36,9 @@ public class HardwareThread implements Runnable {
     private double avgFpsValue = 0;
     private long runCount = 0;
 
-    public Exception ex = null; // TODO: add better error logging
+    public long timeAtHardwareReadStart = 0, timeAtHardwareReadEnd = 0;
 
-    public static long initialEncoderReadTime = 0;
+    public Exception ex = null; // TODO: add better error logging
 
     public HardwareThread(HardwareMap map) {
         lynxModules = map.getAll(LynxModule.class);
@@ -61,9 +62,10 @@ public class HardwareThread implements Runnable {
             runCount++;
 
             long startTime = System.currentTimeMillis();
-            Robot.telemetry.addImportant("Hardware Thread Last Update", startTime);
+            Robot.telemetry.addImportant(new LoggerData("Hardware", startTime, "THREAD UPDATE"));
 
             applyQueues();
+            timeAtHardwareReadStart = System.currentTimeMillis();
 
             // read port values
             for (LynxModule module : lynxModules) module.clearBulkCache();
@@ -77,7 +79,7 @@ public class HardwareThread implements Runnable {
                 }
             }
 
-            initialEncoderReadTime = System.currentTimeMillis();
+            timeAtHardwareReadEnd = System.currentTimeMillis();
 
             lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
             intakePower = Robot.intakeMotor.getPower();
@@ -115,8 +117,8 @@ public class HardwareThread implements Runnable {
                 avgFps.add(fps);
             }
 
-            Robot.telemetry.addImportant("Hardware Thread",
-                truncate((int) delta, 3) + " ms (" + truncate((int) avgFpsValue, 3) + " Avg FPS)");
+            Robot.telemetry.addImportant(new LoggerData("Hardware",
+                truncate((int) delta, 3) + " ms (" + truncate((int) avgFpsValue, 3) + " Avg FPS)", "THREAD LENGTH"));
 
             if (!isRunning.get()) {
                 Robot.telemetry.addImportant("BIG ERROR", "detected multiple hardware threads running");
@@ -200,23 +202,18 @@ public class HardwareThread implements Runnable {
     }
 
     private void applyDrivetrain(Double[] d) {
-        if (TrajectoryRunner.initialMotorWriteTime != 0 && initialEncoderReadTime != 0) {
-            long t = System.currentTimeMillis();
-            Robot.telemetry.addImportant("Time between calculation and write", t - TrajectoryRunner.initialMotorWriteTime);
-            Robot.telemetry.addImportant("Time between read and write", t - initialEncoderReadTime);
-        } else {
-            Robot.telemetry.addImportant("Time between calculation and write", "NA");
-            Robot.telemetry.addImportant("Time between read and write", "NA");
-        }
         Robot.rightFront.setPower(d[0]);
         Robot.leftFront.setPower(d[1]);
         Robot.rightRear.setPower(d[2]);
         Robot.leftRear.setPower(d[3]);
-
-        //leftRear.setPower(bl);
-        //leftFront.setPower(fl);
-        //rightFront.setPower(fr);
-        //rightRear.setPower(br);
+        
+        if (Robot.math.isUpdatingOdometry && Robot.isBusy) {
+            long t = System.currentTimeMillis();
+            Robot.telemetry.addImportant(new LoggerData("Hardware read start", t - timeAtHardwareReadStart, "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Hardware read end", t - timeAtHardwareReadEnd, "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Odo thread start", t - Robot.math.timeAtThreadCalled, "ODOMETRY TIMING"));
+            Robot.telemetry.addImportant(new LoggerData("Odo math end", t - Robot.math.timeAtCalculationFinished, "ODOMETRY TIMING"));
+        }
     }
 
     private <T> void apply(Deque<T> queue, ApplyQueueAction<T> action, String name) {

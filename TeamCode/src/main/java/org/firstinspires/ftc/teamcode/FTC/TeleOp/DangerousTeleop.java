@@ -11,9 +11,11 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.apache.commons.math3.analysis.function.Log;
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
@@ -143,16 +145,13 @@ public class DangerousTeleop extends CommandOpMode {
 
     @Override
     public void run() {
-        Robot.telemetry.add("CURRENT LIFT LEVEL (0 based)", liftLevel);
-        Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
-        Robot.telemetry.add("ROBOT LEVEL", Robot.level);
-        Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
-        Robot.telemetry.add("LIFT POSITION", Robot.hardware.lastLiftPosition);
+        Robot.telemetry.addImportant(new LoggerData("LEVEL", liftLevel, "LIFT"));
+        Robot.telemetry.addImportant(new LoggerData("IS OVERRIDDEN", lift.hangOverride, "LIFT"));
+        Robot.telemetry.addImportant(new LoggerData("TICK", Robot.hardware.lastLiftPosition, "LIFT"));
 
-        Robot.telemetry.addImportant("Main Thread Last Update", System.currentTimeMillis());
+        Robot.telemetry.addImportant(new LoggerData("Main", System.currentTimeMillis(), "THREAD UPDATE"));
 
-        Robot.update();
         CommandScheduler.getInstance().run();
-        Robot.telemetry.update();
+        Robot.update();
     }
 }

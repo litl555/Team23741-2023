@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
 import org.firstinspires.ftc.teamcode.FTC.Threading.HardwareThread;
 import org.firstinspires.ftc.teamcode.FTC.Threading.MathThread;
+
 
 @Config
 public class Robot {
@@ -77,6 +79,7 @@ public class Robot {
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
         //PhotonCore.start(hardwareMap);
+        // todo: set max parallel commands to like 10 -> blog post says limit is like 15
         onlyLogImportant = true;
         isBusy = false;
 
@@ -157,6 +160,7 @@ public class Robot {
         // calling it this way makes sure that the thread still has access to the hardwareThread class itself
         // and the instance variables stored within
         if (!hardware.isRunning.get()) hardwareThread.start();
+        Robot.telemetry.update();
     }
 
     public static boolean isPastTruss() {

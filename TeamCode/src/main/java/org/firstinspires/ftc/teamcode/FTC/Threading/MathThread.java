@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.FTC.Threading;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 // this is called by HardwareThread, not Robot
@@ -15,6 +17,8 @@ public class MathThread implements Runnable {
     private boolean hasErroredOut = false;
     public final AtomicBoolean isRunning = new AtomicBoolean();
     public final AtomicReference<TrajectoryRunner> trajectoryRunner = new AtomicReference<>();
+    public boolean isUpdatingOdometry = false;
+    public long timeAtCalculationFinished = 0, timeAtThreadCalled = 0;
 
     public MathThread() {
         trajectoryRunner.set(null);
@@ -28,7 +32,9 @@ public class MathThread implements Runnable {
             isRunning.set(true);
 
             long startTime = System.currentTimeMillis();
-            Robot.telemetry.addImportant("Math Thread Last Update", startTime);
+            Robot.telemetry.addImportant(new LoggerData("Math", startTime, "THREAD UPDATE"));
+
+            timeAtThreadCalled = startTime;
 
             Robot.liftSubsystem.calculateControllerPower();
 
@@ -44,13 +50,16 @@ public class MathThread implements Runnable {
                 // (specifically switching FINISHED to PRESTART), so filter those. we only want to run "fresh" trajectories
                 if (tr.currentState == TrajectoryRunner.State.FINISHED || tr.currentState == TrajectoryRunner.State.PRESTART) {
                     trajectoryRunner.set(null);
-                } else tr._update();
-            }
+                } else {
+                    tr._update();
+                    isUpdatingOdometry = true;
+                    timeAtCalculationFinished = System.currentTimeMillis();
+                }
+            } else isUpdatingOdometry = false;
 
             long endTime = System.currentTimeMillis();
             long delta = Math.max(endTime - startTime, 1);
-            Robot.telemetry.addImportant("Math Thread",
-                truncate((int) delta, 3) + " ms");
+            Robot.telemetry.addImportant(new LoggerData("Math", truncate((int) delta, 3) + " ms", "THREAD LENGTH"));
 
             isRunning.set(false);
         } catch (Exception e) {

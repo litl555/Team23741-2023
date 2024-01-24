@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.sun.source.tree.Tree;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
@@ -13,6 +14,8 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeMap;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
 
@@ -26,28 +29,46 @@ public class LoggerTool {
     private final ArrayList<Double> yPosVals = new ArrayList<>();
     private double[] xvals;
     private double[] yvals;
+    private TreeMap<String, Object> unsortedData = new TreeMap<>();
+    private TreeMap<String, ArrayList<LoggerData>> sortedData = new TreeMap<>();
     TrajectoryInterface current = null;
     Telemetry telemetry;
 
     public LoggerTool(Telemetry telemetry) {
+        dash.clearTelemetry();
         this.telemetry = telemetry;
-        dash.setTelemetryTransmissionInterval(200);
+        dash.setTelemetryTransmissionInterval(100);
     }
 
     public synchronized void add(String name, Object output) {
         if (!Robot.onlyLogImportant) {
-            p.put(name, output);
+            unsortedData.put(name, output);
             telemetry.addData(name, output);
         }
     }
 
     public synchronized void addImportant(String name, Object output) {
-        p.put(name, output);
+        unsortedData.put(name, output);
         telemetry.addData(name, output);
+    }
+
+    public synchronized void add(LoggerData data) {
+        if (!Robot.onlyLogImportant) {
+            if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new ArrayList<>());
+            sortedData.get(data.section).add(data);
+            telemetry.addData(data.name, data.value);
+        }
+    }
+
+    public synchronized void addImportant(LoggerData data) {
+        if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new ArrayList<>());
+        sortedData.get(data.section).add(data);
+        telemetry.addData(data.name, data.value);
     }
 
     public synchronized void update() {
         if (Robot.onlyLogImportant) addImportant("LOGGING INFO", "onlyLogImportant is active");
+        p = new TelemetryPacket();
 
         //drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
         if (!getTrajectoryNull()) drawTrajectory();
@@ -58,12 +79,31 @@ public class LoggerTool {
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
 
+        int lineCount = 30;
+        for (String section : sortedData.keySet()) {
+            int marker = (lineCount - section.length()) / 2 - 1; // off by one error on odd strings but who cares
+            String header = repeat("=", marker) + " " + section + " " + repeat("=", marker);
+            p.addLine(header);
+
+            ArrayList<LoggerData> data = sortedData.get(section);
+            data.sort(Comparator.comparingInt(a -> a.order));
+
+            for (LoggerData ld : data) p.put(ld.name, ld.value);
+        }
+
+        p.addLine(repeat("+", lineCount));
+        p.putAll(unsortedData);
+
         FtcDashboard.getInstance().sendTelemetryPacket(p);
 
         p = new TelemetryPacket();
-        telemetry.addData("updated on", System.currentTimeMillis());
+        sortedData = new TreeMap<>();
+
+        telemetry.addData("Telemetry updated on", System.currentTimeMillis());
         telemetry.update();
     }
+
+    private String repeat(String s, int n) { return new String(new char[n]).replace("\0", s); }
 
     public synchronized void setCurrentTrajectory(TrajectoryInterface trajectory) {
         current = trajectory;
