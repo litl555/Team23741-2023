@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.outoftheboxrobotics.photoncore.HAL.Motors.PhotonDcMotor;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+
 
 @Config
 public class DriveToSpikeStripRedTruss extends CommandBase {
@@ -41,7 +43,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
         this.pos = pos;
         this.pixelPlaceCommand = pixelPlaceCommand;
     }
-
+    
     @Override
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);

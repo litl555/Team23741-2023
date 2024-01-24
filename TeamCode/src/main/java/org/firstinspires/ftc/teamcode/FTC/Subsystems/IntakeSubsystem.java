@@ -23,7 +23,7 @@ public class IntakeSubsystem extends SubsystemBase {
     public static double outtakePower = -.8;
 
     public static double intakeUpPosition = 0.7;
-    private static double intakeDownPosition = 0;
+    public static double intakeDownPosition = 0;
     private LoggerTool telemetry;
 
     private IntakeDistancePrediction prediction = IntakeDistancePrediction.EMPTY;
@@ -38,8 +38,8 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         // TODO: remove, not needed/should be in better place
-        if (Constants.robotPose.getY() > 100) Robot.pastTruss = true;
-        else Robot.pastTruss = false;
+        //if (Constants.robotPose.getY() > 100) Robot.pastTruss = true;
+        //else Robot.pastTruss = false;
 
         /*
         double distance = Robot.intakeDist.getDistance(DistanceUnit.MM);
@@ -59,54 +59,21 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void update(IntakePowerSetting powerset) { // TODO: remove, just call setPower()
-        telemetry.add("powerset", powerset);
-        switch (powerset) {
-
-            case INTAKE:
-                Robot.setIntakePower(intakePower);
-                Robot.bottomRoller.setPower(-1.0);
-                break;
-            case IDLE:
-                telemetry.add("powering off", "yes");
-                Robot.setIntakePower(0.0);
-                Robot.bottomRoller.setPower(0.0);
-                telemetry.add("power2", Robot.intakeMotor.getPower());
-                break;
-            case OUTTAKE:
-                telemetry.add("powerset1", powerset);
-                telemetry.add("outtaking", "outtaking");
-                Robot.setIntakePower(outtakePower);
-                Robot.bottomRoller.setPower(1.0);
-                break;
-
-        }
+        // does nothing right not, just temp before we fully remove this func
     }
 
-    public void setPower(double power) {
-        Robot.intakeMotor.setPower(power);
-        Robot.bottomRoller.setPower(power);
-    }
+    public void setPower(double power) { Robot.hardware.setIntakePower(power); }
 
     public void resetPixel() {
         pixelPassCount = 0;
     }
 
+    // TODO: remove
     public double getDistance() {
         return (Robot.intakeDist.getDistance(DistanceUnit.MM));
     }
 
-    public void setIntakePosition(IntakePosition pos) {
-        switch (pos) {
-            case UP:
-                Robot.droptakeRight.setPosition(1.0 - intakeUpPosition);
-                Robot.droptakeLeft.setPosition(intakeUpPosition);
-                break;
-            case DOWN:
-                Robot.droptakeRight.setPosition(1.0 - intakeDownPosition);
-                Robot.droptakeLeft.setPosition(intakeDownPosition);
-                break;
-        }
-    }
+    public void setIntakePosition(IntakePosition pos) { Robot.hardware.setDroptake(pos); }
 
     public enum IntakePosition {
         UP,

@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -123,7 +122,7 @@ public class AutoRedTruss extends LinearOpMode {
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 
-            Robot.updateHardwareThread();
+            Robot.update();
             Robot.telemetry.update();
 
             CommandScheduler.getInstance().run();

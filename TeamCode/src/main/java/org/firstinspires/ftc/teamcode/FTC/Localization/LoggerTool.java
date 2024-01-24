@@ -49,7 +49,7 @@ public class LoggerTool {
     public synchronized void update() {
         if (Robot.onlyLogImportant) addImportant("LOGGING INFO", "onlyLogImportant is active");
 
-        drawPoseHistory();
+        //drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
         if (!getTrajectoryNull()) drawTrajectory();
         if (current != null) {
             drawRobot(current.equation(Robot.t));

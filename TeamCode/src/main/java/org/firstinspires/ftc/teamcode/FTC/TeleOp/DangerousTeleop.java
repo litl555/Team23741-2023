@@ -10,7 +10,6 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
@@ -61,7 +60,7 @@ public class DangerousTeleop extends CommandOpMode {
                 double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
                 if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
-                else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
+                else if (Robot.hardware.intakePower != 0) intake.setPower(0);
             }));
         }
 
@@ -148,11 +147,11 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
         Robot.telemetry.add("ROBOT LEVEL", Robot.level);
         Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
-        Robot.telemetry.add("LIFT POSITION", Robot.liftEncoder.getCurrentPosition());
-        Robot.telemetry.add("LIFT POWER LEFT", Robot.liftLeft.getPower());
-        Robot.telemetry.add("LIFT POWER RIGHT", Robot.liftRight.getPower());
+        Robot.telemetry.add("LIFT POSITION", Robot.hardware.lastLiftPosition);
 
-        Robot.updateHardwareThread();
+        Robot.telemetry.addImportant("Main Thread Last Update", System.currentTimeMillis());
+
+        Robot.update();
         CommandScheduler.getInstance().run();
         Robot.telemetry.update();
     }

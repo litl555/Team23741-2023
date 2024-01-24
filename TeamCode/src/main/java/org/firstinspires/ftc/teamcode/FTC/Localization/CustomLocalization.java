@@ -113,9 +113,6 @@ public class CustomLocalization {
 //            }
 //        }
         Constants.lastPose = pose;
-        Robot.telemetry.addImportant("ld", leftTotal);
-        Robot.telemetry.addImportant("rd", rightTotal);
-        Robot.telemetry.addImportant("bd", backT);
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {

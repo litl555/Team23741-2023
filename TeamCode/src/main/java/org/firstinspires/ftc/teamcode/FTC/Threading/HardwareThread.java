@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
+import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 import java.util.ArrayDeque;
@@ -20,11 +21,12 @@ public class HardwareThread implements Runnable {
     private List<LynxModule> lynxModules;
 
     // odometry is stored in Robot.___pod, other values are stored here
-    public double lastLiftPosition = 0;
+    public double lastLiftPosition = 0, intakePower = 0;
 
-    private final Deque<Double> liftQueue, wristQueue, armQueue;
+    private final Deque<Double> liftQueue, wristQueue, armQueue, intakeQueue;
     private final Deque<Double[]> drivetrainQueue;
     private final Deque<ClawSubsystem.ClawState> clawQueue;
+    private final Deque<IntakeSubsystem.IntakePosition> droptakeQueue;
     private boolean hasErroredOut = false;
     public AtomicBoolean isRunning = new AtomicBoolean();
 
@@ -32,6 +34,8 @@ public class HardwareThread implements Runnable {
     private final double avgFpsLength = 100;
     private double avgFpsValue = 0;
     private long runCount = 0;
+
+    public Exception ex = null; // TODO: add better error logging
 
     public static long initialEncoderReadTime = 0;
 
@@ -45,6 +49,8 @@ public class HardwareThread implements Runnable {
         armQueue = new ArrayDeque<>();
         drivetrainQueue = new ArrayDeque<>();
         clawQueue = new ArrayDeque<>();
+        intakeQueue = new ArrayDeque<>();
+        droptakeQueue = new ArrayDeque<>();
     }
 
     @Override
@@ -74,6 +80,7 @@ public class HardwareThread implements Runnable {
             initialEncoderReadTime = System.currentTimeMillis();
 
             lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
+            intakePower = Robot.intakeMotor.getPower();
 
             // TODO: read sensor values via photonFTC
 
@@ -97,6 +104,7 @@ public class HardwareThread implements Runnable {
                 // saturate at start
                 if (avgFps.size() == 0) {
                     for (int i = 0; i < avgFpsLength; i++) avgFps.add(fps);
+                    avgFpsValue = (1000.0 / delta);
                 }
 
                 avgFpsValue += fps;
@@ -110,10 +118,17 @@ public class HardwareThread implements Runnable {
             Robot.telemetry.addImportant("Hardware Thread",
                 truncate((int) delta, 3) + " ms (" + truncate((int) avgFpsValue, 3) + " Avg FPS)");
 
+            if (!isRunning.get()) {
+                Robot.telemetry.addImportant("BIG ERROR", "detected multiple hardware threads running");
+            }
+
             isRunning.set(false);
         } catch (Exception e) {
             // TODO: remove/get better error handling, this is only for testing
+            ex = e;
             Robot.telemetry.addImportant("HARDWARE ERROR", e);
+            Robot.telemetry.addImportant("HARDWARE ERROR STACKTRACE 0", e.getStackTrace()[0]);
+            Robot.telemetry.addImportant("HARDWARE ERROR STACKTRACE 1", e.getStackTrace()[1]);
             hasErroredOut = true;
         }
     }
@@ -126,6 +141,8 @@ public class HardwareThread implements Runnable {
         synchronized (armQueue) { apply(armQueue, this::applyArm, "Arm"); }
         synchronized (clawQueue) { apply(clawQueue, this::applyClaw, "Claw"); }
         synchronized (drivetrainQueue) { apply(drivetrainQueue, this::applyDrivetrain, "Drivetrain"); }
+        synchronized (intakeQueue) { apply(intakeQueue, this::applyIntake, "Intake"); }
+        synchronized (droptakeQueue) { apply(droptakeQueue, this::applyDroptake, "Droptake"); }
     }
 
     private void applyLift(Double d) {
@@ -141,6 +158,24 @@ public class HardwareThread implements Runnable {
     private void applyArm(Double d) {
         Robot.armYellow.setPosition(d);
         Robot.armGreen.setPosition(d);
+    }
+
+    private void applyIntake(Double d) {
+        Robot.intakeMotor.setPower(d);
+        Robot.bottomRoller.setPower(d);
+    }
+
+    private void applyDroptake(IntakeSubsystem.IntakePosition p) {
+        switch (p) {
+            case UP:
+                Robot.droptakeRight.setPosition(1.0 - IntakeSubsystem.intakeUpPosition);
+                Robot.droptakeLeft.setPosition(IntakeSubsystem.intakeUpPosition);
+                break;
+            case DOWN:
+                Robot.droptakeRight.setPosition(1.0 - IntakeSubsystem.intakeDownPosition);
+                Robot.droptakeLeft.setPosition(IntakeSubsystem.intakeDownPosition);
+                break;
+        }
     }
 
     private void applyClaw(ClawSubsystem.ClawState s) {
@@ -185,8 +220,12 @@ public class HardwareThread implements Runnable {
     }
 
     private <T> void apply(Deque<T> queue, ApplyQueueAction<T> action, String name) {
+        // note: there is a race condition here
+        // since .addImportant is synced, there is a considerable gap between calling this function
+        // and calling queue.getLast(), which allows the queue to be updated in that time
+        // note that this is despite us explicitly calling sync (queue) above
         if (queue.size() == 0) return;
-        if (queue.size() > 1) Robot.telemetry.addImportant("WARN",  name + " queue has backed up values");
+        //if (queue.size() > 1) Robot.telemetry.addImportant("WARN",  name + " queue has backed up values");
 
         T o = queue.getLast();
         queue.clear();
@@ -195,13 +234,11 @@ public class HardwareThread implements Runnable {
     }
 
     public void setLiftPower(double power) { liftQueue.addLast(power); }
-
     public void setDrivetrain(double fl, double fr, double bl, double br) { drivetrainQueue.addLast(new Double[] {fl, fr, bl, br}); }
-
     public void setWrist(double angle) { wristQueue.addLast(angle); }
-
+    public void setIntakePower(double p) { intakeQueue.addLast(p); }
+    public void setDroptake(IntakeSubsystem.IntakePosition p) { droptakeQueue.addLast(p); }
     public void setArm(double angle) { armQueue.addLast(angle); }
-
     public void setClaw(ClawSubsystem.ClawState state) { clawQueue.addLast(state); }
 
     private interface ApplyQueueAction<T> {

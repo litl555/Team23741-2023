@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -77,6 +76,7 @@ public class Robot {
 
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
+        //PhotonCore.start(hardwareMap);
         onlyLogImportant = true;
         isBusy = false;
 
@@ -153,14 +153,10 @@ public class Robot {
         level = 0;
     }
 
-    public static void updateHardwareThread() {
+    public static void update() {
         // calling it this way makes sure that the thread still has access to the hardwareThread class itself
         // and the instance variables stored within
         if (!hardware.isRunning.get()) hardwareThread.start();
-    }
-
-    public static void setIntakePower(double power) {
-        intakeMotor.setPower(power);
     }
 
     public static boolean isPastTruss() {
