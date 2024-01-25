@@ -10,17 +10,19 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
+import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+
+import java.lang.reflect.Field;
 
 @TeleOp
 public class DangerousTeleop extends CommandOpMode {
@@ -61,7 +63,7 @@ public class DangerousTeleop extends CommandOpMode {
                 double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
                 if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
-                else if (Robot.intakeMotor.getPower() != 0) intake.setPower(0);
+                else if (Robot.hardware.intakePower != 0) intake.setPower(0);
             }));
         }
 
@@ -139,20 +141,21 @@ public class DangerousTeleop extends CommandOpMode {
         }
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
+        Robot.onlyLogImportant = true;
+
+        Robot.telemetry.update();
+        waitForStart();
     }
 
     @Override
     public void run() {
-        Robot.telemetry.add("CURRENT LIFT LEVEL (0 based)", liftLevel);
-        Robot.telemetry.add("PIXEL LEVEL (1 based)", liftLevel - 2);
-        Robot.telemetry.add("ROBOT LEVEL", Robot.level);
-        Robot.telemetry.add("LIFT IS OVERRIDDEN", lift.hangOverride);
-        Robot.telemetry.add("LIFT POSITION", lift.read());
-        Robot.telemetry.add("LIFT POWER LEFT", Robot.liftLeft.getPower());
-        Robot.telemetry.add("LIFT POWER RIGHT", Robot.liftRight.getPower());
+        Robot.telemetry.addImportant(new LoggerData("LEVEL", liftLevel, "LIFT"));
+        Robot.telemetry.addImportant(new LoggerData("IS OVERRIDDEN", lift.hangOverride, "LIFT"));
+        Robot.telemetry.addImportant(new LoggerData("TICK", Robot.hardware.lastLiftPosition, "LIFT"));
 
-        Robot.customLocalization.update();
+        Robot.telemetry.addImportant(new LoggerData("Main", System.currentTimeMillis(), "THREAD UPDATE"));
+
         CommandScheduler.getInstance().run();
-        Robot.telemetry.update();
+        Robot.update();
     }
 }

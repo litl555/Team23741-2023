@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.sun.source.tree.Tree;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
@@ -13,6 +14,11 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.util.DashboardUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
 
@@ -26,27 +32,50 @@ public class LoggerTool {
     private final ArrayList<Double> yPosVals = new ArrayList<>();
     private double[] xvals;
     private double[] yvals;
+    private HashMap<String, Object> unsortedData = new HashMap<>();
+    private TreeMap<String, HashSet<LoggerData>> sortedData = new TreeMap<>();
     TrajectoryInterface current = null;
     Telemetry telemetry;
 
     public LoggerTool(Telemetry telemetry) {
+        dash.clearTelemetry();
         this.telemetry = telemetry;
+        dash.setTelemetryTransmissionInterval(100);
     }
 
-    public void add(String name, Object output) {
+    public synchronized void add(String name, Object output) {
         if (!Robot.onlyLogImportant) {
-            p.put(name, output);
+            unsortedData.put(name, output);
             telemetry.addData(name, output);
         }
     }
 
-    public void addImportant(String name, Object output) {
-        p.put(name, output);
+    public synchronized void addImportant(String name, Object output) {
+        unsortedData.put(name, output);
         telemetry.addData(name, output);
     }
 
-    public void update() {
-        drawPoseHistory();
+    public synchronized void add(LoggerData data) {
+        if (!Robot.onlyLogImportant) {
+            if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
+            HashSet<LoggerData> s = sortedData.get(data.section);
+            s.remove(data); s.add(data);
+            telemetry.addData(data.name, data.value);
+        }
+    }
+
+    public synchronized void addImportant(LoggerData data) {
+        if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
+        HashSet<LoggerData> s = sortedData.get(data.section);
+        s.remove(data); s.add(data);
+        telemetry.addData(data.name, data.value);
+    }
+
+    public synchronized void update() {
+        if (Robot.onlyLogImportant) addImportant("LOGGING INFO", "onlyLogImportant is active");
+        p = new TelemetryPacket();
+
+        //drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
         if (!getTrajectoryNull()) drawTrajectory();
         if (current != null) {
             drawRobot(current.equation(Robot.t));
@@ -55,14 +84,43 @@ public class LoggerTool {
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
 
+        StringBuilder out = new StringBuilder("<br><br><tt>");
+
+        int lineCount = 60;
+        for (String section : sortedData.keySet()) {
+            int marker = (lineCount - section.length()) / 2 - 1; // off by one error on odd strings but who cares
+            out.append(repeat("=", marker)).append(" ").append(section).append(" ").append(repeat("=", marker)).append("<br>");
+
+            HashSet<LoggerData> data = sortedData.get(section);
+            for (LoggerData ld : data) out.append(ld.name).append(": ").append(ld.value).append("<br>");
+        }
+
+        out.append(repeat("+", lineCount)).append("<br>");
+        for (String key : unsortedData.keySet()) out.append(key).append(": ").append(unsortedData.get(key)).append("<br>");
+
+        out.append("</tt>");
+
+        p.put("DATA", out.toString());
+
         FtcDashboard.getInstance().sendTelemetryPacket(p);
 
         p = new TelemetryPacket();
-        telemetry.addData("updated on", System.currentTimeMillis());
+
+        telemetry.addData("Telemetry updated on", System.currentTimeMillis());
         telemetry.update();
     }
 
-    public void setCurrentTrajectory(TrajectoryInterface trajectory) {
+    public synchronized void addError(String name, Exception e) {
+        StringBuilder s = new StringBuilder(e.toString());
+        for (StackTraceElement st : e.getStackTrace()) s.append(st.toString());
+
+        // unique id via currentTimeMillis
+        addImportant(new LoggerData(name + " (" + System.currentTimeMillis() + ")", s.toString(), "ERROR"));
+    }
+
+    private String repeat(String s, int n) { return new String(new char[n]).replace("\0", s); }
+
+    public synchronized void setCurrentTrajectory(TrajectoryInterface trajectory) {
         current = trajectory;
         xvals = new double[100];
         yvals = new double[100];
@@ -91,28 +149,28 @@ public class LoggerTool {
         p.fieldOverlay().fillCircle(pose.getY() / 25.4, -pose.getX() / 25.4, 1);
     }
 
-    private void drawTrajectory() {
+    private synchronized void drawTrajectory() {
         p.fieldOverlay().setStroke("green");
         p.fieldOverlay().strokePolyline(xvals, yvals);
     }
 
-    public void setCurrentTrajectoryNull() {
+    public synchronized void setCurrentTrajectoryNull() {
         xvals = null;
         yvals = null;
     }
 
-    private boolean getTrajectoryNull() {
+    private synchronized boolean getTrajectoryNull() {
         return (xvals == null);
     }
 
-    private void drawPoseHistory() {
+    private synchronized void drawPoseHistory() {
         Canvas c = p.fieldOverlay();
         c.setStroke("red");
         updatePreviousPoseValsList();
         c.strokePolyline(convertListToArray(xPosVals), convertListToArray(yPosVals));
     }
 
-    private void updatePreviousPoseValsList() {
+    private synchronized void updatePreviousPoseValsList() {
         Pose2d rp = new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading()));
         xPosVals.add(0, (double) rp.getX());
         if (xPosVals.size() > 50000) {
@@ -124,6 +182,7 @@ public class LoggerTool {
         }
     }
 
+    // lol .toArray()
     private double[] convertListToArray(ArrayList<Double> list) {
         double[] xArray = new double[list.size()];
 

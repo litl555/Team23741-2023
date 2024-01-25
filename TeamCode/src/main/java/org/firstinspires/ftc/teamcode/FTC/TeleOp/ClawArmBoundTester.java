@@ -110,7 +110,7 @@ public class ClawArmBoundTester extends CommandOpMode {
         Robot.telemetry.add("delta Wrist2", Robot.wristBlue.getPosition() - ClawSubsystem.zero.wrist);
         Robot.telemetry.add("Speed", speed);
 
-        Robot.telemetry.add("lift level", lift.read());
+        Robot.telemetry.add("lift level", Robot.liftEncoder.getCurrentPosition());
         Robot.telemetry.add("lift override", lift.hangOverride);
         Robot.telemetry.update();
 

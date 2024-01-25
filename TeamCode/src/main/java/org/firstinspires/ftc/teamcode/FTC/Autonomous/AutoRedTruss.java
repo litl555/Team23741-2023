@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -29,7 +28,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@Autonomous
+@Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
     private static Pose2d startPos = new Pose2d(-48 * inToMm + Robot.width / 2.0,-72 * inToMm + Robot.length / 2.0, -Math.PI / 2.0);
@@ -52,8 +51,6 @@ public class AutoRedTruss extends LinearOpMode {
         telemetry1.add("Initialization", "done");
 
         waitForStart();
-
-        //Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
 
         // detect team prop
         int totalCount = 0;
@@ -118,17 +115,11 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
                     new DriveToParkingRed(-180))
         ));
-        double lastTime = System.currentTimeMillis();
-
         while (opModeIsActive() && !isStopRequested()) {
-            double currentTime = System.currentTimeMillis() + 0.1; // dont question it
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
-            Robot.telemetry.addImportant("FPS", 1.0 / (currentTime - lastTime));
-
-            Robot.customLocalization.update();
-            Robot.telemetry.update();
 
             CommandScheduler.getInstance().run();
+            Robot.update();
         }
     }
 }

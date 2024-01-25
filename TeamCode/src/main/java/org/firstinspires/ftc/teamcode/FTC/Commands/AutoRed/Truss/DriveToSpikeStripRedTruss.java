@@ -4,20 +4,13 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.SequentialCommandGroup;
-import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.ActualMultiTrajRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultiTrajEvent;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.SimpleTrajectory;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
-import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+
 
 @Config
 public class DriveToSpikeStripRedTruss extends CommandBase {
@@ -41,7 +34,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
         this.pos = pos;
         this.pixelPlaceCommand = pixelPlaceCommand;
     }
-
+    
     @Override
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
@@ -59,8 +52,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
             case undefined: // if undefined go to middle
             case middle:
                 toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 530), middlePos.getHeading());
-                // odo gets stuck in the "stays in the same place" thingy if it is -180, so have to give it a bit extra movement :/
-                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(0, 0), new Pose2d(0, 0), 180);
+                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(0, 0), new Pose2d(0, 0), -180);
                 break;
             case left:
                 toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0.0, 0), new Pose2d(-870, 85), leftPos.getHeading());

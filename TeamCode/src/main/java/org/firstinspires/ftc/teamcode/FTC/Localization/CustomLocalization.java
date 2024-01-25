@@ -20,8 +20,8 @@ public class CustomLocalization {
 
     public Pose2d pose = new Pose2d(0, 0, 0);
 
-    OdometryModule leftPod, rightPod, backPod;
-    DcMotor leftFront, leftRear, rightFront, rightRear;
+    // OdometryModule leftPod, rightPod, backPod;
+    // DcMotor leftFront, leftRear, rightFront, rightRear;
     double dT, dF, dS, dX, dY, fx, fy, r1, r0, rd, ld, bd;
     double rightTotal = 0;
     int counter = 0;
@@ -36,6 +36,10 @@ public class CustomLocalization {
 
     public CustomLocalization(Pose2d startPose, HardwareMap hardwareMap) {
         this.start = startPose;
+        pose = startPose;
+        Constants.robotPose = startPose;
+        // this has all been moved to hardware thread
+        /*
 
         leftFront = hardwareMap.get(DcMotor.class, "leftFront");
         leftRear = hardwareMap.get(DcMotor.class, "leftRear");
@@ -56,6 +60,7 @@ public class CustomLocalization {
         backPod.reset();
         rightPod.reset();
         leftPod.reset();
+        */
         Constants.angle=start.getHeading();
     }
 
@@ -63,10 +68,13 @@ public class CustomLocalization {
         return (Constants.robotPose);
     }
 
-    public void update() {
+    public synchronized void update() {
+        rd = Robot.rightPod.tickDeltaMm;
+        ld = Robot.leftPod.tickDeltaMm;
+        bd = Robot.backPod.tickDeltaMm;
+
         if (counter == 0) {
             startTime = Constants.toSec(Constants.getTime());
-
         }
         Robot.telemetry.add("running loop", Constants.toSec(Constants.getTime()) - loopStart);
         loopStart = Constants.toSec(Constants.getTime());
@@ -80,12 +88,9 @@ public class CustomLocalization {
         //leftPod.update();
         //Robot.telemetry.add("rightTotal",rightTotal);
         //Robot.telemetry.add("leftTotal",leftTotal);
-        rd = rightPod.getDelta();
-        rightTotal += rd;
 
-        ld = leftPod.getDelta();
+        rightTotal += rd;
         leftTotal += ld;
-        bd = backPod.getDelta();
         backT += bd;
         //calculateDeltaPos(rd,ld,bd);
 
@@ -108,9 +113,6 @@ public class CustomLocalization {
 //            }
 //        }
         Constants.lastPose = pose;
-        Robot.telemetry.add("ld", leftTotal);
-        Robot.telemetry.add("rd", rightTotal);
-        Robot.telemetry.add("bd", backT);
     }
 
     private Pose2d calculateDeltaPos(double R, double L, double B) {
@@ -147,14 +149,6 @@ public class CustomLocalization {
     }
 
     public void setMotorPowers(double fl, double fr, double bl, double br) {
-        //leftRear.setPower(bl);
-        //leftFront.setPower(fl);
-        //rightFront.setPower(fr);
-        //rightRear.setPower(br);
-
-        rightRear.setPower(bl);
-        rightFront.setPower(fl);
-        leftFront.setPower(fr);
-        leftRear.setPower(br);
+        Robot.hardware.setDrivetrain(fl, fr, bl, br);
     }
 }
