@@ -44,7 +44,7 @@ public class MathThread implements Runnable {
             TrajectoryRunner tr = trajectoryRunner.get();
             if (tr != null) {
                 // this is a scuffed system because this is essentially a queue system -> regular code calls tr.update which
-                // sends a request to well, update the trajectory runner
+                // sends a request to update the trajectory runner
                 // what this means though is that this thread doesn't actually control the trajectory runner
                 // and actually the regular code (that called tr.update) controls the current state of the trajectory runner
                 // (specifically switching FINISHED to PRESTART), so filter those. we only want to run "fresh" trajectories

@@ -1,19 +1,25 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
+import org.firstinspires.ftc.teamcode.FTC.SmallParticle.ParticleRev2M;
 import org.firstinspires.ftc.teamcode.FTC.Threading.HardwareThread;
 import org.firstinspires.ftc.teamcode.FTC.Threading.MathThread;
+
+import java.lang.reflect.Field;
 
 
 @Config
@@ -76,9 +82,10 @@ public class Robot {
     public static MathThread math;
     public static Thread hardwareThread, mathThread;
 
+    public static LinearOpMode caller;
+
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
-        //PhotonCore.start(hardwareMap);
         // todo: set max parallel commands to like 10 -> blog post says limit is like 15
         onlyLogImportant = true;
         isBusy = false;
@@ -154,6 +161,27 @@ public class Robot {
 
         // reset static variables where needed
         level = 0;
+        forwardIsForward = true;
+
+        // attach custom distance sensor
+        ParticleRev2M dist = null;
+        for (HardwareDevice device : hardwareMap.getAll(HardwareDevice.class)) {
+            if (device instanceof Rev2mDistanceSensor) {
+                try {
+                    I2cDeviceSynch tmp = (I2cDeviceSynch) getField(device.getClass(), "deviceClient").get(device);
+                    boolean owned = (boolean) getField(device.getClass(), "deviceClientIsOwned").get(device);
+
+                    dist = new ParticleRev2M(tmp, owned);
+                    dist.setRangingProfile(ParticleRev2M.RANGING_PROFILE.HIGH_SPEED);
+
+                    String s = (String) hardwareMap.getNamesOf(device).toArray()[0];
+                    hardwareMap.remove(s, device);
+                    hardwareMap.put(s, dist);
+                } catch (Exception e) {
+                    Robot.telemetry.addImportant("error", e);
+                }
+            }
+        }
     }
 
     public static void update() {
@@ -165,5 +193,19 @@ public class Robot {
 
     public static boolean isPastTruss() {
         return (pastTruss);
+    }
+
+    private static Field getField(Class clazz, String fieldName) {
+        try {
+            Field f = clazz.getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            Class superClass = clazz.getSuperclass();
+            if (superClass != null) {
+                return getField(superClass, fieldName);
+            }
+        }
+        return null;
     }
 }

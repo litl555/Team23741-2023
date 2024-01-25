@@ -9,7 +9,13 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareDevice;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchDevice;
+import com.qualcomm.robotcore.hardware.I2cDeviceSynchSimple;
+import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 
 import org.apache.commons.math3.analysis.function.Log;
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
@@ -17,11 +23,15 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
+import org.firstinspires.ftc.teamcode.FTC.SmallParticle.ParticleRev2M;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.FTC.Threading.I2CThread;
+
+import java.lang.reflect.Field;
 
 @TeleOp
 public class DangerousTeleop extends CommandOpMode {
@@ -139,8 +149,28 @@ public class DangerousTeleop extends CommandOpMode {
             }));
         }
 
+        Robot.caller = this;
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.onlyLogImportant = true;
+
+        Robot.telemetry.update();
+        waitForStart();
+
+        //new Thread(new I2CThread()).start();
+    }
+
+    private Field getField(Class clazz, String fieldName) {
+        try {
+            Field f = clazz.getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f;
+        } catch (NoSuchFieldException e) {
+            Class superClass = clazz.getSuperclass();
+            if (superClass != null) {
+                return getField(superClass, fieldName);
+            }
+        }
+        return null;
     }
 
     @Override

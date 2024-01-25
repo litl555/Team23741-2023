@@ -25,10 +25,12 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.FTC.TeleOp.DangerousTeleop;
+import org.firstinspires.ftc.teamcode.FTC.Threading.I2CThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@Autonomous
+@Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
     private static Pose2d startPos = new Pose2d(-48 * inToMm + Robot.width / 2.0,-72 * inToMm + Robot.length / 2.0, -Math.PI / 2.0);
@@ -50,7 +52,11 @@ public class AutoRedTruss extends LinearOpMode {
 
         telemetry1.add("Initialization", "done");
 
+        Robot.caller = this;
+
         waitForStart();
+
+        //new Thread(new I2CThread()).start();
 
         //Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
 

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.FTC.Threading;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
@@ -23,7 +24,7 @@ public class HardwareThread implements Runnable {
     private List<LynxModule> lynxModules;
 
     // odometry is stored in Robot.___pod, other values are stored here
-    public double lastLiftPosition = 0, intakePower = 0;
+    public double lastLiftPosition = 0, intakePower = 0, lastIntakeDist = 0;
 
     private final Deque<Double> liftQueue, wristQueue, armQueue, intakeQueue;
     private final Deque<Double[]> drivetrainQueue;
@@ -55,7 +56,7 @@ public class HardwareThread implements Runnable {
     }
 
     @Override
-    public void run() {
+    public synchronized void run() { // TODO: gain stability at the cost of speed by making this sync
         try {
             if (isRunning.get() || hasErroredOut) return;
             isRunning.set(true);
@@ -94,6 +95,9 @@ public class HardwareThread implements Runnable {
             // if were not currently do calculations queue them up
             if (!Robot.math.isRunning.get()) Robot.mathThread.start();
 
+            //lastIntakeDist = Robot.intakeDist.getDistance(DistanceUnit.MM);
+            Robot.telemetry.addImportant("Distance", lastIntakeDist);
+
             applyQueues();
 
             // timing stuff
@@ -123,7 +127,6 @@ public class HardwareThread implements Runnable {
         Double a = fps / avgFpsLength;
         if (arr.size() != avgFpsLength) {
             arr.clear();
-            Robot.telemetry.addImportant("cleared", System.currentTimeMillis());
             arr.add(fps);
             for (int i = 1; i < avgFpsLength; i++) arr.add(a);
 
