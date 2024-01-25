@@ -69,8 +69,7 @@ public class DangerousTeleop extends CommandOpMode {
 
         // GAMEMPAD 2 CONTROLS
         {
-            pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new InstantCommand(() -> Robot.drone.setPower(1)));
-            pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whenInactive(new InstantCommand(() -> Robot.drone.setPower(0)));
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_UP).whileHeld(new InstantCommand(() -> Robot.drone.setPower(0.5)));
 
             pad2.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new InstantCommand(() -> {

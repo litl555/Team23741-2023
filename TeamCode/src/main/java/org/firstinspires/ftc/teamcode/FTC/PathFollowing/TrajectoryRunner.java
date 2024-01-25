@@ -134,64 +134,62 @@ public class TrajectoryRunner {
     public static long initialMotorWriteTime = 0;
 
     private void runningMode() {
-        count++;
-        if (count % 10 == 0) {
-            double start = Constants.toSec(Constants.getTime());
-            double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
-            Robot.t = closestT;
-            //loggerTool.add("t",closestT);
-            if (closestT == 0.0) {
-                closestT = .1;
+        double start = Constants.toSec(Constants.getTime());
+        double closestT = t.getClosestTValue(new Pose2d(-robotPose.getY(), robotPose.getX()));
+        Robot.t = closestT;
+        //loggerTool.add("t",closestT);
+        if (closestT == 0.0) {
+            closestT = .1;
+        }
+        Pose2d derivative = t.velocities(closestT);
+        derivative = derivative.div(Math.sqrt(derivative.getX() * derivative.getX() + derivative.getY() * derivative.getY()));
+
+        //loggerTool.drawPoint(t.equation(closestT));
+        Robot.telemetry.add("amgle", Constants.angle);
+        Robot.telemetry.add("angleDes", angleDes);
+        //loggerTool.add("der",derivative);
+
+        if (closestT == 1.0) {
+            derivative = new Pose2d(0, 0, 0);
+        }
+
+
+        //loggerTool.add("radius",Math.sqrt(Math.abs(t.getCentripetalForceVector(closestT).dot(t.getCentripetalForceVector(closestT)))));
+        Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * -1.0 * derivative.getY());
+        //loggerTool.add("path",pathVector);
+        Pose2d point = t.equation(closestT);
+        //loggerTool.add("closestPoint",point);
+        Vector2d centripetalForce = t.getCentripetalForceVector(closestT);
+        centripetalForce = new Vector2d(centripetalForce.getX(), -centripetalForce.getY());
+        Vector2d correctionalVector = new Vector2d(kvCorrect * (point.getX() + robotPose.getY()) + ka * (centripetalForce.getX()), ka * (centripetalForce.getY()) - kvCorrect * (point.getY() - robotPose.getX()));
+        //loggerTool.add("xerror",point.getX() + robotPose.getY());
+        //loggerTool.add("yerror",(point.getY() - robotPose.getX()));
+
+        Vector2d sum = pathVector.plus(correctionalVector);
+        if (Math.sqrt(sum.dot(sum)) > 1.0) {
+            sum = sum.div(Math.sqrt(sum.dot(sum)));
+        }
+        sum = sum.times(speed);
+        //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
+
+        initialMotorWriteTime = System.currentTimeMillis();
+        l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
+
+        loggerTool.add("loop", start - Constants.toSec(Constants.getTime()));
+        Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
+        if (robot.distTo(t.getEnd().vec()) < 500) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)
+            if (!t.getEndStopped()) {
+                currentState = State.FINISHED;
+            } else {
+                loggerTool.add("set to correcting", indexRunTime);
+                indexRunTime++;
+                currentState = State.CORRECTING;
+                count = 0;
+
             }
-            Pose2d derivative = t.velocities(closestT);
-            derivative = derivative.div(Math.sqrt(derivative.getX() * derivative.getX() + derivative.getY() * derivative.getY()));
+        }
 
-            //loggerTool.drawPoint(t.equation(closestT));
-            Robot.telemetry.add("amgle", Constants.angle);
-            Robot.telemetry.add("angleDes", angleDes);
-            //loggerTool.add("der",derivative);
-
-            if (closestT == 1.0) {
-                derivative = new Pose2d(0, 0, 0);
-            }
-
-
-            //loggerTool.add("radius",Math.sqrt(Math.abs(t.getCentripetalForceVector(closestT).dot(t.getCentripetalForceVector(closestT)))));
-            Vector2d pathVector = new Vector2d(derivative.getX() * kvFollow, kvFollow * -1.0 * derivative.getY());
-            //loggerTool.add("path",pathVector);
-            Pose2d point = t.equation(closestT);
-            //loggerTool.add("closestPoint",point);
-            Vector2d centripetalForce = t.getCentripetalForceVector(closestT);
-            centripetalForce = new Vector2d(centripetalForce.getX(), -centripetalForce.getY());
-            Vector2d correctionalVector = new Vector2d(kvCorrect * (point.getX() + robotPose.getY()) + ka * (centripetalForce.getX()), ka * (centripetalForce.getY()) - kvCorrect * (point.getY() - robotPose.getX()));
-            //loggerTool.add("xerror",point.getX() + robotPose.getY());
-            //loggerTool.add("yerror",(point.getY() - robotPose.getX()));
-
-            Vector2d sum = pathVector.plus(correctionalVector);
-            if (Math.sqrt(sum.dot(sum)) > 1.0) {
-                sum = sum.div(Math.sqrt(sum.dot(sum)));
-            }
-            sum = sum.times(speed);
-            //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
-
-            initialMotorWriteTime = System.currentTimeMillis();
-            l.setWeightedDrivePowers(new Pose2d(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), kpa * (-Constants.angle - angleDes1)));
-
-            loggerTool.add("loop", start - Constants.toSec(Constants.getTime()));
-            Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
-            if (robot.distTo(t.getEnd().vec()) < 500) {// && Math.abs(angleDes - Constants.angle) < Math.toRadians(10)
-                if (!t.getEndStopped()) {
-                    currentState = State.FINISHED;
-                } else {
-                    loggerTool.add("set to correcting", indexRunTime);
-                    indexRunTime++;
-                    currentState = State.CORRECTING;
-                    count = 0;
-
-                }
-            }
-
-            loggerTool.add("closetT from runningMode", t.equation(closestT));
+        loggerTool.add("closetT from runningMode", t.equation(closestT));
 //        ind = getIndex();
 //        double tv = t.getVelosSpaced().get(ind);
 //        Pose2d velocity = t.velocities(tv);
@@ -225,7 +223,6 @@ public class TrajectoryRunner {
 //                loggerTool.add("end", Constants.toSec(Constants.getTime()));
 //            }
 //        }
-        }
     }
 
     private void correctMode() {

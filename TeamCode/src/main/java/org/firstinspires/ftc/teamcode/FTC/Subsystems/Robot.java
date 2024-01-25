@@ -53,7 +53,7 @@ public class Robot {
     // claw
     public static Servo clawBlack, clawWhite;
 
-    public static DcMotorEx drone;
+    public static CRServo drone;
 
     // ==============================================================
     // +                       SHARED VALUES                        =
@@ -147,7 +147,7 @@ public class Robot {
         clawBlack = hardwareMap.servo.get("clawBlack");
 
         // drone
-        drone = hardwareMap.get(DcMotorEx.class, "drone");
+        drone = hardwareMap.crservo.get("drone");
 
         // threads
         hardware = new HardwareThread(hardwareMap);
