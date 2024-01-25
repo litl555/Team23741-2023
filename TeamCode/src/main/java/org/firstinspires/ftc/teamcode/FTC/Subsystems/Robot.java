@@ -86,10 +86,6 @@ public class Robot {
 
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
-        // todo: set max parallel commands to like 10 -> blog post says limit is like 15
-        onlyLogImportant = true;
-        isBusy = false;
-
         customLocalization = _l;
         clawSubsystem = _claw;
         liftSubsystem = _lift;
@@ -162,6 +158,8 @@ public class Robot {
         // reset static variables where needed
         level = 0;
         forwardIsForward = true;
+        onlyLogImportant = false;
+        isBusy = false;
 
         // attach custom distance sensor
         ParticleRev2M dist = null;
@@ -177,9 +175,7 @@ public class Robot {
                     String s = (String) hardwareMap.getNamesOf(device).toArray()[0];
                     hardwareMap.remove(s, device);
                     hardwareMap.put(s, dist);
-                } catch (Exception e) {
-                    Robot.telemetry.addImportant("error", e);
-                }
+                } catch (Exception e) { Robot.telemetry.addError("Error Attaching Distance Sensor", e); }
             }
         }
     }
@@ -188,6 +184,11 @@ public class Robot {
         // calling it this way makes sure that the thread still has access to the hardwareThread class itself
         // and the instance variables stored within
         if (!hardware.isRunning.get()) hardwareThread.start();
+
+        long t = System.currentTimeMillis();
+        hardware.errorHandler.update(t);
+        math.errorHandler.update(t);
+
         Robot.telemetry.update();
     }
 

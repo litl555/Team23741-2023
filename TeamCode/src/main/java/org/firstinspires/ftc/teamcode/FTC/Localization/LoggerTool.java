@@ -110,6 +110,14 @@ public class LoggerTool {
         telemetry.update();
     }
 
+    public synchronized void addError(String name, Exception e) {
+        StringBuilder s = new StringBuilder(e.toString());
+        for (StackTraceElement st : e.getStackTrace()) s.append(st.toString());
+
+        // unique id via currentTimeMillis
+        addImportant(new LoggerData(name + " (" + System.currentTimeMillis() + ")", s.toString(), "ERROR"));
+    }
+
     private String repeat(String s, int n) { return new String(new char[n]).replace("\0", s); }
 
     public synchronized void setCurrentTrajectory(TrajectoryInterface trajectory) {

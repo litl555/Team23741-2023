@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.FTC.Threading;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.apache.commons.math3.analysis.function.Log;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
@@ -24,13 +25,12 @@ public class HardwareThread implements Runnable {
     private List<LynxModule> lynxModules;
 
     // odometry is stored in Robot.___pod, other values are stored here
-    public double lastLiftPosition = 0, intakePower = 0, lastIntakeDist = 0;
+    public double lastLiftPosition = 0, intakePower = 0, lastIntakeDist = -1;
 
     private final Deque<Double> liftQueue, wristQueue, armQueue, intakeQueue;
     private final Deque<Double[]> drivetrainQueue;
     private final Deque<ClawSubsystem.ClawState> clawQueue;
     private final Deque<IntakeSubsystem.IntakePosition> droptakeQueue;
-    private boolean hasErroredOut = false;
     public AtomicBoolean isRunning = new AtomicBoolean();
 
     private final ArrayList<Double> hardawareFps = new ArrayList<>();
@@ -39,7 +39,7 @@ public class HardwareThread implements Runnable {
 
     public long timeAtHardwareReadStart = 0, timeAtHardwareReadEnd = 0;
 
-    public Exception ex = null; // TODO: add better error logging
+    public final ThreadErrorDetection errorHandler;
 
     public HardwareThread(HardwareMap map) {
         lynxModules = map.getAll(LynxModule.class);
@@ -53,12 +53,16 @@ public class HardwareThread implements Runnable {
         clawQueue = new ArrayDeque<>();
         intakeQueue = new ArrayDeque<>();
         droptakeQueue = new ArrayDeque<>();
+
+        errorHandler = new ThreadErrorDetection("Hardware", Robot.hardwareThread, 80);
     }
 
     @Override
     public synchronized void run() { // TODO: gain stability at the cost of speed by making this sync
+        errorHandler.notifyIntentToTryRun();
+
         try {
-            if (isRunning.get() || hasErroredOut) return;
+            if (isRunning.get() || errorHandler.catastrophicError.get()) return;
             isRunning.set(true);
             runCount++;
 
@@ -85,8 +89,6 @@ public class HardwareThread implements Runnable {
             lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
             intakePower = Robot.intakeMotor.getPower();
 
-            // TODO: read sensor values via photonFTC
-
             // note that we cannot read and write values at the same time (at least i dont think so)
             // so there is not point having read/write in different threads
             // instead just call write at every possible opportunity lol
@@ -95,31 +97,23 @@ public class HardwareThread implements Runnable {
             // if were not currently do calculations queue them up
             if (!Robot.math.isRunning.get()) Robot.mathThread.start();
 
-            //lastIntakeDist = Robot.intakeDist.getDistance(DistanceUnit.MM);
-            Robot.telemetry.addImportant("Distance", lastIntakeDist);
+            if (Robot.intakeSubsystem.activateIntakeDist.get()) lastIntakeDist = Robot.intakeDist.getDistance(DistanceUnit.MM);
+            else lastIntakeDist = -1;
 
             applyQueues();
 
             // timing stuff
+            long endTime = System.currentTimeMillis();
             if (runCount % 20 == 0) {
-                long endTime = System.currentTimeMillis();
                 long delta = endTime - startTime;
                 Robot.telemetry.addImportant(new LoggerData("Hardware", formatFps(delta, hardawareFps), "THREAD LENGTH"));
             }
 
-            if (!isRunning.get()) {
-                Robot.telemetry.addImportant("BIG ERROR", "detected multiple hardware threads running " + System.currentTimeMillis());
-            }
+            // occasionally (and a lot more freq. before this func was sync), we could get multiple instances of this thread running
+            if (!isRunning.get()) errorHandler.registerError("Multiple instances of thread detected");
 
             isRunning.set(false);
-        } catch (Exception e) {
-            // TODO: remove/get better error handling, this is only for testing
-            ex = e;
-            Robot.telemetry.addImportant("HARDWARE ERROR", e);
-            Robot.telemetry.addImportant("HARDWARE ERROR STACKTRACE 0", e.getStackTrace()[0]);
-            Robot.telemetry.addImportant("HARDWARE ERROR STACKTRACE 1", e.getStackTrace()[1]);
-            hasErroredOut = true;
-        }
+        } catch (Exception e) { errorHandler.registerError(e); }
     }
 
     private double getAverageFps(ArrayList<Double> arr, Double fps) {

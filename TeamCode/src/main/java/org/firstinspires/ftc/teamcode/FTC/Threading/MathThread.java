@@ -20,20 +20,25 @@ public class MathThread implements Runnable {
     public boolean isUpdatingOdometry = false;
     public long timeAtCalculationFinished = 0, timeAtThreadCalled = 0;
 
+    public ThreadErrorDetection errorHandler;
+
     public MathThread() {
         trajectoryRunner.set(null);
         isRunning.set(false);
+
+        errorHandler = new ThreadErrorDetection("Math", Robot.mathThread, 40);
     }
 
     @Override
     public void run() {
+        errorHandler.notifyIntentToTryRun();
+
         try {
-            if (isRunning.get() || hasErroredOut) return;
+            if (isRunning.get() || errorHandler.catastrophicError.get()) return;
             isRunning.set(true);
 
             long startTime = System.currentTimeMillis();
             Robot.telemetry.addImportant(new LoggerData("Math", startTime, "THREAD UPDATE"));
-
             timeAtThreadCalled = startTime;
 
             Robot.liftSubsystem.calculateControllerPower();
@@ -62,11 +67,7 @@ public class MathThread implements Runnable {
             Robot.telemetry.addImportant(new LoggerData("Math", truncate((int) delta, 3) + " ms", "THREAD LENGTH"));
 
             isRunning.set(false);
-        } catch (Exception e) {
-            // TODO: remove/get better error handling, this is only for testing
-            Robot.telemetry.addImportant("MATH ERROR", e);
-            hasErroredOut = true;
-        }
+        } catch (Exception e) { errorHandler.registerError(e); }
     }
 
     // TODO we need to make a helper class eventually lol

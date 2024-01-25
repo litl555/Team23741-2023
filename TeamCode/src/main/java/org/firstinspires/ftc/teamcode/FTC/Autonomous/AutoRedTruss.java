@@ -25,8 +25,6 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
-import org.firstinspires.ftc.teamcode.FTC.TeleOp.DangerousTeleop;
-import org.firstinspires.ftc.teamcode.FTC.Threading.I2CThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
@@ -52,13 +50,7 @@ public class AutoRedTruss extends LinearOpMode {
 
         telemetry1.add("Initialization", "done");
 
-        Robot.caller = this;
-
         waitForStart();
-
-        //new Thread(new I2CThread()).start();
-
-        //Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
 
         // detect team prop
         int totalCount = 0;
@@ -123,8 +115,6 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
                     new DriveToParkingRed(-180))
         ));
-        double lastTime = System.currentTimeMillis();
-
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 
