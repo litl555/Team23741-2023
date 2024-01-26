@@ -6,7 +6,7 @@ import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
-import com.arcrobotics.ftclib.command.WaitUntilCommand;
+import com.outoftheboxrobotics.photoncore.Photon;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -25,9 +25,11 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
+@Photon(singleThreadOptimized = false, maximumParallelCommands = 12) // TODO having so high seems to have caused a few crashes
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
@@ -44,13 +46,21 @@ public class AutoRedTruss extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
+        Robot.onlyLogImportant = true;
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
 
         telemetry1.add("Initialization", "done");
 
+        Robot.write = new WriteThread(this);
+        Robot.writeThread = new Thread(Robot.write);
+
+        Robot.telemetry.update();
+
         waitForStart();
+
+        Robot.writeThread.start();
 
         // detect team prop
         int totalCount = 0;
@@ -81,28 +91,45 @@ public class AutoRedTruss extends LinearOpMode {
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
                 // go to spike strip and place
-                new ParallelCommandGroup(
+            new ParallelCommandGroup(
                     new DriveToSpikeStripRedTruss(last,
                         new SequentialCommandGroup(
                             new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                            new WaitCommand(200),
                             new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
-                    new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE)),
+                    new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
+                    new SequentialCommandGroup(
+                        new WaitCommand(1_000),
+                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.5)))),
                 // now pick up an extra pixel
                 new ParallelCommandGroup(
                     new SequentialCommandGroup(
                         new GoToHeight(lift, claw, 1),
                         new WaitCommand(250),
                         new GoToHeight(lift, claw, 0)),
-                    new IntakePixelFromStack(1, 5_000, -180)),
+                    new IntakePixelFromStack(1, 2_000, 5)),
                 // move to back board
-                new InstantCommand(() -> lift.setTargetPos(100)),
                 new ParallelCommandGroup(
+                    // clean up intake
+                    new SequentialCommandGroup(
+                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
+                        new WaitCommand(2_000),
+                        new InstantCommand(() -> {
+                            Robot.intakeSubsystem.setPower(0);
+                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
+                        })
+                    ),
                     new DriveToBackBoardRedTruss(last),
                     new SequentialCommandGroup(
-                        new WaitUntilCommand(() -> Robot.customLocalization.getPoseEstimate().getX() > 30 * inToMm),
-                        new GoToHeight(lift, claw, 3))),
+                        new WaitCommand(2_500),
+                        new GoToHeight(lift, claw, 2)
+                    )
+                ),
+                new GoToHeight(lift, claw, 3),
                 new RamBoard(),
                 new WaitCommand(350),
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
+                new WaitCommand(1000),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
                 new WaitCommand(350),
                 new ParallelCommandGroup(

@@ -61,7 +61,7 @@ public class GoToHeight extends ParallelCommandGroup {
                 new ConditionalCommand(
                     new SequentialCommandGroup(
                         // grab pixel
-                        new InstantCommand(() -> ClawSubsystem.zero.override(claw)),
+                        new InstantCommand(() -> ClawSubsystem.pickZero.apply(claw)),
                         new WaitCommand(500),
                         new InstantCommand(() -> claw.update(pickupStateOverride)),
                         new WaitCommand(500),

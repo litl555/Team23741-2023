@@ -19,7 +19,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double leftXOffset = -230;
     public static double leftYOffset = 0;
     public static double middleXOffset = -30;
-    public static double middleYOffset = -10;
+    public static double middleYOffset = -20;
     public static double rightXOffset = 120;
     public static double rightYOffset = 0;
 
@@ -37,9 +37,11 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
-        Pose2d intermediary = new Pose2d(12 * inToMm, 36 * inToMm);
+        Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
+        Pose2d clear = new Pose2d(10 * inToMm, 56 * inToMm);
 
-        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(0 , 0), new Pose2d(0, 0), -180);
+        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), -180);
+        SimpleTrajectory clearToInter = new SimpleTrajectory(clear, intermediary, new Pose2d(-50 , 0), new Pose2d(0, 0), -180);
         SimpleTrajectory interToEnd = null;
 
         switch (pos) {

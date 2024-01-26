@@ -15,7 +15,7 @@ public class DriveToParkingRed extends CommandBase {
     private Trajectory traj = null;
     private TrajectoryRunner tr = null;
 
-    public static double xOffset = -50, yOffset = -50;
+    public static double xOffset = 0, yOffset = -50;
     public static double vel_x = 500, vel_y = 2397;
     private double heading;
     public DriveToParkingRed(double heading) {

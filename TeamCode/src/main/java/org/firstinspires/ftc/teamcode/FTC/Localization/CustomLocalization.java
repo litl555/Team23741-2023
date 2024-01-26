@@ -141,9 +141,9 @@ public class CustomLocalization {
     }
 
     public void setWeightedDrivePowers(Pose2d pose) {
-        double y = -pose.getY();
-        double x = pose.getX() * Constants.strafeMult;
-        double rx = pose.getHeading();
+        double y = pose.getY();
+        double x = pose.getX() * Constants.strafeMult * -1.0;
+        double rx = pose.getHeading() * -1.0;
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
         setMotorPowers((y + x + rx) / denominator, (y - x - rx) / denominator, (y - x + rx) / denominator, (y + x - rx) / denominator);
     }

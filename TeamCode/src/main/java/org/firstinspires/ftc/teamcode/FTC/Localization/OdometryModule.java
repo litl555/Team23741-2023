@@ -9,6 +9,8 @@ public class OdometryModule {
     private int ticks, ticksTemp, currentTicks;
     public double tickDeltaMm;
 
+    private int offset = 1;
+
     public OdometryModule(DcMotor encoder) {
         this.encoder = encoder;
         encoder.setDirection((DcMotorSimple.Direction.FORWARD));
@@ -17,11 +19,12 @@ public class OdometryModule {
     }
 
     public void reverse() {
-        encoder.setDirection(DcMotorSimple.Direction.REVERSE);
+        //encoder.setDirection(DcMotorSimple.Direction.REVERSE);
+        offset = -1;
     }
 
     public void getDelta() {
-        currentTicks = encoder.getCurrentPosition();
+        currentTicks = offset * encoder.getCurrentPosition();
         ticksTemp = ticks;
         ticks = currentTicks;
         tickDeltaMm = Constants.ticksToMM(currentTicks - ticksTemp);

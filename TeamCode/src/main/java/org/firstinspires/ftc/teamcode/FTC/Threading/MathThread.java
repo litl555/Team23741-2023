@@ -26,13 +26,11 @@ public class MathThread implements Runnable {
         trajectoryRunner.set(null);
         isRunning.set(false);
 
-        errorHandler = new ThreadErrorDetection("Math", Robot.mathThread, 40);
+        errorHandler = new ThreadErrorDetection("Math");
     }
 
     @Override
     public void run() {
-        errorHandler.notifyIntentToTryRun();
-
         try {
             if (isRunning.get() || errorHandler.catastrophicError.get()) return;
             isRunning.set(true);

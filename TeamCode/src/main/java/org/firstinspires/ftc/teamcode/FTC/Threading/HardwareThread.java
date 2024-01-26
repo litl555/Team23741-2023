@@ -27,10 +27,9 @@ public class HardwareThread implements Runnable {
     // odometry is stored in Robot.___pod, other values are stored here
     public double lastLiftPosition = 0, intakePower = 0, lastIntakeDist = -1;
 
-    private final Deque<Double> liftQueue, wristQueue, armQueue, intakeQueue;
+    private final Deque<Double> liftQueue, wristQueue, armQueue, intakeQueue, droptakeQueue;
     private final Deque<Double[]> drivetrainQueue;
     private final Deque<ClawSubsystem.ClawState> clawQueue;
-    private final Deque<IntakeSubsystem.IntakePosition> droptakeQueue;
     public AtomicBoolean isRunning = new AtomicBoolean();
 
     private final ArrayList<Double> hardawareFps = new ArrayList<>();
@@ -54,13 +53,11 @@ public class HardwareThread implements Runnable {
         intakeQueue = new ArrayDeque<>();
         droptakeQueue = new ArrayDeque<>();
 
-        errorHandler = new ThreadErrorDetection("Hardware", Robot.hardwareThread, 80);
+        errorHandler = new ThreadErrorDetection("Hardware");
     }
 
     @Override
     public synchronized void run() { // TODO: gain stability at the cost of speed by making this sync
-        errorHandler.notifyIntentToTryRun();
-
         try {
             if (isRunning.get() || errorHandler.catastrophicError.get()) return;
             isRunning.set(true);
@@ -69,38 +66,55 @@ public class HardwareThread implements Runnable {
             long startTime = System.currentTimeMillis();
             Robot.telemetry.addImportant(new LoggerData("Hardware", startTime, "THREAD UPDATE"));
 
-            applyQueues();
+            //applyQueues();
             timeAtHardwareReadStart = System.currentTimeMillis();
 
             // read port values
-            for (LynxModule module : lynxModules) module.clearBulkCache();
-            synchronized (Robot.leftPod) {
-                synchronized (Robot.rightPod) {
-                    synchronized (Robot.backPod) {
-                        Robot.leftPod.getDelta();
-                        Robot.rightPod.getDelta();
-                        Robot.backPod.getDelta();
+            synchronized (Robot.class) {
+                synchronized (Constants.class) {
+                    for (LynxModule module : lynxModules) module.clearBulkCache();
+                    Robot.leftPod.getDelta();
+                    Robot.rightPod.getDelta();
+                    Robot.backPod.getDelta();
+
+                    lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
+
+                    Robot.liftSubsystem.calculateControllerPower();
+
+                    Robot.customLocalization.update();
+                    TrajectoryRunner tr = Robot.math.trajectoryRunner.get();
+                    if (tr != null) {
+                        // this is a scuffed system because this is essentially a queue system -> regular code calls tr.update which
+                        // sends a request to update the trajectory runner
+                        // what this means though is that this thread doesn't actually control the trajectory runner
+                        // and actually the regular code (that called tr.update) controls the current state of the trajectory runner
+                        // (specifically switching FINISHED to PRESTART), so filter those. we only want to run "fresh" trajectories
+                        if (tr.currentState == TrajectoryRunner.State.FINISHED || tr.currentState == TrajectoryRunner.State.PRESTART) {
+                            Robot.math.trajectoryRunner.set(null);
+                        } else {
+                            tr._update();
+                        }
                     }
                 }
             }
 
             timeAtHardwareReadEnd = System.currentTimeMillis();
 
-            lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
+            //lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
             intakePower = Robot.intakeMotor.getPower();
 
             // note that we cannot read and write values at the same time (at least i dont think so)
             // so there is not point having read/write in different threads
             // instead just call write at every possible opportunity lol
-            applyQueues();
+            //applyQueues();
 
             // if were not currently do calculations queue them up
-            if (!Robot.math.isRunning.get()) Robot.mathThread.start();
+            //if (!Robot.math.isRunning.get()) Robot.mathThread.start();
 
             if (Robot.intakeSubsystem.activateIntakeDist.get()) lastIntakeDist = Robot.intakeDist.getDistance(DistanceUnit.MM);
             else lastIntakeDist = -1;
 
-            applyQueues();
+            //applyQueues();
 
             // timing stuff
             long endTime = System.currentTimeMillis();
@@ -141,7 +155,7 @@ public class HardwareThread implements Runnable {
 
     private String truncate(int d, int n) { return (d + "").substring(0, Math.min(n, (d + "").length())); }
 
-    private void applyQueues() {
+    public void applyQueues() {
         synchronized (liftQueue) { apply(liftQueue, this::applyLift, "Lift"); }
         synchronized (wristQueue) { apply(wristQueue, this::applyWrist, "Wrist"); }
         synchronized (armQueue) { apply(armQueue, this::applyArm, "Arm"); }
@@ -171,17 +185,9 @@ public class HardwareThread implements Runnable {
         Robot.bottomRoller.setPower(d);
     }
 
-    private void applyDroptake(IntakeSubsystem.IntakePosition p) {
-        switch (p) {
-            case UP:
-                Robot.droptakeRight.setPosition(1.0 - IntakeSubsystem.intakeUpPosition);
-                Robot.droptakeLeft.setPosition(IntakeSubsystem.intakeUpPosition);
-                break;
-            case DOWN:
-                Robot.droptakeRight.setPosition(1.0 - IntakeSubsystem.intakeDownPosition);
-                Robot.droptakeLeft.setPosition(IntakeSubsystem.intakeDownPosition);
-                break;
-        }
+    private void applyDroptake(double d) {
+        Robot.droptakeRight.setPosition(1.0 - d);
+        Robot.droptakeLeft.setPosition(d);
     }
 
     private void applyClaw(ClawSubsystem.ClawState s) {
@@ -245,7 +251,7 @@ public class HardwareThread implements Runnable {
     public void setDrivetrain(double fl, double fr, double bl, double br) { drivetrainQueue.addLast(new Double[] {fl, fr, bl, br}); }
     public void setWrist(double angle) { wristQueue.addLast(angle); }
     public void setIntakePower(double p) { intakeQueue.addLast(p); }
-    public void setDroptake(IntakeSubsystem.IntakePosition p) { droptakeQueue.addLast(p); }
+    public void setDroptake(double d) { droptakeQueue.addLast(d); }
     public void setArm(double angle) { armQueue.addLast(angle); }
     public void setClaw(ClawSubsystem.ClawState state) { clawQueue.addLast(state); }
 

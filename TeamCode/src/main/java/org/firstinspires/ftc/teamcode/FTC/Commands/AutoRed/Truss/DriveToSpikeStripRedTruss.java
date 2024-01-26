@@ -23,7 +23,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     public static double leftXOffset = 0;
     public static double leftYOffset = 0;
     public static double middleXOffset = -60;
-    public static double middleYOffset = -40;
+    public static double middleYOffset = 0;
     public static double rightXOffset = 0;
     public static double rightYOffset = 0;
     public Pose2d rightPos = new Pose2d(34 * inToMm + rightXOffset, -24 * inToMm - Robot.length / 2.0 - 40 + rightYOffset, 180);
@@ -39,7 +39,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position to prep for 2+1
-        Pose2d base = new Pose2d(12 * inToMm, -48 * inToMm);
+        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4);
 
         SimpleTrajectory toStrip = null;
         SimpleTrajectory stripToBase = null;
@@ -52,7 +52,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
             case undefined: // if undefined go to middle
             case middle:
                 toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 530), middlePos.getHeading());
-                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(0, 0), new Pose2d(0, 0), -180);
+                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
             case left:
                 toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0.0, 0), new Pose2d(-870, 85), leftPos.getHeading());

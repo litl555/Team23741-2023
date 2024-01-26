@@ -1,65 +1,57 @@
 package org.firstinspires.ftc.teamcode.FTC.Commands;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
-import com.qualcomm.robotcore.robocol.Command;
 
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.ActualMultiTrajRunner;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultiTrajEvent;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.SimpleTrajectory;
-import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 public class IntakePixelFromStack extends CommandBase {
     // assumptions:
     // we are directly in front of the stack, intake facing the stack
-
-    private final double maxDistanceFromWall = 150;
-    private final double robotLengthWithIntake = 567; // mm
-
     private int numToCollect, collected, initialPixelCount;
-    private double maxTime, robotHeading, startTime;
-    private TrajectoryRunner runner;
+    private long maxTime, startTime;
     private boolean finished = false;
 
-    // time in milliseconds
-    public IntakePixelFromStack(int numToCollect, double maxTime, double robotHeading) {
+    private double increment = 0.005, initialLevel;
+    private int incrementLevel = 0;
+    private long incrementTime = 250;
+
+    // time in milliseconds, starting level 1 based (1 is first pixel)
+    public IntakePixelFromStack(int numToCollect, long maxTime, int startingLevel) {
         this.numToCollect = numToCollect;
         this.maxTime = maxTime;
-        this.robotHeading = robotHeading;
+        initialLevel = IntakeSubsystem.droptakeLevel[startingLevel] + 0.02;
     }
 
     @Override
     public void initialize() {
-        // idk if customLocal returns radians or degrees and i cant be bothered so just pass in the current heading
-        Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX());
-        Pose2d endPose = new Pose2d(startPose.getX(), -72 * 25.4 + maxDistanceFromWall + (robotLengthWithIntake - Robot.length) + Robot.length / 2.0);
-
-        SimpleTrajectory tr = new SimpleTrajectory(startPose, endPose, new Pose2d(0, 0), new Pose2d(0, 0), robotHeading);
-        runner = tr.getTrajectoryRunner(tr.getTrajectory(true, true));
-
-        runner.start();
         startTime = System.currentTimeMillis();
         initialPixelCount = Robot.intakeSubsystem.pixelPassCount;
-        //TrajectoryRunner.speed = 0.2;
 
-        Robot.intakeSubsystem.setIntakePosition(IntakeSubsystem.IntakePosition.DOWN);
+        Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[5]);
         Robot.intakeSubsystem.setPower(-1);
+
+        Robot.intakeSubsystem.activateIntakeDist.set(true);
     }
 
     @Override
     public void execute() {
         if (finished) return;
+        long t = System.currentTimeMillis();
 
-        if (runner.currentState != TrajectoryRunner.State.FINISHED) runner.update();
         collected = Robot.intakeSubsystem.pixelPassCount - initialPixelCount;
+        finished = collected == numToCollect || t - startTime >= maxTime;
 
-        finished = collected == numToCollect || System.currentTimeMillis() - startTime >= maxTime;
-
+        // cleanup should be handled by main thread logic
         if (finished) {
+            Robot.intakeSubsystem.activateIntakeDist.set(false);
             Robot.intakeSubsystem.setPower(1);
-            //TrajectoryRunner.speed = 0.6;
+        } else {
+            long delta = t - startTime;
+            if (delta / incrementTime > incrementLevel) {
+                incrementLevel++;
+                Robot.intakeSubsystem.setDroptakePosition(Math.max(0.02, initialLevel - (double) incrementLevel * increment));
+            }
         }
     }
 

@@ -2,19 +2,11 @@ package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
-import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Config
@@ -22,12 +14,16 @@ public class IntakeSubsystem extends SubsystemBase {
     public int pixelPassCount = 0;
     public boolean seePixel = false;
 
-    public static double intakeUpPosition = 0.7;
-    public static double intakeDownPosition = 0;
+    // down, stack 1, stack 2, stack 3, stack 4, stack 5, up
+    // 0.2 -> stack 3
+    // 0.18 -> stack 2
+    // 0 -> stack 1
+    public static double[] droptakeLevel = new double[] {0, 0, 0.04, 0.075, 0.09, 0.11, 0.5};
+
     private LoggerTool telemetry;
 
     private IntakeDistancePrediction prediction = IntakeDistancePrediction.EMPTY;
-    private final double intakeDistThreshold = 115;
+    private final double intakeDistThreshold = 118;
     private final int intakeDistFrameThreshold = 1;
     private int intakeDistFrameCount = 0;
     public AtomicBoolean activateIntakeDist = new AtomicBoolean(false);
@@ -70,12 +66,7 @@ public class IntakeSubsystem extends SubsystemBase {
         return (Robot.intakeDist.getDistance(DistanceUnit.MM));
     }
 
-    public void setIntakePosition(IntakePosition pos) { Robot.hardware.setDroptake(pos); }
-
-    public enum IntakePosition {
-        UP,
-        DOWN
-    }
+    public void setDroptakePosition(double angle) { Robot.hardware.setDroptake(angle); }
 
     public enum IntakePowerSetting {
         INTAKE,

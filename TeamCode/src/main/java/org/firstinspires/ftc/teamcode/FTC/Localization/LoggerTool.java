@@ -60,7 +60,7 @@ public class LoggerTool {
             if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
             HashSet<LoggerData> s = sortedData.get(data.section);
             s.remove(data); s.add(data);
-            telemetry.addData(data.name, data.value);
+            //telemetry.addData(data.name, data.value);
         }
     }
 
@@ -68,7 +68,7 @@ public class LoggerTool {
         if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
         HashSet<LoggerData> s = sortedData.get(data.section);
         s.remove(data); s.add(data);
-        telemetry.addData(data.name, data.value);
+        //telemetry.addData(data.name, data.value);
     }
 
     public synchronized void update() {
@@ -77,12 +77,16 @@ public class LoggerTool {
 
         //drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
         if (!getTrajectoryNull()) drawTrajectory();
+        /*
         if (current != null) {
             drawRobot(current.equation(Robot.t));
             Vector2d vec = current.getCentripetalForceVector(Robot.t);
 
             drawRobot(new Pose2d(-robotPose.getY() + vec.getX(), robotPose.getX() + vec.getY(), robotPose.getHeading()));
         }
+        */
+
+        //drawRobot(new Pose2d(-robotPose.getY(), robotPose.getX(), robotPose.getHeading()));
 
         StringBuilder out = new StringBuilder("<br><br><tt>");
 
@@ -112,7 +116,9 @@ public class LoggerTool {
 
     public synchronized void addError(String name, Exception e) {
         StringBuilder s = new StringBuilder(e.toString());
-        for (StackTraceElement st : e.getStackTrace()) s.append(st.toString());
+        for (StackTraceElement st : e.getStackTrace()) s.append("<br>").append(st.toString());
+
+        s.append("<br><br>");
 
         // unique id via currentTimeMillis
         addImportant(new LoggerData(name + " (" + System.currentTimeMillis() + ")", s.toString(), "ERROR"));
@@ -122,10 +128,10 @@ public class LoggerTool {
 
     public synchronized void setCurrentTrajectory(TrajectoryInterface trajectory) {
         current = trajectory;
-        xvals = new double[100];
-        yvals = new double[100];
-        for (int i = 0; i < 100; i++) {
-            Pose2d pos = trajectory.equation((double) i / 100.0);
+        xvals = new double[30];
+        yvals = new double[30];
+        for (int i = 0; i < 30; i++) {
+            Pose2d pos = trajectory.equation((double) i / 30.0);
             yvals[i] = -(pos.getX() / 25.4);
             xvals[i] = (pos.getY() / 25.4);
         }
@@ -133,14 +139,12 @@ public class LoggerTool {
     }
 
     private void drawRobot(Pose2d pose) {
-        if (true) return; // for some reason this breaks everything?
         pose = new Pose2d(pose.getY() / 25.4, -pose.getX() / 25.4, pose.getHeading());
         p.fieldOverlay().setStroke("red");
         DashboardUtil.drawRobot(p.fieldOverlay(), pose);
     }
 
     private void drawRobot() {
-        if (true) return;
         p.fieldOverlay().setStroke("blue");
         DashboardUtil.drawRobot(p.fieldOverlay(), new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading())));
     }
@@ -173,11 +177,11 @@ public class LoggerTool {
     private synchronized void updatePreviousPoseValsList() {
         Pose2d rp = new Pose2d(Constants.robotPose.getX() * .0394, Constants.robotPose.getY() * .0394, (Constants.robotPose.getHeading()));
         xPosVals.add(0, (double) rp.getX());
-        if (xPosVals.size() > 50000) {
+        if (xPosVals.size() > 10_000) {
             xPosVals.remove(xPosVals.size() - 1);
         }
         yPosVals.add(0, (double) rp.getY());
-        if (yPosVals.size() > 50000) {
+        if (yPosVals.size() > 10_000) {
             yPosVals.remove(yPosVals.size() - 1);
         }
     }

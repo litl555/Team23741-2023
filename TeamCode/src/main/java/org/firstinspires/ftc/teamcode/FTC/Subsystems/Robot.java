@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareDevice;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.OdometryModule;
 import org.firstinspires.ftc.teamcode.FTC.SmallParticle.ParticleRev2M;
 import org.firstinspires.ftc.teamcode.FTC.Threading.HardwareThread;
 import org.firstinspires.ftc.teamcode.FTC.Threading.MathThread;
+import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 
 import java.lang.reflect.Field;
 
@@ -40,7 +42,7 @@ public class Robot {
 
     // intake
     public static CRServo bottomRoller;
-    public static DistanceSensor intakeDist;
+    public static ParticleRev2M intakeDist;
     public static DcMotorEx intakeMotor;
     public static Servo droptakeRight, droptakeLeft;
 
@@ -53,7 +55,11 @@ public class Robot {
     // claw
     public static Servo clawBlack, clawWhite;
 
+    // drone
     public static CRServo drone;
+
+    // outtake distance sensors
+    public static ParticleRev2M outtakeDistLeft, outtakeDistRight;
 
     // ==============================================================
     // +                       SHARED VALUES                        =
@@ -80,9 +86,8 @@ public class Robot {
     public static HardwareThread hardware;
 
     public static MathThread math;
-    public static Thread hardwareThread, mathThread;
-
-    public static LinearOpMode caller;
+    public static WriteThread write;
+    public static Thread hardwareThread, mathThread, writeThread;
 
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
@@ -103,11 +108,17 @@ public class Robot {
         rightRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftRear.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
-        rightPod = new OdometryModule(hardwareMap.dcMotor.get("drone"));
+        rightPod = new OdometryModule(hardwareMap.dcMotor.get("rightPodWrapper"));
         backPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
 
         rightPod.reverse();
+        backPod.reverse();
 
         backPod.reset();
         rightPod.reset();
@@ -126,7 +137,6 @@ public class Robot {
 
         // intake
         bottomRoller = hardwareMap.crservo.get("bottomRoller");
-        intakeDist = hardwareMap.get(DistanceSensor.class, "intakeDist");
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intake");
 
         droptakeRight = hardwareMap.servo.get("droptakeRight");
@@ -155,20 +165,23 @@ public class Robot {
         hardwareThread = new Thread(hardware, "Hardware Thread");
         mathThread = new Thread(math, "Math Thread");
 
+        hardware.errorHandler.assignThread(hardwareThread);
+        math.errorHandler.assignThread(mathThread);
+
         // reset static variables where needed
         level = 0;
         forwardIsForward = true;
         onlyLogImportant = false;
         isBusy = false;
 
-        // attach custom distance sensor
-        ParticleRev2M dist = null;
+        // replace default distance sensors with custom
         for (HardwareDevice device : hardwareMap.getAll(HardwareDevice.class)) {
             if (device instanceof Rev2mDistanceSensor) {
                 try {
                     I2cDeviceSynch tmp = (I2cDeviceSynch) getField(device.getClass(), "deviceClient").get(device);
                     boolean owned = (boolean) getField(device.getClass(), "deviceClientIsOwned").get(device);
 
+                    ParticleRev2M dist = null;
                     dist = new ParticleRev2M(tmp, owned);
                     dist.setRangingProfile(ParticleRev2M.RANGING_PROFILE.HIGH_SPEED);
 
@@ -178,6 +191,9 @@ public class Robot {
                 } catch (Exception e) { Robot.telemetry.addError("Error Attaching Distance Sensor", e); }
             }
         }
+
+        // distance sensors
+        intakeDist = hardwareMap.get(ParticleRev2M.class, "intakeDist");
     }
 
     public static void update() {
