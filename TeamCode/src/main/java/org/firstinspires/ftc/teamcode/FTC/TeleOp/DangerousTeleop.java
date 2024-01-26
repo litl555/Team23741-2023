@@ -160,7 +160,7 @@ public class DangerousTeleop extends CommandOpMode {
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.onlyLogImportant = true;
-        intake.activateIntakeDist.set(true);
+        //intake.activateIntakeDist.set(true);
 
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
