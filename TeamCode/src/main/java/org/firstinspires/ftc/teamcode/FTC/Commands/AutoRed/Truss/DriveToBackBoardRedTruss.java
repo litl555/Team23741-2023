@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.Trajectory;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.TrajectoryRunner;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
+@Config
 public class DriveToBackBoardRedTruss extends CommandBase {
     private static final double inToMm = 25.4;
 
@@ -20,7 +22,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double leftYOffset = 0;
     public static double middleXOffset = -30;
     public static double middleYOffset = -20;
-    public static double rightXOffset = 120;
+    public static double rightXOffset = 320;
     public static double rightYOffset = 0;
 
 
@@ -46,7 +48,8 @@ public class DriveToBackBoardRedTruss extends CommandBase {
 
         switch (pos) {
             case right:
-                interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(210, 1078), -180);
+                baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), 180);
+                interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(210, 1078), 180);
                 break;
             case left:
                 interToEnd = new SimpleTrajectory(intermediary, leftPos, new Pose2d(0, 0), new Pose2d(69, 978), -180);

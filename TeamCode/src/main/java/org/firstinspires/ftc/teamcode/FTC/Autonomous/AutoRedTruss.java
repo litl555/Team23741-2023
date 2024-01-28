@@ -145,8 +145,8 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                             new WaitCommand(200),
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                    new DriveToTrussCycle().interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
-                new DriveToStackCycle(),
+                    new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
+                new DriveToStackCycle(last),
                 new IntakePixelFromStack(2, 2000, 4),
                 new ParallelCommandGroup(
                     // clean up intake
@@ -158,7 +158,7 @@ public class AutoRedTruss extends LinearOpMode {
                             Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
                         })
                     ),
-                    new DriveToBackBoardRedTruss(TeamPropPosition.middle),
+                    new DriveToBackBoardRedTruss(last),
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
                         new GoToHeight(lift, claw, 2)

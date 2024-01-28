@@ -233,6 +233,7 @@ public class TrajectoryRunner {
     }
 
     private void correctMode() {
+        Robot.telemetry.addImportant("HI", "HI");
         if (count % 1 == 0) {
 
             Pose2d positions = t.getEnd();
@@ -242,16 +243,8 @@ public class TrajectoryRunner {
 
             double px = trajRunnerSpeedMult * xerror;
             double py = -1.0 * trajRunnerSpeedMult * yerror;
-            if (px > 1.0) {
-                px = 1.0;
-            } else if (px < -1.0) {
-                px = -1.0;
-            }
-            if (py > 1.0) {
-                py = 1.0;
-            } else if (py < -1.0) {
-                py = -1.0;
-            }
+
+
             Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
             double x, y = 0;
             if (robot.distTo(t.getEnd().vec()) < 100) {
