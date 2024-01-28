@@ -176,6 +176,7 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.telemetry.addImportant(new LoggerData("LEVEL", liftLevel, "LIFT", true));
         Robot.telemetry.addImportant(new LoggerData("IS OVERRIDDEN", lift.hangOverride, "LIFT", true));
         Robot.telemetry.addImportant(new LoggerData("TICK", Robot.hardware.lastLiftPosition, "LIFT", true));
+        Robot.telemetry.addImportant(new LoggerData("POWER", Robot.liftSubsystem.maxPower, "LIFT", true));
 
         Robot.telemetry.addImportant(new LoggerData("Main", System.currentTimeMillis(), "THREAD UPDATE"));
         Robot.telemetry.addImportant("Droptake", droptakeLevel);

@@ -80,7 +80,10 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // if were going to 1, close
                         new ConditionalCommand(
-                            new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)),
+                            new InstantCommand(() -> {
+                                claw.update(ClawSubsystem.ClawState.CLOSED);
+                                lift.maxPower = 0.7;
+                            }),
                             new InstantCommand(),
                             () -> newLevel == 1
                         ),
@@ -104,7 +107,9 @@ public class GoToHeight extends ParallelCommandGroup {
                     else claw.updateArmWristPos(newLevel);
                 }),
                 new ConditionalCommand(
-                    new WaitCommand(600),
+                    new SequentialCommandGroup(
+                        new WaitCommand(600),
+                        new InstantCommand(() -> lift.maxPower = 1)),
                     new InstantCommand(),
                     () -> Robot.level >= 2 && newLevel < 2
                 ),
