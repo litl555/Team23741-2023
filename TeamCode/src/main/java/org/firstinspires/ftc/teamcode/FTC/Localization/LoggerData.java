@@ -5,11 +5,20 @@ import java.util.Comparator;
 public class LoggerData {
     public final String name, section;
     public final Object value;
+    public final boolean shouldLogToDriver;
 
     public LoggerData(String name, Object value, String section) {
         this.name = name;
         this.value = value;
         this.section = section;
+        this.shouldLogToDriver = false;
+    }
+
+    public LoggerData(String name, Object value, String section, boolean shouldLogToDriver) {
+        this.name = name;
+        this.value = value;
+        this.section = section;
+        this.shouldLogToDriver = shouldLogToDriver;
     }
 
     @Override

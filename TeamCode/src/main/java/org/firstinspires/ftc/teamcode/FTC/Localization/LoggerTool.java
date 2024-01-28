@@ -60,7 +60,7 @@ public class LoggerTool {
             if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
             HashSet<LoggerData> s = sortedData.get(data.section);
             s.remove(data); s.add(data);
-            //telemetry.addData(data.name, data.value);
+            if (data.shouldLogToDriver) telemetry.addData("(" + data.section + ") " + data.name, data.value);
         }
     }
 
@@ -68,7 +68,7 @@ public class LoggerTool {
         if (!sortedData.containsKey(data.section)) sortedData.put(data.section, new HashSet<>());
         HashSet<LoggerData> s = sortedData.get(data.section);
         s.remove(data); s.add(data);
-        //telemetry.addData(data.name, data.value);
+        if (data.shouldLogToDriver) telemetry.addData("(" + data.section + ") " + data.name, data.value);
     }
 
     public synchronized void update() {

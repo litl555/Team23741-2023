@@ -129,7 +129,7 @@ public class DangerousTeleop extends CommandOpMode {
                     else if (Robot.level == 1) schedule(new GoToHeight(lift, claw, 0));
                     else schedule(new SequentialCommandGroup(
                         new GoToHeight(lift, claw, 1),
-                        new WaitCommand(1000),
+                        new WaitCommand(400),
                         new GoToHeight(lift, claw, 0)
                     ));
                 })
@@ -173,9 +173,9 @@ public class DangerousTeleop extends CommandOpMode {
 
     @Override
     public void run() {
-        Robot.telemetry.addImportant(new LoggerData("LEVEL", liftLevel, "LIFT"));
-        Robot.telemetry.addImportant(new LoggerData("IS OVERRIDDEN", lift.hangOverride, "LIFT"));
-        Robot.telemetry.addImportant(new LoggerData("TICK", Robot.hardware.lastLiftPosition, "LIFT"));
+        Robot.telemetry.addImportant(new LoggerData("LEVEL", liftLevel, "LIFT", true));
+        Robot.telemetry.addImportant(new LoggerData("IS OVERRIDDEN", lift.hangOverride, "LIFT", true));
+        Robot.telemetry.addImportant(new LoggerData("TICK", Robot.hardware.lastLiftPosition, "LIFT", true));
 
         Robot.telemetry.addImportant(new LoggerData("Main", System.currentTimeMillis(), "THREAD UPDATE"));
         Robot.telemetry.addImportant("Droptake", droptakeLevel);

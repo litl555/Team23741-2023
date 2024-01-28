@@ -10,7 +10,7 @@ public class LiftSubsystem extends SubsystemBase {
     public final double P = 0.003, I = 0.145, D = 2, F = 0.0;
     public PIDFController pid = new PIDFController(P, I, D, F);
 
-    public double maxPower = 0.8;
+    public double maxPower = 1;
     public boolean hangOverride = false;
     public double controllerPower = 0;
 
@@ -21,7 +21,7 @@ public class LiftSubsystem extends SubsystemBase {
     // 3 -> board row 1
     // 4 -> board row 2
     // 5 -> board row 3...
-    public double[] rowHeights = new double[]{-30, 200, 350, 650, 800, 1200, 1600, 2000, 2300};
+    public double[] rowHeights = new double[]{-30, 260, 350, 650, 800, 1200, 1600, 2000, 2300};
 
     public LiftSubsystem() {
         pid.setTolerance(10);
