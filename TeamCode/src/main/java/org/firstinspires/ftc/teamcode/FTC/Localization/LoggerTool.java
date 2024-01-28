@@ -75,7 +75,7 @@ public class LoggerTool {
         if (Robot.onlyLogImportant) addImportant("LOGGING INFO", "onlyLogImportant is active");
         p = new TelemetryPacket();
 
-        //drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
+        drawPoseHistory(); // TODO: fix this so it doesnt send 50k values per cycle
         if (!getTrajectoryNull()) drawTrajectory();
         /*
         if (current != null) {
@@ -86,7 +86,7 @@ public class LoggerTool {
         }
         */
 
-        //drawRobot(new Pose2d(-robotPose.getY(), robotPose.getX(), robotPose.getHeading()));
+        drawRobot(new Pose2d(-robotPose.getY(), robotPose.getX(), robotPose.getHeading()));
 
         StringBuilder out = new StringBuilder("<br><br><tt>");
 

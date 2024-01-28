@@ -4,8 +4,13 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
+import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.ActualMultiTrajRunner;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.MultiTrajEvent;
 import org.firstinspires.ftc.teamcode.FTC.PathFollowing.SimpleTrajectory;
@@ -39,7 +44,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position to prep for 2+1
-        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4);
+        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4 - 20);
 
         SimpleTrajectory toStrip = null;
         SimpleTrajectory stripToBase = null;
@@ -51,7 +56,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
                 break;
             case undefined: // if undefined go to middle
             case middle:
-                toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 530), middlePos.getHeading());
+                toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 1030), middlePos.getHeading());
                 stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
             case left:
@@ -60,10 +65,16 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
                 break;
         }
 
-        tr = new ActualMultiTrajRunner(
-            new SimpleTrajectory[] {toStrip, stripToBase},
-            new MultiTrajEvent[] {new MultiTrajEvent(0, pixelPlaceCommand)});
-
+        tr = new ActualMultiTrajRunner();
+        tr.addEvents(new MultiTrajEvent[]{new MultiTrajEvent(0, new SequentialCommandGroup(
+            pixelPlaceCommand,
+            new InstantCommand(tr::notifyUnpause),
+            new SequentialCommandGroup(
+                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
+                new WaitCommand(250),
+                new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0)
+            )), true)});
+        tr.initEvents(new SimpleTrajectory[]{toStrip, stripToBase});
         tr.start();
     }
 

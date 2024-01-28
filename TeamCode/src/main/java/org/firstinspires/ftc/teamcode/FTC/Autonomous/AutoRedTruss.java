@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.outoftheboxrobotics.photoncore.Photon;
@@ -14,10 +15,13 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToBackBoardRedTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveToParkingRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToSpikeStripRedTruss;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToStackCycle;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToTrussCycle;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
+import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -92,28 +96,27 @@ public class AutoRedTruss extends LinearOpMode {
             new SequentialCommandGroup(
                 // go to spike strip and place
             new ParallelCommandGroup(
-                    new DriveToSpikeStripRedTruss(last,
-                        new SequentialCommandGroup(
-                            new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                            new WaitCommand(200),
-                            new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
-                    new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
+                new InstantCommand(() -> {
+                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
+                }),
+                new DriveToSpikeStripRedTruss(last,
                     new SequentialCommandGroup(
-                        new WaitCommand(1_000),
-                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.5)))),
+                        new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                        new WaitCommand(200),
+                        new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
+                new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
+                new SequentialCommandGroup(
+                    new WaitCommand(1_000),
+                    new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.5)))),
                 // now pick up an extra pixel
-                new ParallelCommandGroup(
-                    new SequentialCommandGroup(
-                        new GoToHeight(lift, claw, 1),
-                        new WaitCommand(250),
-                        new GoToHeight(lift, claw, 0)),
-                    new IntakePixelFromStack(1, 2_000, 5)),
+
+                new IntakePixelFromStack(1, 2_000, 5),
                 // move to back board
                 new ParallelCommandGroup(
                     // clean up intake
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
-                        new WaitCommand(2_000),
+                        new WaitCommand(500),
                         new InstantCommand(() -> {
                             Robot.intakeSubsystem.setPower(0);
                             Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
@@ -127,11 +130,13 @@ public class AutoRedTruss extends LinearOpMode {
                 ),
                 new GoToHeight(lift, claw, 3),
                 new RamBoard(),
-                new WaitCommand(350),
+
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
-                new WaitCommand(1000),
+                new WaitCommand(250),
+                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
+                new WaitCommand(500),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                new WaitCommand(350),
+                new WaitCommand(250),
                 new ParallelCommandGroup(
                     // reset lift
                     new SequentialCommandGroup(
@@ -140,8 +145,35 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                             new WaitCommand(200),
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                    new DriveToParkingRed(-180))
-        ));
+                    new DriveToTrussCycle().interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
+                new DriveToStackCycle(),
+                new IntakePixelFromStack(2, 2000, 4),
+                new ParallelCommandGroup(
+                    // clean up intake
+                    new SequentialCommandGroup(
+                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
+                        new WaitCommand(500),
+                        new InstantCommand(() -> {
+                            Robot.intakeSubsystem.setPower(0);
+                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
+                        })
+                    ),
+                    new DriveToBackBoardRedTruss(TeamPropPosition.middle),
+                    new SequentialCommandGroup(
+                        new WaitCommand(2_500),
+                        new GoToHeight(lift, claw, 2)
+                    )
+                ),
+                new GoToHeight(lift, claw, 3),
+                new RamBoard(),
+
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
+                new WaitCommand(250),
+                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
+                new WaitCommand(500),
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
+
+            ));
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 

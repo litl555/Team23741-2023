@@ -17,7 +17,12 @@ public class ActualMultiTrajRunner {
     private boolean finished = false, started = false, paused = false;
     private int currentlyRunningIndex = 0;
 
+    public ActualMultiTrajRunner() {
+
+    }
+
     public ActualMultiTrajRunner(SimpleTrajectory[] traj) {
+
         initialize(traj);
     }
 
@@ -27,6 +32,14 @@ public class ActualMultiTrajRunner {
     // | tr 0 | cp 0 | tr 1 | cp 1 ...
     public ActualMultiTrajRunner(SimpleTrajectory[] traj, MultiTrajEvent[] events) {
         for (MultiTrajEvent event : events) this.events.put(event.checkpoint, event);
+        initialize(traj);
+    }
+
+    public void addEvents(MultiTrajEvent[] events) {
+        for (MultiTrajEvent event : events) this.events.put(event.checkpoint, event);
+    }
+
+    public void initEvents(SimpleTrajectory[] traj) {
         initialize(traj);
     }
 

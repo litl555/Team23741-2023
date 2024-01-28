@@ -12,7 +12,7 @@ public class IntakePixelFromStack extends CommandBase {
     private long maxTime, startTime;
     private boolean finished = false;
 
-    private double increment = 0.005, initialLevel;
+    private double increment = 0.01, initialLevel;
     private int incrementLevel = 0;
     private long incrementTime = 250;
 
@@ -29,7 +29,7 @@ public class IntakePixelFromStack extends CommandBase {
         initialPixelCount = Robot.intakeSubsystem.pixelPassCount;
 
         Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[5]);
-        Robot.intakeSubsystem.setPower(-1);
+        Robot.intakeSubsystem.setPower(-.8);
 
         Robot.intakeSubsystem.activateIntakeDist.set(true);
     }
@@ -45,6 +45,7 @@ public class IntakePixelFromStack extends CommandBase {
         // cleanup should be handled by main thread logic
         if (finished) {
             Robot.intakeSubsystem.activateIntakeDist.set(false);
+            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
             Robot.intakeSubsystem.setPower(1);
         } else {
             long delta = t - startTime;

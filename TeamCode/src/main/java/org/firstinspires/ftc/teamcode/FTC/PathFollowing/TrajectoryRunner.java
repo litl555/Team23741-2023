@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
+import java.util.ArrayList;
+
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.angle;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.getTime;
 import static org.firstinspires.ftc.teamcode.FTC.Localization.Constants.robotPose;
@@ -40,13 +42,14 @@ public class TrajectoryRunner {
         TangentHeading
     }
 
-    public static double speed = 0.6;
+    public static double speed = 0.8;
     public int ind;
 
     public static double angleDes = 90; // TODO: this should be instance not static
     public State currentState = State.PRESTART;
     int count = 0;
-
+    ArrayList<Double> errorsx = new ArrayList<>();
+    ArrayList<Double> errorsy = new ArrayList<>();
     private double lastTime = 0;
 
     BasicFeedforward fx = new BasicFeedforward(new FeedforwardCoefficients(kv, ka, ks));
@@ -168,10 +171,11 @@ public class TrajectoryRunner {
             //loggerTool.add("yerror",(point.getY() - robotPose.getX()));
 
             Vector2d sum = pathVector.plus(correctionalVector);
-            if (Math.sqrt(sum.dot(sum)) > 1.0) {
-                sum = sum.div(Math.sqrt(sum.dot(sum)));
-            }
+
+            sum = sum.div(Math.sqrt(Math.pow(sum.getX(), 2) + Math.pow(sum.getY(), 2)));
+
             sum = sum.times(speed);
+            Robot.telemetry.addImportant("sum", Math.sqrt(Math.pow(Math.cos(Constants.angle) * sum.getX() - Math.sin(Constants.angle) * sum.getY(), 2) + Math.pow(sum.getX() * Math.sin(Constants.angle) + sum.getY() * Math.cos(Constants.angle), 2)));
             //l.setWeightedDrivePowers(new Pose2d(sum.getX(), sum.getY(), kpa * (angleDes - Constants.angle)));
 
             initialMotorWriteTime = System.currentTimeMillis();
@@ -229,10 +233,13 @@ public class TrajectoryRunner {
     }
 
     private void correctMode() {
-        if (count % 3 == 0) {
+        if (count % 1 == 0) {
+
             Pose2d positions = t.getEnd();
             double xerror = (positions.getX() + robotPose.getY());
+
             double yerror = (positions.getY() - robotPose.getX());
+
             double px = trajRunnerSpeedMult * xerror;
             double py = -1.0 * trajRunnerSpeedMult * yerror;
             if (px > 1.0) {
@@ -245,13 +252,39 @@ public class TrajectoryRunner {
             } else if (py < -1.0) {
                 py = -1.0;
             }
+            Vector2d robot = new Vector2d(-robotPose.getY(), robotPose.getX());
+            double x, y = 0;
+            if (robot.distTo(t.getEnd().vec()) < 100) {
+                errorsy.add(yerror);
+
+                errorsx.add(xerror);
+                double sumx = 0;
+                for (double i :
+                    errorsx) {
+                    sumx += i;
+                }
+                double sumy = 0;
+                for (double i :
+                    errorsy) {
+                    sumx += i;
+                }
+                if (errorsx.size() > 100) {
+                    errorsx.remove(0);
+                }
+                if (errorsy.size() > 100) {
+                    errorsy.remove(0);
+                }
+                x = px + dxy * (xerror - xerrorLast) + kixy * sumy;
+                y = py - dxy * (yerror - yerrorLast) - kixy * sumx;
+            } else {
+                x = px + dxy * (xerror - xerrorLast);
+                y = py - dxy * (yerror - yerrorLast);
+            }
 
 
-            double x = px + dxy * (xerror - xerrorLast);
-            double y = py - dxy * (yerror - yerrorLast);
-            Robot.telemetry.add("y", y);
+//            Robot.telemetry.add("y", y);
             Robot.telemetry.add("yD", dxy * (yerror - yerrorLast) * -1.0);
-            Robot.telemetry.add("x", x);
+//            Robot.telemetry.add("x", x);
             Robot.telemetry.add("xD", dxy * (xerror - xerrorLast));
 
             yerrorLast = yerror;

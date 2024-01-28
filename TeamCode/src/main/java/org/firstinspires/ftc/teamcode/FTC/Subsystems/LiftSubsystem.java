@@ -37,7 +37,7 @@ public class LiftSubsystem extends SubsystemBase {
         return index;
     }
 
-    private double targetPos = 0; // in ticks
+    public double targetPos = 0; // in ticks
     public void setTargetPos(double height) {
         pid.reset();
         targetPos = height;

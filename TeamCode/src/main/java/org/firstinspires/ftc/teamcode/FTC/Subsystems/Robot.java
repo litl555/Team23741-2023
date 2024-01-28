@@ -115,7 +115,7 @@ public class Robot {
 
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("rightPodWrapper"));
-        backPod = new OdometryModule(hardwareMap.dcMotor.get("rightRear"));
+        backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
 
         rightPod.reverse();
         backPod.reverse();

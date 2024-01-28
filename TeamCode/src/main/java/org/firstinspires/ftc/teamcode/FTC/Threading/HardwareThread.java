@@ -43,7 +43,7 @@ public class HardwareThread implements Runnable {
     public HardwareThread(HardwareMap map) {
         lynxModules = map.getAll(LynxModule.class);
 
-        for (LynxModule module : lynxModules) module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+//        for (LynxModule module : lynxModules) module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         liftQueue = new ArrayDeque<>();
         wristQueue = new ArrayDeque<>();
@@ -72,7 +72,7 @@ public class HardwareThread implements Runnable {
             // read port values
             synchronized (Robot.class) {
                 synchronized (Constants.class) {
-                    for (LynxModule module : lynxModules) module.clearBulkCache();
+//                    for (LynxModule module : lynxModules) module.clearBulkCache();
                     Robot.leftPod.getDelta();
                     Robot.rightPod.getDelta();
                     Robot.backPod.getDelta();
