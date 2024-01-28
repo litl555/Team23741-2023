@@ -120,22 +120,20 @@ public class CustomLocalization {
         L *= X_MULTIPLIER;
         B *= Y_MULTIPLER;
 
+
         dT = ((double) R - (double) L) / (Constants.LATERAL_DISTANCE);//(r-l)/(ly-ry)
         Constants.angle += dT;
         double T = Constants.robotPose.getHeading();
         dF = (R + L) / (double) 2.0;
         dS = (B - Constants.PERPENDICULAR_X * dT);
         if (dT == 0.0) {
-            dX = dF;
-            dY = dS;
+            fx = (-1.0 * dT * dT * dF * Math.cos(T) + 6.0 * dF * Math.cos(T) - 3.0 * dT * dS * Math.cos(T) - 3.0 * dT * dF * Math.sin(T) + dT * dT * dS * Math.sin(T) - 6.0 * dS * Math.sin(T)) / 6.0;
+            fy = (3.0 * dT * dF * Math.cos(T) - dT * dT * dS * Math.cos(T) + 6.0 * dS * Math.cos(T) - dT * dT * dF * Math.sin(T) + 6.0 * dF * Math.sin(T) - 3.0 * dT * dS * Math.sin(T)) / 6.0;
+
         } else {
-            r0 = dF / dT;
-            r1 = dS / dT;
-            dX = r0 * Math.sin(dT) - r1 * ((double) 1.0 - Math.cos(dT));
-            dY = r1 * Math.sin(dT) + r0 * ((double) 1.0 - Math.cos(dT));
+            fx = (-1.0 * dS * Math.cos(T) + dS * Math.cos(T + dT) - dF * Math.sin(T) + dF * Math.sin(T + dT)) / dT;
+            fy = (-1.0 * dF * Math.cos(T) - dF * Math.cos(T + dT) - dS * Math.sin(T) + dS * Math.sin(T + dT)) / dT;
         }
-        fx = (double) (dX * Math.cos(T) - (double) dY * Math.sin(T));
-        fy = (double) (dY * Math.cos(T) + (double) dX * Math.sin(T));
 
         return (new Pose2d(fx, fy, dT));
     }
