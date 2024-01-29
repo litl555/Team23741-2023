@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.Range;
 
 @Config
 public class LiftSubsystem extends SubsystemBase {
-    public final double P = 0.003, I = 0.145, D = 2, F = 0.0;
+    public static double P = 0.003, I = 0.145, D = 2, F = 0.0;
     public PIDFController pid = new PIDFController(P, I, D, F);
 
     public double maxPower = 1;

@@ -26,6 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private final double intakeDistThreshold = 118;
     private final int intakeDistFrameThreshold = 1;
     private int intakeDistFrameCount = 0;
+    public double intakeIndex = 0;
     public AtomicBoolean activateIntakeDist = new AtomicBoolean(false);
 
     public IntakeSubsystem(LoggerTool telemetry) {
@@ -66,7 +67,10 @@ public class IntakeSubsystem extends SubsystemBase {
         return (Robot.intakeDist.getDistance(DistanceUnit.MM));
     }
 
-    public void setDroptakePosition(double angle) { Robot.hardware.setDroptake(angle); }
+    public void setDroptakePosition(double angle) {
+        Robot.hardware.setDroptake(angle);
+        intakeIndex = angle;
+    }
 
     public enum IntakePowerSetting {
         INTAKE,

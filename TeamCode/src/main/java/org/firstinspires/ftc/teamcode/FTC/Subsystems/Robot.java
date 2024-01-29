@@ -83,6 +83,7 @@ public class Robot {
     public static ClawSubsystem clawSubsystem;
     public static LiftSubsystem liftSubsystem;
     public static IntakeSubsystem intakeSubsystem;
+    public static boolean pidControl = false;
     public static HardwareThread hardware;
 
     public static MathThread math;

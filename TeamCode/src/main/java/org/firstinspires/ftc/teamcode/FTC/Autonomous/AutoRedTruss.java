@@ -33,7 +33,8 @@ import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@Photon(singleThreadOptimized = false, maximumParallelCommands = 12) // TODO having so high seems to have caused a few crashes
+@Photon(singleThreadOptimized = false, maximumParallelCommands = 8)
+// TODO having so high seems to have caused a few crashes
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;

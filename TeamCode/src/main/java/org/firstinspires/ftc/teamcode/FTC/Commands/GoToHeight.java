@@ -63,7 +63,7 @@ public class GoToHeight extends ParallelCommandGroup {
                         // extract pixel
                         new InstantCommand(() -> {
                             lift.maxPower = 0.4;
-                            lift.setTargetPos(300);
+                            lift.setTargetPos(350);
                         }),
                         new WaitCommand(50),
                         new InstantCommand(() -> ClawSubsystem.clearPixelIntake.apply(claw)),
