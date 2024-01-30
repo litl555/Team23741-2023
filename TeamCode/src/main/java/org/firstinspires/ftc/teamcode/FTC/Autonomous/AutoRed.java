@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToBackBoardRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveToParkingRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToSpikeStripRed;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.CycleFullBoardSide;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
@@ -94,16 +95,14 @@ public class AutoRed extends LinearOpMode {
                 new WaitCommand(250),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
                 new WaitCommand(250),
-                new ParallelCommandGroup(
-                    // reset lift
-                    new SequentialCommandGroup(
-                        new WaitCommand(1_000),
-                        new SequentialCommandGroup(
-                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
-                            new WaitCommand(200),
-                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
-                    new DriveToParkingRed(180)))
-        );
+
+                // reset lift
+
+
+                new CycleFullBoardSide(last, 1)
+
+            ));
+
 
         double lastTime = System.currentTimeMillis();
 

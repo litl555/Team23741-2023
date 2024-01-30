@@ -23,16 +23,25 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double middleXOffset = -30;
     public static double middleYOffset = -20;
     public static double rightXOffset = 320;
+    public static double iterOneOffY = 40;
     public static double rightYOffset = 0;
+    public static double yOffsetGlobal = -40.0;
 
-
-    private Pose2d backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm);
+    private Pose2d backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal);
     private Pose2d middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
     private Pose2d rightPos = new Pose2d(backBoardCenter.getX() + rightXOffset, backBoardCenter.getY() + rightYOffset);
     private Pose2d leftPos = new Pose2d(backBoardCenter.getX() + leftXOffset, backBoardCenter.getY() + leftYOffset);
 
-    public DriveToBackBoardRedTruss(TeamPropPosition pos) {
+
+    public DriveToBackBoardRedTruss(TeamPropPosition pos, int iter) {
         this.pos = pos;
+
+        if (iter == 1) {
+            backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal - iterOneOffY);
+        }
+        middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
+        rightPos = new Pose2d(backBoardCenter.getX() + rightXOffset, backBoardCenter.getY() + rightYOffset);
+        leftPos = new Pose2d(backBoardCenter.getX() + leftXOffset, backBoardCenter.getY() + leftYOffset);
     }
 
     @Override

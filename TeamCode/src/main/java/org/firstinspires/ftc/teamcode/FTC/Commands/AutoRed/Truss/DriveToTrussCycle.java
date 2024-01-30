@@ -19,6 +19,8 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 public class DriveToTrussCycle extends CommandBase {
     ActualMultiTrajRunner mtr;
     public static double xoffright = 100;
+    public static double xoffmiddle = 100;
+    public static double xoffleft = 100;
     private boolean finished = false;
     private TeamPropPosition pos;
 
@@ -34,10 +36,10 @@ public class DriveToTrussCycle extends CommandBase {
                 trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(200 + xoffright, 200), new Pose2d(0, -300), new Pose2d(0, 0), 180.0);
                 break;
             case middle:
-                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(200, 200), new Pose2d(0, -300), new Pose2d(0, 0), -180.0);
+                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(200 + xoffmiddle, 200), new Pose2d(0, -300), new Pose2d(0, 0), -180.0);
                 break;
             case left:
-                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(200, 200), new Pose2d(0, -300), new Pose2d(0, 0), -180.0);
+                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(200 + xoffleft, 200), new Pose2d(0, -300), new Pose2d(0, 0), -180.0);
                 break;
 
         }

@@ -16,7 +16,9 @@ public class DriveToStackCycle extends CommandBase {
     private boolean finished = false;
     Pose2d base = new Pose2d(13.5 * 25.4 + 100, -58.5 * 25.4 - 40);//-40 y +150x
     private TeamPropPosition pos;
-    public static double yoffright = 40;
+    public static double yoffright = 80;
+    public static double yoffmiddle = 80;
+    public static double yoffleft = 80;
 
     public DriveToStackCycle(TeamPropPosition position) {
         pos = position;
@@ -30,10 +32,10 @@ public class DriveToStackCycle extends CommandBase {
                 trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(base.getX(), base.getY() + yoffright), new Pose2d(0, 0), new Pose2d(300, -400), 180);
                 break;
             case left:
-                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(base.getX(), base.getY()), new Pose2d(0, 0), new Pose2d(300, -400), -180);
+                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(base.getX(), base.getY() + yoffmiddle), new Pose2d(0, 0), new Pose2d(300, -400), -180);
                 break;
             case middle:
-                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(base.getX(), base.getY()), new Pose2d(0, 0), new Pose2d(300, -400), -180);
+                trajectory = new SimpleTrajectory(new Pose2d(Constants.robotPose.getY() * -1.0, Constants.robotPose.getX()), new Pose2d(base.getX(), base.getY() + yoffleft), new Pose2d(0, 0), new Pose2d(300, -400), -180);
 
         }
         mtr = new ActualMultiTrajRunner(new SimpleTrajectory[]{trajectory});

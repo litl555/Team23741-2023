@@ -20,6 +20,7 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToTrussCyc
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
+import org.firstinspires.ftc.teamcode.FTC.Commands.RamIntake;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
@@ -108,10 +109,12 @@ public class AutoRedTruss extends LinearOpMode {
                 new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
                 new SequentialCommandGroup(
                     new WaitCommand(1_000),
-                    new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.5)))),
+                    new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.7)))),
                 // now pick up an extra pixel
-
-                new IntakePixelFromStack(1, 2_000, 5),
+                new ParallelCommandGroup(
+                    new IntakePixelFromStack(1, 2000, 5),
+                    new RamIntake()
+                ),
                 // move to back board
                 new ParallelCommandGroup(
                     // clean up intake
@@ -123,7 +126,7 @@ public class AutoRedTruss extends LinearOpMode {
                             Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
                         })
                     ),
-                    new DriveToBackBoardRedTruss(last),
+                    new DriveToBackBoardRedTruss(last, 0),
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
                         new GoToHeight(lift, claw, 2)
@@ -148,7 +151,10 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
                     new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
                 new DriveToStackCycle(last),
-                new IntakePixelFromStack(2, 2000, 4),
+                new ParallelCommandGroup(
+                    new IntakePixelFromStack(2, 2000, 3),
+                    new RamIntake()
+                ),
                 new ParallelCommandGroup(
                     // clean up intake
                     new SequentialCommandGroup(
@@ -159,13 +165,13 @@ public class AutoRedTruss extends LinearOpMode {
                             Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
                         })
                     ),
-                    new DriveToBackBoardRedTruss(last),
+                    new DriveToBackBoardRedTruss(last, 1),
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
                         new GoToHeight(lift, claw, 2)
                     )
                 ),
-                new GoToHeight(lift, claw, 3),
+                new GoToHeight(lift, claw, 4),
                 new RamBoard(),
 
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
@@ -173,8 +179,8 @@ public class AutoRedTruss extends LinearOpMode {
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(500),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
-
-            ));
+            )
+        );
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 
