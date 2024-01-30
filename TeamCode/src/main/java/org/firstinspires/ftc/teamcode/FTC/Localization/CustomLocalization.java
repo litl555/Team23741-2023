@@ -70,9 +70,7 @@ public class CustomLocalization {
     }
 
     public synchronized void update() {
-        rd = Robot.rightPod.tickDeltaMm;
-        ld = Robot.leftPod.tickDeltaMm;
-        bd = Robot.backPod.tickDeltaMm;
+
 
         if (counter == 0) {
             startTime = Constants.toSec(Constants.getTime());
@@ -89,7 +87,9 @@ public class CustomLocalization {
         //leftPod.update();
         //Robot.telemetry.add("rightTotal",rightTotal);
         //Robot.telemetry.add("leftTotal",leftTotal);
-
+        rd = Robot.rightPod.tickDeltaMm;
+        ld = Robot.leftPod.tickDeltaMm;
+        bd = Robot.backPod.tickDeltaMm;
         rightTotal += rd;
         leftTotal += ld;
         backT += bd;
@@ -126,9 +126,10 @@ public class CustomLocalization {
         dF = (R + L) / (double) 2.0;
         dS = (B - Constants.PERPENDICULAR_X * dT);
         Constants.angle += dT;
-        T = Constants.angle;
+        T = Constants.angle - dT; //PRAY THIS WAS AN ISSUE
 
         if (dT == 0.0) {
+            //Taylor approximations :p
             fx = (-1.0 * dT * dT * dF * Math.cos(T) + 6.0 * dF * Math.cos(T) - 3.0 * dT * dS * Math.cos(T) - 3.0 * dT * dF * Math.sin(T) + dT * dT * dS * Math.sin(T) - 6.0 * dS * Math.sin(T)) / 6.0;
             fy = (3.0 * dT * dF * Math.cos(T) - dT * dT * dS * Math.cos(T) + 6.0 * dS * Math.cos(T) - dT * dT * dF * Math.sin(T) + 6.0 * dF * Math.sin(T) - 3.0 * dT * dS * Math.sin(T)) / 6.0;
 
