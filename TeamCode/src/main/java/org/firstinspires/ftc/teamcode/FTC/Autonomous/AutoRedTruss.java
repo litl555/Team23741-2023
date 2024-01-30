@@ -91,56 +91,67 @@ public class AutoRedTruss extends LinearOpMode {
         cam.stopStreaming();
 
         intake.pixelPassCount = 2;
-        // TODO: add back in two distance sensors, then during board side auto after we place the pixel on board and
-        // and prepare to cycle, use the distance sensors to check if there is still a robot on the wall side of the truss
-
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
+// =================================================================================================
                 // go to spike strip and place
-            new ParallelCommandGroup(
-                new InstantCommand(() -> {
-                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
-                }),
-                new DriveToSpikeStripRedTruss(last,
+// =================================================================================================
+                new ParallelCommandGroup(
+                    // go to spike strip
+                    new DriveToSpikeStripRedTruss(last,
+                        new SequentialCommandGroup(
+                            new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                            new WaitCommand(200),
+                            new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
+                    // prep lift
+                    new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
+                    // make sure team prop doesnt interfere
                     new SequentialCommandGroup(
-                        new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                        new WaitCommand(200),
-                        new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
-                new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
-                new SequentialCommandGroup(
-                    new WaitCommand(1_000),
-                    new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.7)))),
+                        new InstantCommand(() -> Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1])),
+                        new WaitCommand(1_000),
+                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.7)))),
+
+// =================================================================================================
                 // now pick up an extra pixel
+// =================================================================================================
                 new ParallelCommandGroup(
                     new IntakePixelFromStack(1, 2000, 5),
-                    new RamIntake()
-                ),
+                    new RamIntake()),
+
+// =================================================================================================
                 // move to back board
+// =================================================================================================
                 new ParallelCommandGroup(
+                    new DriveToBackBoardRedTruss(last, 0),
                     // clean up intake
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
                         new WaitCommand(500),
                         new InstantCommand(() -> {
                             Robot.intakeSubsystem.setPower(0);
-                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
-                        })
-                    ),
-                    new DriveToBackBoardRedTruss(last, 0),
+                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);})),
+                    // prep lift
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
                         new GoToHeight(lift, claw, 2)
                     )
                 ),
+
+// =================================================================================================
+                // drop pixel (2+1)
+// =================================================================================================
                 new GoToHeight(lift, claw, 3),
                 new RamBoard(),
-
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(250),
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(500),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
                 new WaitCommand(250),
+
+// =================================================================================================
+                // cycle to stack
+// =================================================================================================
                 new ParallelCommandGroup(
                     // reset lift
                     new SequentialCommandGroup(
@@ -151,29 +162,32 @@ public class AutoRedTruss extends LinearOpMode {
                             new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
                     new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
                 new DriveToStackCycle(last),
+
+// =================================================================================================
+                // intake from stack
+// =================================================================================================
                 new ParallelCommandGroup(
                     new IntakePixelFromStack(2, 2000, 3),
-                    new RamIntake()
-                ),
+                    new RamIntake()),
                 new ParallelCommandGroup(
+                    new DriveToBackBoardRedTruss(last, 1),
                     // clean up intake
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
                         new WaitCommand(500),
                         new InstantCommand(() -> {
                             Robot.intakeSubsystem.setPower(0);
-                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);
-                        })
-                    ),
-                    new DriveToBackBoardRedTruss(last, 1),
+                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);})),
+                    // prep lift
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
-                        new GoToHeight(lift, claw, 2)
-                    )
-                ),
+                        new GoToHeight(lift, claw, 2))),
+
+// =================================================================================================
+                // return to board for 2+3
+// =================================================================================================
                 new GoToHeight(lift, claw, 4),
                 new RamBoard(),
-
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(250),
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),

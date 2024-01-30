@@ -34,7 +34,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     public static double rightYOffset = 0;
     public Pose2d rightPos = new Pose2d(34 * inToMm + rightXOffset, -24 * inToMm - Robot.length / 2.0 - 40 + rightYOffset, 180);
     public Pose2d middlePos = new Pose2d(24 * inToMm - Robot.width / 2.0 - 10 + middleXOffset, -36 * inToMm + middleYOffset, -90.0);
-    public Pose2d leftPos = new Pose2d(34 * inToMm + leftXOffset, -48 * inToMm + leftYOffset, -90.0);
+    public Pose2d leftPos = new Pose2d(28 * inToMm - Robot.width / 2.0 + leftXOffset, -48 * inToMm + leftYOffset, -90);
 
     public DriveToSpikeStripRedTruss(TeamPropPosition pos, Command pixelPlaceCommand) {
         this.pos = pos;
@@ -61,7 +61,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
                 stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
             case left:
-                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(1000, 0), new Pose2d(1000, 0), leftPos.getHeading());
+                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(-50, -970), leftPos.getHeading());
                 stripToBase = new SimpleTrajectory(leftPos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
         }
