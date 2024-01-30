@@ -81,6 +81,20 @@ public class DangerousTeleop extends CommandOpMode {
                 if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
                 else if (Robot.hardware.intakePower != 0) intake.setPower(0);
             }));
+
+            pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
+                Robot.pidControl = !Robot.pidControl;
+                Drive.angledes = Constants.angle;
+            }));
+
+            pad1.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> {
+                if (Robot.intakeSubsystem.intakeIndex == IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]) {
+                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[0]);
+                } else {
+                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
+
+                }
+            }));
         }
 
         // GAMEMPAD 2 CONTROLS
@@ -122,14 +136,7 @@ public class DangerousTeleop extends CommandOpMode {
                     if (Robot.level == 0 && liftLevel == 1) liftLevel = 2;
                 })
             );
-            pad1.getGamepadButton(GamepadKeys.Button.LEFT_STICK_BUTTON).whenPressed(new InstantCommand(() -> {
-                if (Robot.intakeSubsystem.intakeIndex == IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]) {
-                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[0]);
-                } else {
-                    Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
 
-                }
-            }));
             pad2.getGamepadButton(GamepadKeys.Button.X).whenPressed( // go to tray
                 new InstantCommand(() -> {
                     liftLevel = 0;
@@ -150,10 +157,9 @@ public class DangerousTeleop extends CommandOpMode {
                     else claw.update(ClawSubsystem.ClawState.OPENONE);
                 })
             );
-            pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
-                Robot.pidControl = !Robot.pidControl;
-                Drive.angledes = Constants.angle;
-            }));
+
+            // close claw
+            pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
 
             // toggling how strong the lift should be during hang
             pad2.getGamepadButton(GamepadKeys.Button.RIGHT_STICK_BUTTON).whenPressed(new InstantCommand(() -> {
