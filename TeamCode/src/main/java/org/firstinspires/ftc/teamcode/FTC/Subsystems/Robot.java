@@ -114,12 +114,17 @@ public class Robot {
         rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
         rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
 
+        //leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
+        //rightPod = new OdometryModule(hardwareMap.dcMotor.get("rightPodWrapper"));
+        //backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
+
         leftPod = new OdometryModule(hardwareMap.dcMotor.get("intake"));
         rightPod = new OdometryModule(hardwareMap.dcMotor.get("rightPodWrapper"));
-        backPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
+        backPod = new OdometryModule(hardwareMap.dcMotor.get("liftRight"));
 
-        rightPod.reverse();
-        backPod.reverse();
+        //leftPod.reverse();
+        //rightPod.reverse();
+        //backPod.reverse();
 
         backPod.reset();
         rightPod.reset();
@@ -132,13 +137,16 @@ public class Robot {
 
         liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
         liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        liftRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // intake
         bottomRoller = hardwareMap.crservo.get("bottomRoller");
         intakeMotor = hardwareMap.get(DcMotorEx.class,"intake");
+        intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         droptakeRight = hardwareMap.servo.get("droptakeRight");
         droptakeLeft = hardwareMap.servo.get("droptakeLeft");
