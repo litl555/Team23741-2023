@@ -12,7 +12,7 @@ public class IntakePixelFromStack extends CommandBase {
     private long maxTime, startTime;
     private boolean finished = false;
 
-    private double increment = 0.01, initialLevel;
+    private double increment = 0.01, initialLevel, intakePower;
     private int incrementLevel = 0;
     private long incrementTime = 500;
 
@@ -21,6 +21,14 @@ public class IntakePixelFromStack extends CommandBase {
         this.numToCollect = numToCollect;
         this.maxTime = maxTime;
         initialLevel = IntakeSubsystem.droptakeLevel[startingLevel] + 0.02;
+        intakePower = -0.8;
+    }
+
+    public IntakePixelFromStack(int numToCollect, long maxTime, int startingLevel, double intakePower) {
+        this.numToCollect = numToCollect;
+        this.maxTime = maxTime;
+        initialLevel = IntakeSubsystem.droptakeLevel[startingLevel] + 0.02;
+        this.intakePower = intakePower;
     }
 
     @Override
@@ -28,8 +36,8 @@ public class IntakePixelFromStack extends CommandBase {
         startTime = System.currentTimeMillis();
         initialPixelCount = Robot.intakeSubsystem.pixelPassCount;
 
-        Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[5]);
-        Robot.intakeSubsystem.setPower(-.8);
+        Robot.intakeSubsystem.setDroptakePosition(initialLevel);
+        Robot.intakeSubsystem.setPower(intakePower);
 
         Robot.intakeSubsystem.activateIntakeDist.set(true);
     }

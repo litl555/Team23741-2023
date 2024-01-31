@@ -17,9 +17,7 @@ public class ActualMultiTrajRunner {
     private boolean finished = false, started = false, paused = false;
     private int currentlyRunningIndex = 0;
 
-    public ActualMultiTrajRunner() {
-
-    }
+    public ActualMultiTrajRunner() {}
 
     public ActualMultiTrajRunner(SimpleTrajectory[] traj) {
 

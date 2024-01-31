@@ -6,9 +6,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 @Config
 public class Constants {
-    public OdometryModule rightPod = new OdometryModule(hardwareMap.dcMotor.get("leftFront"));
-    public OdometryModule leftPod = new OdometryModule(hardwareMap.dcMotor.get("leftRear"));
-    public OdometryModule backPod = new OdometryModule(hardwareMap.dcMotor.get("rightFront"));
     public static Pose2d lastPose = new Pose2d(0, 0, 0);
     public static double angle = 0;
     public static final float Max_velo = 1;
@@ -41,4 +38,7 @@ public class Constants {
         return nano / 1000000000.0;
     }
 
+    public static Pose2d getCurrentFieldCoords() {
+        return new Pose2d(-robotPose.getY(), robotPose.getX());
+    }
 }

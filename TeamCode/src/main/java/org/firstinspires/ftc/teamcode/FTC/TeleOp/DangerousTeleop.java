@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
+import org.firstinspires.ftc.teamcode.FTC.Commands.ReturnClawToTray;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
@@ -142,11 +143,7 @@ public class DangerousTeleop extends CommandOpMode {
                     liftLevel = 0;
                     if (Robot.level == 0) return;
                     else if (Robot.level == 1) schedule(new GoToHeight(lift, claw, 0));
-                    else schedule(new SequentialCommandGroup(
-                            new GoToHeight(lift, claw, 1),
-                            new WaitCommand(400),
-                            new GoToHeight(lift, claw, 0)
-                        ));
+                    else schedule(new ReturnClawToTray(400));
                 })
             );
 

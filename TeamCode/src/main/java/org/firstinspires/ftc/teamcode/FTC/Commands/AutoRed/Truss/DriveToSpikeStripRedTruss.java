@@ -45,7 +45,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position to prep for 2+1
-        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4 - 20);
+        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4 + 20);
 
         SimpleTrajectory toStrip = null;
         SimpleTrajectory stripToBase = null;
@@ -74,7 +74,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
                 new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
                 new WaitCommand(250),
                 new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0)
-            )), true)});
+            )))});
         tr.initEvents(new SimpleTrajectory[]{toStrip, stripToBase});
         tr.start();
     }
