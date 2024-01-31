@@ -25,7 +25,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double rightXOffset = 320;
     public static double iterOneOffY = 40;
     public static double rightYOffset = 0;
-    public static double yOffsetGlobal = -40.0;
+    public static double yOffsetGlobal = -60.0;
 
     private Pose2d backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal);
     private Pose2d middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
@@ -37,6 +37,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
         this.pos = pos;
 
         if (iter == 1) {
+            if (pos == TeamPropPosition.left) this.pos = TeamPropPosition.middle;
             backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal - iterOneOffY);
         }
         middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
@@ -49,15 +50,11 @@ public class DriveToBackBoardRedTruss extends CommandBase {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
         Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
-        Pose2d clear = new Pose2d(10 * inToMm, 56 * inToMm);
-
-        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), -180);
-        SimpleTrajectory clearToInter = new SimpleTrajectory(clear, intermediary, new Pose2d(-50 , 0), new Pose2d(0, 0), -180);
+        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         SimpleTrajectory interToEnd = null;
 
         switch (pos) {
             case right:
-                baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), 180);
                 interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(210, 1078), 180);
                 break;
             case left:

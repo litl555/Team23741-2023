@@ -38,7 +38,10 @@ public class IntakeSubsystem extends SubsystemBase {
         if (!activateIntakeDist.get() || Robot.hardware.lastIntakeDist == -1) {
             telemetry.addImportant(new LoggerData("Is Active", "false", "INTAKE"));
             return;
-        } else telemetry.addImportant(new LoggerData("Is Active", "true", "INTAKE"));
+        } else {
+            telemetry.addImportant(new LoggerData("Is Active", "true", "INTAKE"));
+            telemetry.addImportant(new LoggerData("Detected Distance", Robot.hardware.lastIntakeDist, "INTAKE"));
+        }
 
         if (Robot.hardware.lastIntakeDist < intakeDistThreshold) intakeDistFrameCount++;
         else intakeDistFrameCount = 0;

@@ -53,7 +53,7 @@ public class ParticleRev2M extends Rev2mDistanceSensor {
                 this.setMeasurementTimingBudget(33000);
                 break;
             case HIGH_SPEED:
-                this.setMeasurementTimingBudget(10_000);
+                this.setMeasurementTimingBudget(20_000);
                 break;
             case HIGH_ACCURACY:
                 this.setMeasurementTimingBudget(100000);

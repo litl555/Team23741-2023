@@ -34,8 +34,7 @@ import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 
-@Photon(singleThreadOptimized = false, maximumParallelCommands = 8)
-// TODO having so high seems to have caused a few crashes
+@Photon(singleThreadOptimized = false, maximumParallelCommands = 12)
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
@@ -101,7 +100,7 @@ public class AutoRedTruss extends LinearOpMode {
                     new DriveToSpikeStripRedTruss(last,
                         new SequentialCommandGroup(
                             new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                            new WaitCommand(200),
+                            new WaitCommand(300),
                             new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
                     // prep lift
                     new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
@@ -133,9 +132,7 @@ public class AutoRedTruss extends LinearOpMode {
                     // prep lift
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
-                        new GoToHeight(lift, claw, 2)
-                    )
-                ),
+                        new GoToHeight(lift, claw, 2))),
 
 // =================================================================================================
                 // drop pixel (2+1)
@@ -147,7 +144,7 @@ public class AutoRedTruss extends LinearOpMode {
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(500),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                new WaitCommand(250),
+                new WaitCommand(400),
 
 // =================================================================================================
                 // cycle to stack
