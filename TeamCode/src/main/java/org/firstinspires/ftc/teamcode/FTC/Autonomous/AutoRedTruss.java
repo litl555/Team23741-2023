@@ -52,6 +52,7 @@ public class AutoRedTruss extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
+        Robot.resetLift();
         Robot.onlyLogImportant = true;
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));

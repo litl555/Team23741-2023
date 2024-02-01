@@ -135,10 +135,7 @@ public class Robot {
         liftLeft = hardwareMap.get(DcMotorEx.class,"liftLeft");
         liftRight = hardwareMap.get(DcMotorEx.class,"liftRight");
 
-        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
 
         liftRight.setDirection(DcMotorSimple.Direction.REVERSE);
         liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -178,7 +175,7 @@ public class Robot {
         math.errorHandler.assignThread(mathThread);
 
         // reset static variables where needed
-        level = 0;
+
         forwardIsForward = true;
         onlyLogImportant = false;
         isBusy = false;
@@ -215,6 +212,14 @@ public class Robot {
         math.errorHandler.update(t);
 
         Robot.telemetry.update();
+    }
+
+    public static void resetLift() {
+        level = 0;
+        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     public static boolean isPastTruss() {
