@@ -41,10 +41,11 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public DriveToBackBoardRedTruss(TeamPropPosition pos, int iter) {
         this.pos = pos;
 
+        /*
         if (iter == 1) {
             if (pos == TeamPropPosition.left) this.pos = TeamPropPosition.middle;
             backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal - iterOneOffY);
-        }
+        }*/
         middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
         rightPos = new Pose2d(backBoardCenter.getX() + rightXOffset, backBoardCenter.getY() + rightYOffset);
         leftPos = new Pose2d(backBoardCenter.getX() + leftXOffset, backBoardCenter.getY() + leftYOffset);
@@ -55,7 +56,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
         //Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
-        Pose2d intermediary = new Pose2d(24 * inToMm, 36 * inToMm);
+        Pose2d intermediary = new Pose2d(28 * inToMm, 36 * inToMm);
         Pose2d camPos = new Pose2d(10 * inToMm, 0);
         SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(1140, 460), pos == TeamPropPosition.right ? 180 : -180);
         //SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
@@ -92,6 +93,12 @@ public class DriveToBackBoardRedTruss extends CommandBase {
                             switch (pos) {
                                 case middle:
                                     tr.trajectories[1].forceSetP5(new Pose2d(middlePos.getX() + BoardTagLocalizationPipeline.finalDeltaX, middlePos.getY(), middlePos.getHeading()));
+                                    break;
+                                case right:
+                                    tr.trajectories[1].forceSetP5(new Pose2d(rightPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, rightPos.getY(), rightPos.getHeading()));
+                                    break;
+                                case left:
+                                    tr.trajectories[1].forceSetP5(new Pose2d(leftPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, leftPos.getY(), leftPos.getHeading()));
                                     break;
                             }
                         })

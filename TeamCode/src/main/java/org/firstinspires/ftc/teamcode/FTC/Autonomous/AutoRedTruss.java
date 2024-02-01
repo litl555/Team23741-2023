@@ -106,7 +106,7 @@ public class AutoRedTruss extends LinearOpMode {
                     new DriveToSpikeStripRedTruss(last,
                         new SequentialCommandGroup(
                             new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                            new WaitCommand(300),
+                            new WaitCommand(350),
                             new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
                     // prep lift
                     new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
@@ -114,13 +114,13 @@ public class AutoRedTruss extends LinearOpMode {
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.raise()),
                         new WaitCommand(1_000),
-                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.7)))),
+                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)))),
 
 // =================================================================================================
                 // now pick up an extra pixel
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(1, 2000, 5, -0.6),
+                    new IntakePixelFromStack(1, 2000, 5, -0.8),
                     new RamIntake()),
 
 // =================================================================================================
@@ -153,20 +153,21 @@ public class AutoRedTruss extends LinearOpMode {
 // =================================================================================================
                 // cycle to stack
 // =================================================================================================
-                //new DriveFromBoardToStackRed(last, 1000),
+                new DriveFromBoardToStackRed(last, 1000),
+                /*
                 new ParallelCommandGroup(
                     // reset lift
                     new SequentialCommandGroup(
                         new WaitCommand(1_000),
                         new ReturnClawToTray()),
                     new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
-                new DriveToStackCycle(last),
+                new DriveToStackCycle(last),*/
 
 // =================================================================================================
                 // intake from stack
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(2, 2000, 3)),
+                    new IntakePixelFromStack(2, 2000, 1, -1)), // we usually end up knocking over the stack
                 new ParallelCommandGroup(
                     new DriveToBackBoardRedTruss(last, 1),
                     // clean up intake

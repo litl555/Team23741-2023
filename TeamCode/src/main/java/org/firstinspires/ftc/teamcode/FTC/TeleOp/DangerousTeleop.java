@@ -187,14 +187,8 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
 
-        OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "tag_camera"));
-        BoardTagLocalizationPipeline pipeline = new BoardTagLocalizationPipeline(cam);
-
         Robot.telemetry.update();
         waitForStart();
-
-        cam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
-        BoardTagLocalizationPipeline.shouldGetPosition = true;
 
         Robot.writeThread.start();
     }

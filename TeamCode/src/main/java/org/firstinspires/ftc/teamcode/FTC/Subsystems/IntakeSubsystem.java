@@ -18,7 +18,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // 0.2 -> stack 3
     // 0.18 -> stack 2
     // 0 -> stack 1
-    public static double[] droptakeLevel = new double[] {0, 0, 0.04, 0.075, 0.09, 0.11, 0.5};
+    public static double[] droptakeLevel = new double[] {0, 0, 0.04, 0.075, 0.088, 0.1, 0.5};
 
     private LoggerTool telemetry;
 

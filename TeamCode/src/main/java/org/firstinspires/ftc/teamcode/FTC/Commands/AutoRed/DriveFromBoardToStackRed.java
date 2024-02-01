@@ -31,7 +31,7 @@ public class DriveFromBoardToStackRed extends CommandBase {
 
         Pose2d start = Constants.getCurrentFieldCoords();
         Pose2d base = new Pose2d(280, 200);
-        Pose2d stack = new Pose2d(13.5 * 25.4 + 100, -58.5 * 25.4 + 20);
+        Pose2d stack = new Pose2d(13.5 * 25.4, -58.5 * 25.4 + 50);
 
         switch (pos) {
             case right:
