@@ -1,30 +1,16 @@
 package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
-import com.arcrobotics.ftclib.command.InstantCommand;
-import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
-import org.firstinspires.ftc.teamcode.FTC.Commands.DriveToBackdrop;
-import org.firstinspires.ftc.teamcode.FTC.Commands.GetUpdatedPoseXHeading;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
-import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
-import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
-
-import java.util.logging.Logger;
 
 @TeleOp
 public class CommandTest extends CommandOpMode {

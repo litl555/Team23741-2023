@@ -28,9 +28,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double yOffsetGlobal = -60.0;
 
     private Pose2d backBoardCenter = new Pose2d(36 * inToMm, 46 * inToMm + yOffsetGlobal);
-    private Pose2d middlePos = new Pose2d(backBoardCenter.getX() + middleXOffset, backBoardCenter.getY() + middleYOffset);
-    private Pose2d rightPos = new Pose2d(backBoardCenter.getX() + rightXOffset, backBoardCenter.getY() + rightYOffset);
-    private Pose2d leftPos = new Pose2d(backBoardCenter.getX() + leftXOffset, backBoardCenter.getY() + leftYOffset);
+    private Pose2d middlePos, rightPos, leftPos;
 
 
     public DriveToBackBoardRedTruss(TeamPropPosition pos, int iter) {

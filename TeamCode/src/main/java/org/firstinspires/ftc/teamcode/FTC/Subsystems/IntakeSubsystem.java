@@ -55,8 +55,13 @@ public class IntakeSubsystem extends SubsystemBase {
         telemetry.addImportant(new LoggerData("Pixel Count", pixelPassCount, "INTAKE"));
     }
 
-    public void update(IntakePowerSetting powerset) { // TODO: remove, just call setPower()
-        // does nothing right not, just temp before we fully remove this func
+    public void raise() {
+        this.setDroptakePosition(droptakeLevel[droptakeLevel.length - 1]);
+    }
+
+    public void raise(double p) {
+        raise();
+        this.setPower(p);
     }
 
     public void setPower(double power) { Robot.hardware.setIntakePower(power); }

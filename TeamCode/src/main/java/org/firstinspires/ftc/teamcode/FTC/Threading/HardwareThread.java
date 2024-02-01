@@ -43,7 +43,7 @@ public class HardwareThread implements Runnable {
     public HardwareThread(HardwareMap map) {
         lynxModules = map.getAll(LynxModule.class);
 
-//        for (LynxModule module : lynxModules) module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+        for (LynxModule module : lynxModules) module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
 
         liftQueue = new ArrayDeque<>();
         wristQueue = new ArrayDeque<>();
@@ -55,6 +55,9 @@ public class HardwareThread implements Runnable {
 
         errorHandler = new ThreadErrorDetection("Hardware");
     }
+
+    private long lastOdoRun = 0, lastOdoRunCountClear = 0;
+    private int odoRunCount = 0;
 
     @Override
     public synchronized void run() { // TODO: gain stability at the cost of speed by making this sync
@@ -72,29 +75,40 @@ public class HardwareThread implements Runnable {
             // read port values
             synchronized (Robot.class) {
                 synchronized (Constants.class) {
-//                    for (LynxModule module : lynxModules) module.clearBulkCache();
-                    Robot.leftPod.getDelta();
-                    Robot.rightPod.getDelta();
-                    Robot.backPod.getDelta();
+                    for (LynxModule module : lynxModules) module.clearBulkCache();
+                    // we have a problem where we will read significantly faster than we can write
+                    // this only really matters for odometry, so force the robot to finish writing before we do more reading
+                    long current = System.currentTimeMillis();
+
+                    if (current - lastOdoRun > 7 && (current - lastOdoRun >= 20 || drivetrainQueue.size() < 3)) { // allow max 3 stale writes or at most 20 ms for writes
+                        lastOdoRun = current;
+
+                        Robot.leftPod.getDelta();
+                        Robot.rightPod.getDelta();
+                        Robot.backPod.getDelta();
+
+                        Robot.customLocalization.update();
+
+                        TrajectoryRunner tr = Robot.math.trajectoryRunner.get();
+                        if (tr != null) {
+                            // this is a scuffed system because this is essentially a queue system -> regular code calls tr.update which
+                            // sends a request to update the trajectory runner
+                            // what this means though is that this thread doesn't actually control the trajectory runner
+                            // and actually the regular code (that called tr.update) controls the current state of the trajectory runner
+                            // (specifically switching FINISHED to PRESTART), so filter those. we only want to run "fresh" trajectories
+                            if (tr.currentState == TrajectoryRunner.State.FINISHED || tr.currentState == TrajectoryRunner.State.PRESTART) {
+                                Robot.math.trajectoryRunner.set(null);
+                            } else {
+                                tr._update();
+                            }
+                        }
+
+                        odoRunCount++;
+                    }
 
                     lastLiftPosition = Robot.liftEncoder.getCurrentPosition();
 
                     Robot.liftSubsystem.calculateControllerPower();
-
-                    Robot.customLocalization.update();
-                    TrajectoryRunner tr = Robot.math.trajectoryRunner.get();
-                    if (tr != null) {
-                        // this is a scuffed system because this is essentially a queue system -> regular code calls tr.update which
-                        // sends a request to update the trajectory runner
-                        // what this means though is that this thread doesn't actually control the trajectory runner
-                        // and actually the regular code (that called tr.update) controls the current state of the trajectory runner
-                        // (specifically switching FINISHED to PRESTART), so filter those. we only want to run "fresh" trajectories
-                        if (tr.currentState == TrajectoryRunner.State.FINISHED || tr.currentState == TrajectoryRunner.State.PRESTART) {
-                            Robot.math.trajectoryRunner.set(null);
-                        } else {
-                            tr._update();
-                        }
-                    }
                 }
             }
 
@@ -121,6 +135,15 @@ public class HardwareThread implements Runnable {
             if (runCount % 20 == 0) {
                 long delta = endTime - startTime;
                 Robot.telemetry.addImportant(new LoggerData("Hardware", formatFps(delta, hardawareFps), "THREAD LENGTH"));
+            }
+
+            if (endTime - lastOdoRunCountClear > 500) {
+                lastOdoRunCountClear = endTime;
+
+                String len = truncate((int) (1000.0 / (Math.max(odoRunCount, 1) * 2.0)), 3);
+                Robot.telemetry.addImportant(new LoggerData("Odometry Sub-Thread", len + " ms (" + (odoRunCount * 2) + " FPS)", "THREAD LENGTH"));
+
+                odoRunCount = 0;
             }
 
             // occasionally (and a lot more freq. before this func was sync), we could get multiple instances of this thread running

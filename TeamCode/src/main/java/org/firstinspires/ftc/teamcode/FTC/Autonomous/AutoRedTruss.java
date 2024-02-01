@@ -4,7 +4,6 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
-import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.outoftheboxrobotics.photoncore.Photon;
@@ -12,8 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveFromBoardToStackRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToBackBoardRedTruss;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveToParkingRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToSpikeStripRedTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToStackCycle;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToTrussCycle;
@@ -21,8 +20,8 @@ import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamIntake;
+import org.firstinspires.ftc.teamcode.FTC.Commands.ReturnClawToTray;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateIntake;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -56,10 +55,10 @@ public class AutoRedTruss extends LinearOpMode {
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
 
-        telemetry1.add("Initialization", "done");
-
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
+
+        telemetry1.add("Initialization", "done");
 
         Robot.telemetry.update();
 
@@ -106,7 +105,7 @@ public class AutoRedTruss extends LinearOpMode {
                     new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
                     // make sure team prop doesnt interfere
                     new SequentialCommandGroup(
-                        new InstantCommand(() -> Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1])),
+                        new InstantCommand(() -> Robot.intakeSubsystem.raise()),
                         new WaitCommand(1_000),
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(0.7)))),
 
@@ -114,7 +113,7 @@ public class AutoRedTruss extends LinearOpMode {
                 // now pick up an extra pixel
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(1, 2000, 5),
+                    new IntakePixelFromStack(1, 2000, 5, -0.6),
                     new RamIntake()),
 
 // =================================================================================================
@@ -126,9 +125,7 @@ public class AutoRedTruss extends LinearOpMode {
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
                         new WaitCommand(500),
-                        new InstantCommand(() -> {
-                            Robot.intakeSubsystem.setPower(0);
-                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);})),
+                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
                     // prep lift
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
@@ -149,14 +146,12 @@ public class AutoRedTruss extends LinearOpMode {
 // =================================================================================================
                 // cycle to stack
 // =================================================================================================
+                //new DriveFromBoardToStackRed(last, 1000),
                 new ParallelCommandGroup(
                     // reset lift
                     new SequentialCommandGroup(
                         new WaitCommand(1_000),
-                        new SequentialCommandGroup(
-                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 1),
-                            new WaitCommand(200),
-                            new GoToHeight(Robot.liftSubsystem, Robot.clawSubsystem, 0))),
+                        new ReturnClawToTray()),
                     new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
                 new DriveToStackCycle(last),
 
@@ -164,17 +159,14 @@ public class AutoRedTruss extends LinearOpMode {
                 // intake from stack
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(2, 2000, 3),
-                    new RamIntake()),
+                    new IntakePixelFromStack(2, 2000, 3)),
                 new ParallelCommandGroup(
                     new DriveToBackBoardRedTruss(last, 1),
                     // clean up intake
                     new SequentialCommandGroup(
                         new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
                         new WaitCommand(500),
-                        new InstantCommand(() -> {
-                            Robot.intakeSubsystem.setPower(0);
-                            Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[6]);})),
+                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
                     // prep lift
                     new SequentialCommandGroup(
                         new WaitCommand(2_500),
