@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import java.util.HashMap;
 
 public class ActualMultiTrajRunner {
-    private Trajectory[] trajectories;
+    public Trajectory[] trajectories;
     private TrajectoryRunner[] trajectoryRunners;
     private SimpleTrajectory[] trajectoryMetadata;
     private HashMap<Integer, MultiTrajEvent> events = new HashMap<>();

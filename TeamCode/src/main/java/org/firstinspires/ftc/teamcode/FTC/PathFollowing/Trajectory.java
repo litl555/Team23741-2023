@@ -43,9 +43,9 @@ public class Trajectory implements TrajectoryInterface {
         //mp = generateMotionProfile();
         //getTimeValues();
         //getTotalTimeSum();
-
-
     }
+
+    public void forceSetP5(Pose2d p) { p5 = p; }
 
     public boolean getEndStopped() {
         return (endStopped);

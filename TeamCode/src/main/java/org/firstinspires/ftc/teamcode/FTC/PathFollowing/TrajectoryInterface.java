@@ -32,5 +32,5 @@ public interface TrajectoryInterface {
 
     Pose2d normalize(Pose2d pose);
 
-
+    void forceSetP5(Pose2d p);
 }

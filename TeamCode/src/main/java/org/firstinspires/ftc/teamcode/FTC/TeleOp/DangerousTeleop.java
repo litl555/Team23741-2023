@@ -31,6 +31,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 @Photon(singleThreadOptimized = false, maximumParallelCommands = 12)
 @TeleOp
@@ -191,6 +192,9 @@ public class DangerousTeleop extends CommandOpMode {
 
         Robot.telemetry.update();
         waitForStart();
+
+        cam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
+        BoardTagLocalizationPipeline.shouldGetPosition = true;
 
         Robot.writeThread.start();
     }

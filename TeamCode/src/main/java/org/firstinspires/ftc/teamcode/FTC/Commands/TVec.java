@@ -15,7 +15,7 @@ public class TVec {
 
     public void updateTvec(double[] tvec, int pos) {
         tvec = addRobot(tvec);
-        tvec = rotateByRobotAngle(tvec);
+        //tvec = rotateByRobotAngle(tvec);
         if (pos == 1) {
             worldPos = boardPos1.plus((new Pose2d(tvec[0], tvec[1])).times(-1.0));
         } else if (pos == 2) {
@@ -35,6 +35,6 @@ public class TVec {
     }
 
     private double[] rotateByRobotAngle(double[] tvec) {
-        return (new double[]{tvec[0] * Math.cos(Constants.angle+Math.PI) - tvec[1] * Math.sin(Constants.angle+Math.PI), tvec[0] * Math.sin(Constants.angle+Math.PI) + tvec[1] * Math.cos(Constants.angle+Math.PI)});
+        return (new double[]{tvec[0] * Math.cos(Constants.angle) - tvec[1] * Math.sin(Constants.angle), tvec[0] * Math.sin(Constants.angle) + tvec[1] * Math.cos(Constants.angle)});
     }
 }

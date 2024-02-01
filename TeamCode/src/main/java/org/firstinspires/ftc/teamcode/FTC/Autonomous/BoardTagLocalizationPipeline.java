@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
+import org.firstinspires.ftc.robotcore.external.Const;
 import org.firstinspires.ftc.teamcode.FTC.Commands.TVec;
 import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
@@ -41,6 +42,8 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
     private long detectorPtr;
 
     public BoardTagLocalizationPipeline(OpenCvCamera cam) {
+        finalDeltaX = 0;
+        shouldGetPosition = false;
         detectorPtr = AprilTagDetectorJNI.createApriltagDetector(AprilTagDetectorJNI.TagFamily.TAG_36h11.string, decimation, 2);
         cam.setPipeline(this);
 
@@ -55,8 +58,18 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
         });
     }
 
+    public static boolean shouldGetPosition = false;
+
+    public static double finalDeltaX = 0;
+
+    private int forceUpdateCount = 0;
     @Override
     public Mat processFrame(Mat _input) {
+        if (!shouldGetPosition) return _input;
+
+        // note that this doesnt account for the time it takes to load the image itself, just the time to process the image
+        double originalX = Constants.getCurrentFieldCoords().getX();
+
         Mat processedTag = new Mat();
         Imgproc.cvtColor(_input, processedTag, Imgproc.COLOR_RGBA2GRAY);
         Imgproc.threshold(processedTag, processedTag, 160, 255, Imgproc.THRESH_BINARY);
@@ -83,22 +96,47 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
             t.updateTvec(new double[] {-y, z, x}, detection.id - 3);
 
             Robot.telemetry.addImportant(new LoggerData(offsetId + " TVEC","(" + x + ", " + y + ", " + z + ")", "CAMERA"));
-            Robot.telemetry.addImportant(new LoggerData(offsetId + " WORLD", "(" + TVec.worldPos.getX() + ", " + TVec.worldPos.getY() + ")", "CAMERA"));
+            Robot.telemetry.addImportant(new LoggerData(offsetId + " WORLD", "(" + (TVec.worldPos.getX() / 25.4) + ", " + (TVec.worldPos.getY() / 25.4) + ")", "CAMERA"));
             //Robot.telemetry.addImportant("tvec xyz " + offsetId, "(" + x + ", " + y + ", " + z + ")");
             //Robot.telemetry.addImportant("world xyz " + offsetId, "(" + TVec.worldPos.getX() + ", " + TVec.worldPos.getY() + ")");
 
             px += TVec.worldPos.getX();
             py += TVec.worldPos.getY();
             count++;
+
+            Mat camMatrix = new Mat(3, 3, CvType.CV_32FC1);
+            camMatrix.put(0, 0,
+                572.42030608, 0, 248.86563431,
+                0, 571.44741121, 347.77866451,
+                0, 0, 1);
+
+            //drawAxisMarker(_input, 2, 3, p.rvec, p.tvec, camMatrix);
         }
 
-        if (count != 0 && Constants.robotPose.getX() > 900) Constants.robotPose = new Pose2d(Constants.robotPose.getX(), -px / count, Constants.robotPose.getHeading());
+        if (count != 0 && shouldGetPosition) {
+            double deltaX = (px / count) - originalX;
+            Robot.telemetry.addImportant(new LoggerData("deltaX", deltaX, "CAMERA"));
+            if (Math.abs(deltaX) < 400 && shouldGetPosition) {
+                //Robot.math.trajectoryRunner.get().t.forceSetP5(new Pose2d(endTruth.getX() - deltaX, endTruth.getY(), endTruth.getHeading()));
+                finalDeltaX = -deltaX;
+
+                forceUpdateCount++;
+                Robot.telemetry.addImportant(new LoggerData("Force update", forceUpdateCount, "CAMERA"));
+                shouldGetPosition = false;
+            }
+        }
+
+        //if (count != 0 && Constants.robotPose.getX() > 900) Constants.robotPose = new Pose2d(Constants.robotPose.getX(), -px / count, Constants.robotPose.getHeading());
 
         Robot.telemetry.addImportant(new LoggerData("Last Run", System.currentTimeMillis(), "CAMERA"));
 
         //Bitmap bitmap = Bitmap.createBitmap(_input.cols(), _input.rows(), Bitmap.Config.RGB_565);
         //Utils.matToBitmap(_input, bitmap);
         //FtcDashboard.getInstance().sendImage(bitmap);
+
+        //predictedPosition = new Pose2d(px / count, py / count);
+        //isReadyToRead = true;
+        //shouldGetPosition = false;
 
         return _input;
     }

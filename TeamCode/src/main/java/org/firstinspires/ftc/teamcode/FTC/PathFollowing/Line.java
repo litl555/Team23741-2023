@@ -29,6 +29,8 @@ public class Line implements TrajectoryInterface {
 
     }
 
+    public void forceSetP5(Pose2d p) {}
+
     private ArrayList<Double> generateTimeValues() {
         double totalTime = 0;
         ArrayList<Double> tv = new ArrayList<>();
