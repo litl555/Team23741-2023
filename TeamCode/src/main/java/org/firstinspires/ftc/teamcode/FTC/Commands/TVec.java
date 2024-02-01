@@ -30,11 +30,11 @@ public class TVec {
     }
 
     private double[] addRobot(double[] tvec) {
-        double[] robotVec = new double[]{cameraPos.getX() + tvec[0], -tvec[2] + cameraPos.getY()};
+        double[] robotVec = new double[]{cameraPos.getX() + tvec[0], tvec[2] + cameraPos.getY()};
         return robotVec;
     }
 
     private double[] rotateByRobotAngle(double[] tvec) {
-        return (new double[]{tvec[0] * Math.cos(Constants.angle) - tvec[1] * Math.sin(Constants.angle), tvec[0] * Math.sin(Constants.angle) + tvec[1] * Math.cos(Constants.angle)});
+        return (new double[]{tvec[0] * Math.cos(Constants.angle+Math.PI) - tvec[1] * Math.sin(Constants.angle+Math.PI), tvec[0] * Math.sin(Constants.angle+Math.PI) + tvec[1] * Math.cos(Constants.angle+Math.PI)});
     }
 }

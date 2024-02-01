@@ -94,7 +94,7 @@ public class CustomLocalization {
         leftTotal += ld;
         backT += bd;
         //calculateDeltaPos(rd,ld,bd);
-
+        pose=Constants.robotPose;
         pose = pose.plus(calculateDeltaPos(rd, ld, bd));
         //pose = new Pose2d(dr.getPoseEstimate().getX() * (double) 25.4 + (double) start.getX(), dr.getPoseEstimate().getY() * (double) 25.4 + (double) start.getY(), dr.getPoseEstimate().getHeading()+start.getHeading());
 

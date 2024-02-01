@@ -13,6 +13,9 @@ import com.outoftheboxrobotics.photoncore.Photon;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.FTC.Autonomous.BoardTagLocalizationPipeline;
+import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropDetectionPipeline;
 import org.firstinspires.ftc.teamcode.FTC.Commands.Drive;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.ReturnClawToTray;
@@ -26,6 +29,8 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
 
 @Photon(singleThreadOptimized = false, maximumParallelCommands = 12)
 @TeleOp
@@ -180,6 +185,9 @@ public class DangerousTeleop extends CommandOpMode {
 
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
+
+        OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "tag_camera"));
+        BoardTagLocalizationPipeline pipeline = new BoardTagLocalizationPipeline(cam);
 
         Robot.telemetry.update();
         waitForStart();

@@ -32,8 +32,9 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Photon(singleThreadOptimized = false, maximumParallelCommands = 12)
+@Photon(singleThreadOptimized = false, maximumParallelCommands = 8)
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoRedTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
@@ -54,6 +55,9 @@ public class AutoRedTruss extends LinearOpMode {
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
         TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
+
+        OpenCvCamera tagCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "tag_camera"));
+        BoardTagLocalizationPipeline tagPipeline = new BoardTagLocalizationPipeline(tagCam);
 
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
@@ -87,6 +91,8 @@ public class AutoRedTruss extends LinearOpMode {
 
         pipeline.destroy();
         cam.stopStreaming();
+
+        tagCam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
 
         intake.pixelPassCount = 2;
         CommandScheduler.getInstance().schedule(
@@ -184,6 +190,7 @@ public class AutoRedTruss extends LinearOpMode {
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
             )
         );
+
         while (opModeIsActive() && !isStopRequested()) {
             Robot.telemetry.addImportant("Detected prop pos from auto", last);
 

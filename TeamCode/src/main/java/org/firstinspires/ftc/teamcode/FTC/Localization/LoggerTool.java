@@ -138,7 +138,7 @@ public class LoggerTool {
 
     }
 
-    private void drawRobot(Pose2d pose) {
+    public void drawRobot(Pose2d pose) {
         pose = new Pose2d(pose.getY() / 25.4, -pose.getX() / 25.4, pose.getHeading());
         p.fieldOverlay().setStroke("red");
         DashboardUtil.drawRobot(p.fieldOverlay(), pose);
