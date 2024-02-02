@@ -25,7 +25,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     private TeamPropPosition pos;
     private ActualMultiTrajRunner tr;
 
-    public static double leftXOffset = -230;
+    public static double leftXOffset = -190;
     public static double leftYOffset = 0;
     public static double middleXOffset = -50;
     public static double middleYOffset = -20;
@@ -39,7 +39,10 @@ public class DriveToBackBoardRedTruss extends CommandBase {
 
 
     public DriveToBackBoardRedTruss(TeamPropPosition pos, int iter) {
-        this.pos = pos;
+        if (iter == 1) {
+            this.pos = TeamPropPosition.left;
+            if (pos == TeamPropPosition.left) this.pos = TeamPropPosition.middle;
+        } else this.pos = pos;
 
         /*
         if (iter == 1) {
@@ -55,12 +58,8 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
-        //Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
         Pose2d intermediary = new Pose2d(30 * inToMm, 36 * inToMm);
-        Pose2d camPos = new Pose2d(10 * inToMm, 0);
         SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(1140, 460), pos == TeamPropPosition.right ? 180 : -180);
-        //SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
-        //SimpleTrajectory camToInter = new SimpleTrajectory(camPos, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         SimpleTrajectory interToEnd = null;
 
         Pose2d endPos = null;

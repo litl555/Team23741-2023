@@ -103,7 +103,7 @@ public class AutoRedTruss extends LinearOpMode {
                     new DriveToSpikeStripRedTruss(last,
                         new SequentialCommandGroup(
                             new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                            new WaitCommand(350),
+                            new WaitCommand(400),
                             new InstantCommand(() -> Robot.intakeSubsystem.pixelPassCount = 1))),
                     // prep lift
                     new GoToHeight(lift, Robot.clawSubsystem, 2, ClawSubsystem.ClawState.OPENONE),
@@ -116,7 +116,7 @@ public class AutoRedTruss extends LinearOpMode {
 // =================================================================================================
                 // now pick up an extra pixel
 // =================================================================================================
-                new IntakePixelFromStack(1, 2000, 5, -0.75),
+                new IntakePixelFromStack(1, 2000, 5, -0.9),
 
 // =================================================================================================
                 // move to back board
