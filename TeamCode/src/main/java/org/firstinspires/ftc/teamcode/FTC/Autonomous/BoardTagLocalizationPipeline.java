@@ -93,7 +93,7 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
 
             int offsetId = detection.id - 3;
             TVec t = new TVec();
-            t.updateTvec(new double[] {-y, z, x}, detection.id - 3);
+            t.updateTvec(new double[]{-y, z, x}, detection.id > 3 ? detection.id - 3 : offsetId, detection.id > 3);
 
             Robot.telemetry.addImportant(new LoggerData(offsetId + " TVEC","(" + x + ", " + y + ", " + z + ")", "CAMERA"));
             Robot.telemetry.addImportant(new LoggerData(offsetId + " WORLD", "(" + (TVec.worldPos.getX() / 25.4) + ", " + (TVec.worldPos.getY() / 25.4) + ")", "CAMERA"));

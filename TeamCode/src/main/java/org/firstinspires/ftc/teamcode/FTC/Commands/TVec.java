@@ -13,7 +13,7 @@ public class TVec {
     Pose2d boardPos3 = new Pose2d(900 + 25.4 * 6, 1500);
     public static Pose2d worldPos = new Pose2d();
 
-    public void updateTvec(double[] tvec, int pos) {
+    public void updateTvec(double[] tvec, int pos, boolean isRed) {
         tvec = addRobot(tvec);
         //tvec = rotateByRobotAngle(tvec);
         if (pos == 1) {
@@ -24,6 +24,9 @@ public class TVec {
             worldPos = boardPos3.plus((new Pose2d(tvec[0], tvec[1])).times(-1.0));
         } else {
             worldPos = boardPos2.plus((new Pose2d(tvec[0], tvec[1])).times(-1.0));
+        }
+        if (!isRed) {
+            worldPos = new Pose2d(worldPos.getX() - 1800, worldPos.getY());
         }
 
 
