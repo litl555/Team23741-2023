@@ -26,7 +26,7 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
     private ActualMultiTrajRunner tr;
 
     public static double leftXOffset = 0;
-    public static double leftYOffset = 0;
+    public static double leftYOffset = 50;
     public static double middleXOffset = -60;
     public static double yoffright = 120;
     public static double middleYOffset = -20;
@@ -63,7 +63,8 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
                 stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
             case left:
-                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(-50, -970), leftPos.getHeading());
+                //toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(-50, -970), leftPos.getHeading());
+                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(-530,10), new Pose2d(190, -1230), leftPos.getHeading());
                 stripToBase = new SimpleTrajectory(leftPos, base, new Pose2d(-676, 53), new Pose2d(0, 0), -180);
                 break;
         }
