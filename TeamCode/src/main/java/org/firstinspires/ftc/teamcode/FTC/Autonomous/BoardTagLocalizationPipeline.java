@@ -63,6 +63,7 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
     public static double finalDeltaX = 0;
 
     private int forceUpdateCount = 0;
+    public double globalX = 0.0;
     @Override
     public Mat processFrame(Mat _input) {
         if (!shouldGetPosition) return _input;
@@ -93,7 +94,7 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
 
             int offsetId = detection.id - 3;
             TVec t = new TVec();
-            t.updateTvec(new double[]{-y, z, x}, detection.id > 3 ? detection.id - 3 : offsetId, detection.id > 3);
+            t.updateTvec(new double[]{-y, z, x}, detection.id > 3 ? detection.id - 3 : detection.id, detection.id > 3);
 
             Robot.telemetry.addImportant(new LoggerData(offsetId + " TVEC","(" + x + ", " + y + ", " + z + ")", "CAMERA"));
             Robot.telemetry.addImportant(new LoggerData(offsetId + " WORLD", "(" + (TVec.worldPos.getX() / 25.4) + ", " + (TVec.worldPos.getY() / 25.4) + ")", "CAMERA"));
@@ -115,6 +116,7 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
 
         if (count != 0 && shouldGetPosition) {
             double deltaX = (px / count) - originalX;
+
             Robot.telemetry.addImportant(new LoggerData("deltaX", deltaX, "CAMERA"));
             if (Math.abs(deltaX) < 400 && shouldGetPosition) {
                 //Robot.math.trajectoryRunner.get().t.forceSetP5(new Pose2d(endTruth.getX() - deltaX, endTruth.getY(), endTruth.getHeading()));

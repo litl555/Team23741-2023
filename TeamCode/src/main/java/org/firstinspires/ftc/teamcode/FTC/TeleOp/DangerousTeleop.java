@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.FTC.TeleOp;
 
+import android.util.Log;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -32,6 +34,8 @@ import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.logging.Logger;
 
 @Photon(singleThreadOptimized = false, maximumParallelCommands = 12)
 @TeleOp
@@ -207,6 +211,13 @@ public class DangerousTeleop extends CommandOpMode {
         Robot.write = new WriteThread(this);
         Robot.writeThread = new Thread(Robot.write);
 
+        OpenCvCamera tagCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "tag_camera"));
+        BoardTagLocalizationPipeline tagPipeline = new BoardTagLocalizationPipeline(tagCam);
+
+        tagCam.startStreaming(1280, 720, OpenCvCameraRotation.UPRIGHT);
+
+        BoardTagLocalizationPipeline.shouldGetPosition = true;
+
         Robot.telemetry.update();
         waitForStart();
 
@@ -222,6 +233,7 @@ public class DangerousTeleop extends CommandOpMode {
 
         Robot.telemetry.addImportant(new LoggerData("Main", System.currentTimeMillis(), "THREAD UPDATE"));
         Robot.telemetry.addImportant("Droptake", droptakeLevel);
+
 
         CommandScheduler.getInstance().run();
         Robot.update();
