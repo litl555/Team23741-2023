@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
 @Config
 public class RamIntake extends SequentialCommandGroup {
-    public static double ramPowerMag = .4;
+    public static double ramPowerMag = .14;
     public static int ramTime = 700;
 
     public RamIntake() {

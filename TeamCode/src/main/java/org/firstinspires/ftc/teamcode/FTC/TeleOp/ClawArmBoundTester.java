@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.FTC.Subsystems.DriveSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.LiftSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
+import org.firstinspires.ftc.teamcode.FTC.Threading.WriteThread;
 
 @TeleOp
 public class ClawArmBoundTester extends CommandOpMode {
@@ -38,6 +39,10 @@ public class ClawArmBoundTester extends CommandOpMode {
         CustomLocalization l = new CustomLocalization(new Pose2d(0, 0, 0), hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, tele);
         Robot.robotInit(hardwareMap, l, tele, intake, claw, lift);
+
+
+        Robot.write = new WriteThread(this);
+        Robot.writeThread = new Thread(Robot.write);
 
         //Robot.liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -94,6 +99,10 @@ public class ClawArmBoundTester extends CommandOpMode {
         pad2.getGamepadButton(GamepadKeys.Button.Y).whenPressed(new InstantCommand(() -> ClawSubsystem.clearPixelIntake.apply(claw)));
 
         pad2.getGamepadButton(GamepadKeys.Button.DPAD_RIGHT).whenPressed(new InstantCommand(() -> lift.hangOverride = !lift.hangOverride));
+
+        waitForStart();
+
+        Robot.writeThread.start();
     }
 
     @Override

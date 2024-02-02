@@ -40,19 +40,21 @@ public class DriveToSpikeStripRedTruss extends CommandBase {
         this.pos = pos;
         this.pixelPlaceCommand = pixelPlaceCommand;
     }
+
+    public static double baseOffset = 60;
     
     @Override
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position to prep for 2+1
-        Pose2d base = new Pose2d(13.5 * inToMm, -58.5 * 25.4 + 110);
+        Pose2d base = new Pose2d(12 * inToMm, -58.5 * 25.4 + baseOffset);
 
         SimpleTrajectory toStrip = null;
         SimpleTrajectory stripToBase = null;
 
         switch (pos) {
             case right:
-                toStrip = new SimpleTrajectory(startPose, rightPos, new Pose2d(0.0, 0), new Pose2d(-1160, 1327), rightPos.getHeading());
+                toStrip = new SimpleTrajectory(startPose, rightPos, new Pose2d( 0.0, 0), new Pose2d(-1160, 1327), rightPos.getHeading());
                 stripToBase = new SimpleTrajectory(rightPos, new Pose2d(base.getX(), base.getY() + yoffright), new Pose2d(18, -1200), new Pose2d(0, 0), 180);
                 break;
             case undefined: // if undefined go to middle

@@ -73,6 +73,9 @@ public class Robot {
     public static final double width = 412.7; // mm, drivetrain plate to other drivetrain plate
     public static final double length = 440.63; // mm, intake roller to back odo pod u channel
     public static boolean onlyLogImportant = false;
+    public static boolean hasCachedLiftValues = false;
+    public static double cachedLiftTick = 0;
+    public static int cachedLiftRobotLevel = 0;
 
     // ==============================================================
     // +                         SUBSYSTEMS                         =
@@ -134,8 +137,6 @@ public class Robot {
         liftEncoder = hardwareMap.get(DcMotorEx.class,"liftLeft");
         liftLeft = hardwareMap.get(DcMotorEx.class,"liftLeft");
         liftRight = hardwareMap.get(DcMotorEx.class,"liftRight");
-
-
 
         liftRight.setDirection(DcMotorSimple.Direction.REVERSE);
         liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -200,6 +201,8 @@ public class Robot {
 
         // distance sensors
         intakeDist = hardwareMap.get(ParticleRev2M.class, "intakeDist");
+
+        setupLift();
     }
 
     public static void update() {
@@ -214,12 +217,26 @@ public class Robot {
         Robot.telemetry.update();
     }
 
-    public static void resetLift() {
-        level = 0;
-        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    private static void setupLift() {
+        if (hasCachedLiftValues) {
+            level = cachedLiftRobotLevel;
+            liftSubsystem.setTargetPos(cachedLiftTick);
+        } else {
+            level = 0;
+            liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+
+        hasCachedLiftValues = false;
+    }
+
+    public static void cacheLiftValues() {
+        hasCachedLiftValues = true;
+        cachedLiftRobotLevel = level;
+        cachedLiftTick = hardware.lastLiftPosition;
     }
 
     public static boolean isPastTruss() {

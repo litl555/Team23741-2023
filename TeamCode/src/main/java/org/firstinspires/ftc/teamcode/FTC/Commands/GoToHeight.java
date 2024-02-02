@@ -56,13 +56,13 @@ public class GoToHeight extends ParallelCommandGroup {
                     new SequentialCommandGroup(
                         // grab pixel
                         new InstantCommand(() -> ClawSubsystem.pickZero.apply(claw)),
-                        new WaitCommand(400),
+                        new WaitCommand(600), // 400
                         new InstantCommand(() -> claw.update(pickupStateOverride)),
                         new WaitCommand(400),
 
                         // extract pixel
                         new InstantCommand(() -> {
-                            lift.maxPower = 0.4;
+                            lift.maxPower = 0.3; // 0.4;
                             lift.setTargetPos(350);
                         }),
                         new WaitCommand(50),

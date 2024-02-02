@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
+import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerData;
@@ -28,6 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private int intakeDistFrameCount = 0;
     public double intakeIndex = 0;
     public AtomicBoolean activateIntakeDist = new AtomicBoolean(false);
+    public Gamepad rumblePad = null;
 
     public IntakeSubsystem(LoggerTool telemetry) {
         this.telemetry = telemetry;
@@ -50,6 +52,8 @@ public class IntakeSubsystem extends SubsystemBase {
         else if (prediction == IntakeDistancePrediction.FILLED) {
             pixelPassCount++;
             prediction = IntakeDistancePrediction.EMPTY;
+
+            if (rumblePad != null) rumblePad.rumble(200);
         }
 
         telemetry.addImportant(new LoggerData("Pixel Count", pixelPassCount, "INTAKE"));

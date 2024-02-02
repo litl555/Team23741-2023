@@ -30,7 +30,7 @@ public class ClawSubsystem extends SubsystemBase {
     public static final ArmWristPos hangDelta = new ArmWristPos(-0.1549999, 0.205);
     public static final ArmWristPos clearPixelIntake = new ArmWristPos(0, -0.02055);
     //public static final ArmWristPos zero = new ArmWristPos(0.5777777, 0.3577777);
-    public static final ArmWristPos zero = new ArmWristPos(0.5777777 + 0.01, 0.33666);
+    public static final ArmWristPos zero = new ArmWristPos(0.5777777 + 0.02, 0.33666);
     public static final ArmWristPos pickZero = new ArmWristPos(0, 0.02);
 
     public ClawState currentState = ClawState.UNKNOWN;

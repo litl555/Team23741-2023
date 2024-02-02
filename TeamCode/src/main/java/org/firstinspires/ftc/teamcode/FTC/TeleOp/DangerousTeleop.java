@@ -45,6 +45,8 @@ public class DangerousTeleop extends CommandOpMode {
 
     private int droptakeLevel = 0;
 
+    private boolean liftPowerLock = false;
+
     @Override
     public void initialize() {
         // initialization
@@ -85,8 +87,15 @@ public class DangerousTeleop extends CommandOpMode {
                 double rt = pad1.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER);
                 double lt = pad1.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER);
 
-                if (rt != 0.0 || lt != 0.0) intake.setPower(lt - rt);
-                else if (Robot.hardware.intakePower != 0) intake.setPower(0);
+                if (rt != 0.0 || lt != 0.0) {
+                    intake.rumblePad = gamepad1;
+                    intake.activateIntakeDist.set(true);
+                    intake.setPower(lt - rt);
+                } else {
+                    if (Robot.hardware.intakePower != 0) intake.setPower(0);
+                    intake.activateIntakeDist.set(false);
+                    intake.rumblePad = null;
+                }
             }));
 
             pad1.getGamepadButton(GamepadKeys.Button.X).whenPressed(new InstantCommand(() -> {
@@ -161,6 +170,12 @@ public class DangerousTeleop extends CommandOpMode {
                 })
             );
 
+            pad2.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whenPressed(
+                new InstantCommand(() -> {
+                    if (Robot.liftSubsystem.hangOverride) liftPowerLock = true;
+                })
+            );
+
             // close claw
             pad2.getGamepadButton(GamepadKeys.Button.A).whenPressed(new InstantCommand(() -> claw.update(ClawSubsystem.ClawState.CLOSED)));
 
@@ -174,9 +189,14 @@ public class DangerousTeleop extends CommandOpMode {
             schedule(new RunCommand(() -> {
                 if (!lift.hangOverride) return;
 
-                double y = pad2.getLeftY();
-                if (Math.abs(y) > 0.2) lift.setPower(-y);
-                else lift.setPower(0);
+                if (liftPowerLock) {
+                    Robot.telemetry.addImportant("LIFT POWER LOCK", "ACTIVE");
+                    lift.setPower(1);
+                } else {
+                    double y = pad2.getLeftY();
+                    if (Math.abs(y) > 0.2) lift.setPower(-y);
+                    else lift.setPower(0);
+                }
             }));
         }
 

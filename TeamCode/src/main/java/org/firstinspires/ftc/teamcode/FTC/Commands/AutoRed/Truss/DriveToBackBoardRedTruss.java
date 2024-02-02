@@ -56,7 +56,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
         //Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
-        Pose2d intermediary = new Pose2d(28 * inToMm, 36 * inToMm);
+        Pose2d intermediary = new Pose2d(30 * inToMm, 36 * inToMm);
         Pose2d camPos = new Pose2d(10 * inToMm, 0);
         SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(1140, 460), pos == TeamPropPosition.right ? 180 : -180);
         //SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);

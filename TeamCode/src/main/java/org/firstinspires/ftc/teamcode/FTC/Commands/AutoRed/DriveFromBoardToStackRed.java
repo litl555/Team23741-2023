@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
 import com.arcrobotics.ftclib.command.CommandScheduler;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.FTC.PathFollowing.SimpleTrajectory;
 import org.firstinspires.ftc.teamcode.FTC.Pixels.Types.Pose;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
+@Config
 public class DriveFromBoardToStackRed extends CommandBase {
     private ActualMultiTrajRunner mtr;
     private TeamPropPosition pos;
@@ -25,13 +27,13 @@ public class DriveFromBoardToStackRed extends CommandBase {
         this.pos = pos;
         this.clawReturnDelay = clawReturnDelay;
     }
-
+    public static double yoffset = 40;
     @Override public void initialize() {
         SimpleTrajectory boardToBase = null, baseToStack = null;
 
         Pose2d start = Constants.getCurrentFieldCoords();
         Pose2d base = new Pose2d(280, 200);
-        Pose2d stack = new Pose2d(13.5 * 25.4, -58.5 * 25.4 + 50);
+        Pose2d stack = new Pose2d(12 * 25.4, -58.5 * 25.4 + yoffset);
 
         switch (pos) {
             case right:

@@ -52,7 +52,6 @@ public class AutoRedTruss extends LinearOpMode {
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
-        Robot.resetLift();
         Robot.onlyLogImportant = true;
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
@@ -185,6 +184,7 @@ public class AutoRedTruss extends LinearOpMode {
                 // return to board for 2+3
 // =================================================================================================
                 new GoToHeight(lift, claw, 4),
+                new InstantCommand(Robot::cacheLiftValues),
                 new RamBoard(),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(250),
