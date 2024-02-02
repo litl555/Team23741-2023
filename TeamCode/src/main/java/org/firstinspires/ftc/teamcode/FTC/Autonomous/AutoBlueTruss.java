@@ -13,10 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoBlue.Truss.DriveToBackBoardBlueTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoBlue.Truss.DriveToSpikeStripBlueTruss;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveFromBoardToStackBlue;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveFromBoardToStackRed;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToBackBoardRedTruss;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToSpikeStripRedTruss;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoBlue.DriveFromBoardToStackBlue;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
@@ -155,14 +152,6 @@ public class AutoBlueTruss extends LinearOpMode {
                 // cycle to stack
 // =================================================================================================
                 new DriveFromBoardToStackBlue(last, 1000),
-                /*
-                new ParallelCommandGroup(
-                    // reset lift
-                    new SequentialCommandGroup(
-                        new WaitCommand(1_000),
-                        new ReturnClawToTray()),
-                    new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
-                new DriveToStackCycle(last),*/
 
 // =================================================================================================
                 // intake from stack

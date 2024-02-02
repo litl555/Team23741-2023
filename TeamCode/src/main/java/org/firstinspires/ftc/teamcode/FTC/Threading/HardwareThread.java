@@ -264,10 +264,14 @@ public class HardwareThread implements Runnable {
         if (queue.size() == 0) return;
         //if (queue.size() > 1) Robot.telemetry.addImportant("WARN",  name + " queue has backed up values");
 
-        T o = queue.getLast();
-        queue.clear();
+        try {
+            T o = queue.getLast();
+            queue.clear();
 
-        action.run(o);
+            action.run(o);
+        } catch (Exception e) {
+            Robot.telemetry.addError("Write Queue", e);
+        }
     }
 
     public void setLiftPower(double power) { liftQueue.addLast(power); }

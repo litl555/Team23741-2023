@@ -27,7 +27,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
 
     public static double leftXOffset = -230;
     public static double leftYOffset = 0;
-    public static double middleXOffset = -30;
+    public static double middleXOffset = -50;
     public static double middleYOffset = -20;
     public static double rightXOffset = 320;
     public static double iterOneOffY = 40;

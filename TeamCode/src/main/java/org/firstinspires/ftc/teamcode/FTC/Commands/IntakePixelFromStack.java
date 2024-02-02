@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.FTC.Commands;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandBase;
+import com.arcrobotics.ftclib.command.CommandScheduler;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.Robot;
 
@@ -47,11 +51,24 @@ public class IntakePixelFromStack extends CommandBase {
         if (finished) return;
         long t = System.currentTimeMillis();
 
+        // note that this is for power = 1
+        // normal operation (no blockage) is around 3-4k
+        // full stop is 7k low power, 10k max power (batteru, ~12.3v to 13.5v)
+        // note that it is difficult to detect if were on ground intaking because there is overlap between low and high battery vol
+        double current = Robot.intakeMotor.getCurrent(CurrentUnit.MILLIAMPS);
+        double scaledCurrent = Math.abs(current * (1.0 / intakePower));
+
+        // note that this is for max power (13.23 is what this was tested at)
+        if (scaledCurrent > 8250 * (Robot.startingBatteryVoltage / 13.23)) { // we are too close, back up
+            Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, 0.4, 0));
+        } else Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, -0.15, 0)); // otherwise move forwards
+
         collected = Robot.intakeSubsystem.pixelPassCount - initialPixelCount;
         finished = collected == numToCollect || t - startTime >= maxTime;
 
         // cleanup should be handled by main thread logic
         if (finished) {
+            Robot.customLocalization.setWeightedDrivePowers(new Pose2d());
             Robot.intakeSubsystem.activateIntakeDist.set(false);
             Robot.intakeSubsystem.setDroptakePosition(IntakeSubsystem.droptakeLevel[IntakeSubsystem.droptakeLevel.length - 1]);
             Robot.intakeSubsystem.setPower(1);

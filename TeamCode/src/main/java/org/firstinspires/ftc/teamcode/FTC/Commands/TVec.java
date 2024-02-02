@@ -33,7 +33,7 @@ public class TVec {
     }
 
     private double[] addRobot(double[] tvec) {
-        double[] robotVec = new double[]{cameraPos.getX() + tvec[0], tvec[2] + cameraPos.getY()};
+        double[] robotVec = new double[]{cameraPos.getX() + tvec[0], tvec[1] + cameraPos.getY()};
         return robotVec;
     }
 

@@ -15,13 +15,4 @@ public class DriveSubsystem extends SubsystemBase {
         this.telemetry = telemetry;
         this.l = l;
     }
-
-    // note that this is blocking and quite slow
-    // this is only meant to run once or twice, not in a loop
-    public double queryOuttakeObstacle() {
-        double left = Robot.outtakeDistLeft.getDistance(DistanceUnit.MM);
-        double right = Robot.outtakeDistRight.getDistance(DistanceUnit.MM);
-
-        return (left + right) / 2.0;
-    }
 }

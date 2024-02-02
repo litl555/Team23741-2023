@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.FTC.Subsystems;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.outoftheboxrobotics.photoncore.hardware.PhotonLynxVoltageSensor;
+import com.outoftheboxrobotics.photoncore.hardware.motor.PhotonDcMotor;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -58,9 +60,6 @@ public class Robot {
     // drone
     public static CRServo drone;
 
-    // outtake distance sensors
-    public static ParticleRev2M outtakeDistLeft, outtakeDistRight;
-
     // ==============================================================
     // +                       SHARED VALUES                        =
     // ==============================================================
@@ -76,6 +75,7 @@ public class Robot {
     public static boolean hasCachedLiftValues = false;
     public static double cachedLiftTick = 0;
     public static int cachedLiftRobotLevel = 0;
+    public static double startingBatteryVoltage = 0;
 
     // ==============================================================
     // +                         SUBSYSTEMS                         =
@@ -92,7 +92,6 @@ public class Robot {
     public static MathThread math;
     public static WriteThread write;
     public static Thread hardwareThread, mathThread, writeThread;
-
 
     public static void robotInit(HardwareMap hardwareMap, CustomLocalization _l, LoggerTool _telemetry, IntakeSubsystem intake, ClawSubsystem _claw, LiftSubsystem _lift) {
         customLocalization = _l;
@@ -176,10 +175,10 @@ public class Robot {
         math.errorHandler.assignThread(mathThread);
 
         // reset static variables where needed
-
         forwardIsForward = true;
         onlyLogImportant = false;
         isBusy = false;
+        startingBatteryVoltage = hardwareMap.getAll(PhotonLynxVoltageSensor.class).iterator().next().getVoltage();
 
         // replace default distance sensors with custom
         for (HardwareDevice device : hardwareMap.getAll(HardwareDevice.class)) {
@@ -228,6 +227,8 @@ public class Robot {
 
             liftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             liftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+            liftSubsystem.setTargetPos(0);
         }
 
         hasCachedLiftValues = false;

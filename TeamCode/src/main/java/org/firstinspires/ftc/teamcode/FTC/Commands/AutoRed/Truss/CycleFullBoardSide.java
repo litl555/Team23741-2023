@@ -6,6 +6,8 @@ import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 
 import org.firstinspires.ftc.teamcode.FTC.Autonomous.TeamPropPosition;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToStackCycle;
+import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Board.DriveToTrussCycle;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;

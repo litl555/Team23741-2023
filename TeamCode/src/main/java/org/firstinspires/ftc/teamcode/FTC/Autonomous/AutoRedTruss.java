@@ -14,15 +14,11 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.DriveFromBoardToStackRed;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToBackBoardRedTruss;
 import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToSpikeStripRedTruss;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToStackCycle;
-import org.firstinspires.ftc.teamcode.FTC.Commands.AutoRed.Truss.DriveToTrussCycle;
 import org.firstinspires.ftc.teamcode.FTC.Commands.GoToHeight;
 import org.firstinspires.ftc.teamcode.FTC.Commands.IntakePixelFromStack;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamBoard;
 import org.firstinspires.ftc.teamcode.FTC.Commands.RamIntake;
-import org.firstinspires.ftc.teamcode.FTC.Commands.ReturnClawToTray;
 import org.firstinspires.ftc.teamcode.FTC.Commands.UpdateClaw;
-import org.firstinspires.ftc.teamcode.FTC.Localization.Constants;
 import org.firstinspires.ftc.teamcode.FTC.Localization.CustomLocalization;
 import org.firstinspires.ftc.teamcode.FTC.Localization.LoggerTool;
 import org.firstinspires.ftc.teamcode.FTC.Subsystems.ClawSubsystem;
@@ -51,6 +47,7 @@ public class AutoRedTruss extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
+        Robot.hasCachedLiftValues = false; // TODO
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.onlyLogImportant = true;
 
@@ -119,9 +116,7 @@ public class AutoRedTruss extends LinearOpMode {
 // =================================================================================================
                 // now pick up an extra pixel
 // =================================================================================================
-                new ParallelCommandGroup(
-                    new IntakePixelFromStack(1, 2000, 5, -0.8),
-                    new RamIntake()),
+                new IntakePixelFromStack(1, 2000, 5, -0.75),
 
 // =================================================================================================
                 // move to back board
@@ -144,30 +139,21 @@ public class AutoRedTruss extends LinearOpMode {
                 new GoToHeight(lift, claw, 3),
                 new RamBoard(),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
-                new WaitCommand(250),
-                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(500),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(400),
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                new WaitCommand(500),
 
 // =================================================================================================
                 // cycle to stack
 // =================================================================================================
                 new DriveFromBoardToStackRed(last, 1000),
-                /*
-                new ParallelCommandGroup(
-                    // reset lift
-                    new SequentialCommandGroup(
-                        new WaitCommand(1_000),
-                        new ReturnClawToTray()),
-                    new DriveToTrussCycle(last).interruptOn(() -> Robot.liftSubsystem.targetPos == Robot.liftSubsystem.rowHeights[0])),
-                new DriveToStackCycle(last),*/
 
 // =================================================================================================
                 // intake from stack
 // =================================================================================================
-                new ParallelCommandGroup(
-                    new IntakePixelFromStack(2, 2000, 1, -1)), // we usually end up knocking over the stack
+                new IntakePixelFromStack(2, 2000, 3, -0.7),
                 new ParallelCommandGroup(
                     new DriveToBackBoardRedTruss(last, 1),
                     // clean up intake

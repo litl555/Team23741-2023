@@ -27,7 +27,7 @@ public class DriveFromBoardToStackRed extends CommandBase {
         this.pos = pos;
         this.clawReturnDelay = clawReturnDelay;
     }
-    public static double yoffset = 40;
+    public static double yoffset = 0;
     @Override public void initialize() {
         SimpleTrajectory boardToBase = null, baseToStack = null;
 
