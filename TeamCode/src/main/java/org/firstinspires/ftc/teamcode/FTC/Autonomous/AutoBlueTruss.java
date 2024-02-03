@@ -37,7 +37,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoBlueTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
-    public static double power = .7;
+    public static double power = .6;
     private static Pose2d startPos = new Pose2d(-48 * inToMm + Robot.width / 2.0, -(-72 * inToMm + Robot.length / 2.0), Math.PI / 2.0);
 
     @Override
@@ -97,6 +97,7 @@ public class AutoBlueTruss extends LinearOpMode {
         intake.pixelPassCount = 2;
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
+                new WaitCommand(10000),
 // =================================================================================================
                 // go to spike strip and place
 // =================================================================================================
@@ -141,47 +142,48 @@ public class AutoBlueTruss extends LinearOpMode {
                 // drop pixel (2+1)
 // =================================================================================================
                 new GoToHeight(lift, claw, 3),
-                new RamBoard(),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
-                new WaitCommand(250),
-                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
-                new WaitCommand(500),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                new WaitCommand(400),
-
-// =================================================================================================
-                // cycle to stack
-// =================================================================================================
-                new DriveFromBoardToStackBlue(last, 1000),
-
-// =================================================================================================
-                // intake from stack
-// =================================================================================================
-                new ParallelCommandGroup(
-                    new IntakePixelFromStack(2, 2000, 1, -power)), // we usually end up knocking over the stack
-                new ParallelCommandGroup(
-                    new DriveToBackBoardBlueTruss(last, 1),
-                    // clean up intake
-                    new SequentialCommandGroup(
-                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
-                        new WaitCommand(500),
-                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
-                    // prep lift
-                    new SequentialCommandGroup(
-                        new WaitCommand(2_500),
-                        new GoToHeight(lift, claw, 2))),
-
-// =================================================================================================
-                // return to board for 2+3
-// =================================================================================================
-                new GoToHeight(lift, claw, 4),
                 new InstantCommand(Robot::cacheLiftValues),
                 new RamBoard(),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(250),
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(500),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
+                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
+                new WaitCommand(400)
+
+// =================================================================================================
+                // cycle to stack
+// =================================================================================================
+//                new DriveFromBoardToStackBlue(last, 1000),
+
+// =================================================================================================
+                // intake from stack
+// =================================================================================================
+//                new ParallelCommandGroup(
+//                    new IntakePixelFromStack(1, 2000, 2, -power)), // we usually end up knocking over the stack
+//                new ParallelCommandGroup(
+//                    new DriveToBackBoardBlueTruss(last, 1),
+//                    // clean up intake
+//                    new SequentialCommandGroup(
+//                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
+//                        new WaitCommand(500),
+//                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
+//                    // prep lift
+//                    new SequentialCommandGroup(
+//                        new WaitCommand(2_500),
+//                        new GoToHeight(lift, claw, 2))),
+
+// =================================================================================================
+                // return to board for 2+3
+// =================================================================================================
+//                new GoToHeight(lift, claw, 4),
+//                new InstantCommand(Robot::cacheLiftValues),
+//                new RamBoard(),
+//                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
+//                new WaitCommand(250),
+//                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
+//                new WaitCommand(500),
+//                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
             )
         );
 

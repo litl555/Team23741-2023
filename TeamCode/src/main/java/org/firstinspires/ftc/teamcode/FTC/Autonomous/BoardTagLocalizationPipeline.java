@@ -105,15 +105,13 @@ public class BoardTagLocalizationPipeline extends OpenCvPipeline {
             py += TVec.worldPos.getY();
             count++;
 
-            /*
             Mat camMatrix = new Mat(3, 3, CvType.CV_32FC1);
             camMatrix.put(0, 0,
                 572.42030608, 0, 248.86563431,
                 0, 571.44741121, 347.77866451,
                 0, 0, 1);
 
-            drawAxisMarker(_input, 2, 3, p.rvec, p.tvec, camMatrix);
-            */
+            //drawAxisMarker(_input, 2, 3, p.rvec, p.tvec, camMatrix);
         }
 
         if (count != 0 && shouldGetPosition) {
