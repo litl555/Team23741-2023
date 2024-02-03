@@ -60,8 +60,8 @@ public class IntakePixelFromStack extends CommandBase {
         double scaledCurrent = Math.abs(current * (1.0 / intakePower));
 
         // note that this is for max power (13.23 is what this was tested at)
-        if (scaledCurrent > 8250 * (Robot.startingBatteryVoltage / 13.23)) { // we are too close, back up
-            Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, 0.4, 0));
+        if (scaledCurrent > 7700 * (Robot.startingBatteryVoltage / 13.23)) { // we are too close, back up
+            Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, 0.5, 0));
         } else Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, -0.15, 0)); // otherwise move forwards
 
         collected = Robot.intakeSubsystem.pixelPassCount - initialPixelCount;
