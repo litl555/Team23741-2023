@@ -20,6 +20,7 @@ public class IntakePixelFromStack extends CommandBase {
     private int incrementLevel = 0;
     private long incrementTime = 500;
 
+
     // time in milliseconds, starting level 1 based (1 is first pixel)
     public IntakePixelFromStack(int numToCollect, long maxTime, int startingLevel) {
         this.numToCollect = numToCollect;

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.FTC.Autonomous;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
@@ -31,10 +32,12 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
+@Config
 @Photon(singleThreadOptimized = false, maximumParallelCommands = 8)
 @Autonomous(preselectTeleOp = "DangerousTeleop")
 public class AutoBlueTruss extends LinearOpMode {
     private static final double inToMm = 25.4;
+    public static double power = .7;
     private static Pose2d startPos = new Pose2d(-48 * inToMm + Robot.width / 2.0, -(-72 * inToMm + Robot.length / 2.0), Math.PI / 2.0);
 
     @Override
@@ -85,9 +88,6 @@ public class AutoBlueTruss extends LinearOpMode {
             if (totalCount > 250) break;
         }
 
-        if (last == TeamPropPosition.right) last = TeamPropPosition.middle;
-        else if (last == TeamPropPosition.middle) last = TeamPropPosition.left;
-        else last = TeamPropPosition.right;
 
         pipeline.destroy();
         cam.stopStreaming();
@@ -119,7 +119,7 @@ public class AutoBlueTruss extends LinearOpMode {
                 // now pick up an extra pixel
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(1, 2000, 5, -0.8),
+                    new IntakePixelFromStack(1, 2000, 4, -power),
                     new RamIntake()),
 
 // =================================================================================================
@@ -158,7 +158,7 @@ public class AutoBlueTruss extends LinearOpMode {
                 // intake from stack
 // =================================================================================================
                 new ParallelCommandGroup(
-                    new IntakePixelFromStack(2, 2000, 1, -1)), // we usually end up knocking over the stack
+                    new IntakePixelFromStack(2, 2000, 1, -power)), // we usually end up knocking over the stack
                 new ParallelCommandGroup(
                     new DriveToBackBoardBlueTruss(last, 1),
                     // clean up intake

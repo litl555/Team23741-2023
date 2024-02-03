@@ -88,20 +88,25 @@ public class DriveToBackBoardRedTruss extends CommandBase {
                     new SequentialCommandGroup(
                         new InstantCommand(() -> BoardTagLocalizationPipeline.shouldGetPosition = true),
                         new WaitUntilCommand(() -> BoardTagLocalizationPipeline.finalDeltaX != 0),
-                        new InstantCommand(() -> {
-                            switch (pos) {
-                                case middle:
-                                    tr.trajectories[1].forceSetP5(new Pose2d(middlePos.getX() + BoardTagLocalizationPipeline.finalDeltaX, middlePos.getY(), middlePos.getHeading()));
-                                    break;
-                                case right:
-                                    tr.trajectories[1].forceSetP5(new Pose2d(rightPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, rightPos.getY(), rightPos.getHeading()));
-                                    break;
-                                case left:
-                                    tr.trajectories[1].forceSetP5(new Pose2d(leftPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, leftPos.getY(), leftPos.getHeading()));
-                                    break;
-                            }
-                        })
-                )), new MultiTrajEvent(1, new InstantCommand(() -> {
+                        new SequentialCommandGroup(
+                            new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(1, 0, 0))),
+                            new WaitCommand(250),
+                            new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, 0, 0))),
+                            new InstantCommand(() -> {
+                                switch (pos) {
+                                    case middle:
+                                        tr.trajectories[1].forceSetP5(new Pose2d(middlePos.getX() + BoardTagLocalizationPipeline.finalDeltaX, middlePos.getY(), middlePos.getHeading()));
+                                        break;
+                                    case right:
+                                        tr.trajectories[1].forceSetP5(new Pose2d(rightPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, rightPos.getY(), rightPos.getHeading()));
+                                        break;
+                                    case left:
+                                        tr.trajectories[1].forceSetP5(new Pose2d(leftPos.getX() + BoardTagLocalizationPipeline.finalDeltaX, leftPos.getY(), leftPos.getHeading()));
+                                        break;
+                                }
+                            })
+                        )
+                    )), new MultiTrajEvent(1, new InstantCommand(() -> {
                     Constants.robotPose = new Pose2d(intermediary.getY(), -intermediary.getX());
                 }))
             });

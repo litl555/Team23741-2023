@@ -27,7 +27,7 @@ public class DriveToSpikeStripBlueTruss extends CommandBase {
     public static double leftXOffset = 0;
     public static double leftYOffset = 0;
     public static double middleXOffset = -60;
-    public static double yoffright = 120;
+    public static double yoffright = 100;
     public static double middleYOffset = -20;
     public static double rightXOffset = 0;
     public static double rightYOffset = 0;
@@ -63,7 +63,7 @@ public class DriveToSpikeStripBlueTruss extends CommandBase {
                 break;
             case right:
                 toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(50, -970), leftPos.getHeading());
-                stripToBase = new SimpleTrajectory(leftPos, base, new Pose2d(676, 53), new Pose2d(0, 0), 180);
+                stripToBase = new SimpleTrajectory(leftPos, new Pose2d(base.getX(), base.getY() - yoffright), new Pose2d(676, 53), new Pose2d(0, 0), 180);
                 break;
         }
 

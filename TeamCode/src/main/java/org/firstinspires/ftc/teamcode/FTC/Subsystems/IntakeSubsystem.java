@@ -24,7 +24,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private LoggerTool telemetry;
 
     private IntakeDistancePrediction prediction = IntakeDistancePrediction.EMPTY;
-    private final double intakeDistThreshold = 118;
+    private final double intakeDistThreshold = 120;
     private final int intakeDistFrameThreshold = 1;
     private int intakeDistFrameCount = 0;
     public double intakeIndex = 0;
@@ -48,9 +48,11 @@ public class IntakeSubsystem extends SubsystemBase {
         if (Robot.hardware.lastIntakeDist < intakeDistThreshold) intakeDistFrameCount++;
         else intakeDistFrameCount = 0;
 
-        if (intakeDistFrameCount >= intakeDistFrameThreshold) prediction = IntakeDistancePrediction.FILLED;
-        else if (prediction == IntakeDistancePrediction.FILLED) {
-            pixelPassCount++;
+        if (intakeDistFrameCount >= intakeDistFrameThreshold) {
+            if (prediction == IntakeDistancePrediction.EMPTY) pixelPassCount++;
+            prediction = IntakeDistancePrediction.FILLED;
+        } else if (prediction == IntakeDistancePrediction.FILLED) {
+            //pixelPassCount++;
             prediction = IntakeDistancePrediction.EMPTY;
 
             if (rumblePad != null) rumblePad.rumble(200);
