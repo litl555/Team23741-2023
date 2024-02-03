@@ -55,7 +55,7 @@ public class DriveToBackBoardBlueTruss extends CommandBase {
         //Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
         Pose2d intermediary = new Pose2d(-30.0 * inToMm, 36 * inToMm);
         Pose2d camPos = new Pose2d(10 * inToMm, 0);
-        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(1140, 460), pos == TeamPropPosition.right ? 180 : -180);
+        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(300, 1625), new Pose2d(-2000, -600), pos == TeamPropPosition.left ? -180 : 180);
         //SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         //SimpleTrajectory camToInter = new SimpleTrajectory(camPos, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         SimpleTrajectory interToEnd = null;
@@ -65,16 +65,16 @@ public class DriveToBackBoardBlueTruss extends CommandBase {
         switch (pos) {
             case right:
                 endPos = rightPos;
-                interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(210, 1078), -180);
+                interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(-210, 1078), 180);
                 break;
             case left:
                 endPos = leftPos;
-                interToEnd = new SimpleTrajectory(intermediary, leftPos, new Pose2d(0, 0), new Pose2d(69, 978), 180);
+                interToEnd = new SimpleTrajectory(intermediary, leftPos, new Pose2d(0, 0), new Pose2d(-69, 978), -180);
                 break;
             case undefined: // if undefined go to middle
             case middle:
                 endPos = middlePos;
-                interToEnd = new SimpleTrajectory(intermediary, middlePos, new Pose2d(0, 0), new Pose2d(913, -20), 180);
+                interToEnd = new SimpleTrajectory(intermediary, middlePos, new Pose2d(0, 0), new Pose2d(-913, -20), 180);
                 break;
         }
 

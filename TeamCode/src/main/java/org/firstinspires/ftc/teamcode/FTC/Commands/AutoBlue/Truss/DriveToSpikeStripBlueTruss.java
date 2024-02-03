@@ -46,24 +46,24 @@ public class DriveToSpikeStripBlueTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position to prep for 2+1
-        Pose2d base = new Pose2d(12 * inToMm, -58.5 * 25.4 + baseOffset);
+        Pose2d base = new Pose2d(-12 * inToMm, -58.5 * 25.4 + baseOffset);
 
         SimpleTrajectory toStrip = null;
         SimpleTrajectory stripToBase = null;
 
         switch (pos) {
-            case right:
-                toStrip = new SimpleTrajectory(startPose, rightPos, new Pose2d(0.0, 0), new Pose2d(-1160, 1327), rightPos.getHeading());
-                stripToBase = new SimpleTrajectory(rightPos, new Pose2d(base.getX(), base.getY() + yoffright), new Pose2d(18, -1200), new Pose2d(0, 0), -180);
+            case left:
+                toStrip = new SimpleTrajectory(startPose, rightPos, new Pose2d(0.0, 0), new Pose2d(1160, 1327), rightPos.getHeading());
+                stripToBase = new SimpleTrajectory(rightPos, new Pose2d(base.getX(), base.getY() ), new Pose2d(18, -1200), new Pose2d(0, 0), -180);
                 break;
             case undefined: // if undefined go to middle
             case middle:
-                toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(-1300, 1030), middlePos.getHeading());
-                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(-676, 53), new Pose2d(0, 0), 180);
+                toStrip = new SimpleTrajectory(startPose, middlePos, new Pose2d(0.0, 0), new Pose2d(1300, 1030), middlePos.getHeading());
+                stripToBase = new SimpleTrajectory(middlePos, base, new Pose2d(676, 53), new Pose2d(0, 0), 180);
                 break;
-            case left:
-                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(-50, -970), leftPos.getHeading());
-                stripToBase = new SimpleTrajectory(leftPos, base, new Pose2d(-676, 53), new Pose2d(0, 0), 180);
+            case right:
+                toStrip = new SimpleTrajectory(startPose, leftPos, new Pose2d(0, 0), new Pose2d(50, -970), leftPos.getHeading());
+                stripToBase = new SimpleTrajectory(leftPos, base, new Pose2d(676, 53), new Pose2d(0, 0), 180);
                 break;
         }
 

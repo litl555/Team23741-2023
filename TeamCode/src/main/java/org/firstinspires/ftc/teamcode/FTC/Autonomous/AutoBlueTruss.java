@@ -48,11 +48,12 @@ public class AutoBlueTruss extends LinearOpMode {
         CustomLocalization l = new CustomLocalization(startPos, hardwareMap);
         DriveSubsystem drive = new DriveSubsystem(l, telemetry1);
 
+        Robot.hasCachedLiftValues = false;
         Robot.robotInit(hardwareMap, l, telemetry1, intake, claw, lift);
         Robot.onlyLogImportant = true;
 
         OpenCvCamera cam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "outtake_camera"));
-        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, true);
+        TeamPropDetectionPipeline pipeline = new TeamPropDetectionPipeline(cam, telemetry1, false);
 
         OpenCvCamera tagCam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "tag_camera"));
         BoardTagLocalizationPipeline tagPipeline = new BoardTagLocalizationPipeline(tagCam);

@@ -37,16 +37,16 @@ public class DriveFromBoardToStackRed extends CommandBase {
 
         switch (pos) {
             case right:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), 180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(-320, -54), new Pose2d(0, -2400), -180);
                 baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(300, -400), 180);
                 break;
             case left:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), -180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(-320, -54), new Pose2d(0, -2400), -180);
                 baseToStack = new SimpleTrajectory(base, new Pose2d(stack.getX() + 30, stack.getY()), new Pose2d(0, 0), new Pose2d(300, -400), -180);
                 break;
             case undefined:
             case middle:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), -180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(-320, -54), new Pose2d(0, -2400), -180);
                 baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(300, -400), -180);
                 break;
         }

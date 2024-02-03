@@ -28,28 +28,29 @@ public class DriveFromBoardToStackBlue extends CommandBase {
     }
 
     public static double yoffset = 40;
-
+    public static double xBase=-240;
+    public static double xStackOffset=-150;
     @Override
     public void initialize() {
         SimpleTrajectory boardToBase = null, baseToStack = null;
 
         Pose2d start = Constants.getCurrentFieldCoords();
-        Pose2d base = new Pose2d(-280, 200);
-        Pose2d stack = new Pose2d(-12 * 25.4, -58.5 * 25.4 + yoffset);
+        Pose2d base = new Pose2d(xBase, 200);
+        Pose2d stack = new Pose2d(-12 * 25.4+xStackOffset, -58.5 * 25.4 + yoffset);
 
         switch (pos) {
             case right:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), -180);
-                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(300, -400), -180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(320, -54), new Pose2d(0, -2400), 180);
+                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(-300, -400), 180);
                 break;
             case left:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), 180);
-                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(300, -400), 180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(320, -54), new Pose2d(0, -2400), -180);
+                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(-300, -400), -180);
                 break;
             case undefined:
             case middle:
-                boardToBase = new SimpleTrajectory(start, base, new Pose2d(0, -300), new Pose2d(0, 0), 180);
-                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(300, -400), 180);
+                boardToBase = new SimpleTrajectory(start, base, new Pose2d(320, -54), new Pose2d(0, -2400), 180);
+                baseToStack = new SimpleTrajectory(base, stack, new Pose2d(0, 0), new Pose2d(-300, -400), 180);
                 break;
         }
 
