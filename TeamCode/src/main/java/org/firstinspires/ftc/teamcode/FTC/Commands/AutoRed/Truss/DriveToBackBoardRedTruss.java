@@ -29,7 +29,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public static double leftYOffset = 0;
     public static double middleXOffset = -50;
     public static double middleYOffset = -20;
-    public static double rightXOffset = 320;
+    public static double rightXOffset = 170;
     public static double iterOneOffY = 40;
     public static double rightYOffset = 0;
     public static double yOffsetGlobal = -60.0;
@@ -39,7 +39,7 @@ public class DriveToBackBoardRedTruss extends CommandBase {
 
 
     public DriveToBackBoardRedTruss(TeamPropPosition pos, int iter) {
-        if (iter == 1) {
+        if (iter == 1 && pos != TeamPropPosition.right) {
             this.pos = TeamPropPosition.left;
             if (pos == TeamPropPosition.left) this.pos = TeamPropPosition.middle;
         } else this.pos = pos;
@@ -58,24 +58,19 @@ public class DriveToBackBoardRedTruss extends CommandBase {
     public void initialize() {
         Pose2d startPose = new Pose2d(Robot.customLocalization.getPoseEstimate().getY() * -1.0, Robot.customLocalization.getPoseEstimate().getX(), 0);
         // shared position just before we start pixel placing movement
-        Pose2d intermediary = new Pose2d(30 * inToMm, 36 * inToMm);
-        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(1140, 460), pos == TeamPropPosition.right ? 180 : -180);
+        Pose2d intermediary = new Pose2d(32 * inToMm, 36 * inToMm);
+        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-500, 7000), new Pose2d(1000, -600), pos == TeamPropPosition.right ? 180 : -180);
         SimpleTrajectory interToEnd = null;
-
-        Pose2d endPos = null;
 
         switch (pos) {
             case right:
-                endPos = rightPos;
                 interToEnd = new SimpleTrajectory(intermediary, rightPos, new Pose2d(0, 0), new Pose2d(210, 1078), 180);
                 break;
             case left:
-                endPos = leftPos;
                 interToEnd = new SimpleTrajectory(intermediary, leftPos, new Pose2d(0, 0), new Pose2d(69, 978), -180);
                 break;
             case undefined: // if undefined go to middle
             case middle:
-                endPos = middlePos;
                 interToEnd = new SimpleTrajectory(intermediary, middlePos, new Pose2d(0, 0), new Pose2d(913, -20), -180);
                 break;
         }
@@ -89,9 +84,6 @@ public class DriveToBackBoardRedTruss extends CommandBase {
                         new InstantCommand(() -> BoardTagLocalizationPipeline.shouldGetPosition = true),
                         new WaitUntilCommand(() -> BoardTagLocalizationPipeline.finalDeltaX != 0),
                         new SequentialCommandGroup(
-                            new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(1, 0, 0))),
-                            new WaitCommand(250),
-                            new InstantCommand(() -> Robot.customLocalization.setWeightedDrivePowers(new Pose2d(0, 0, 0))),
                             new InstantCommand(() -> {
                                 switch (pos) {
                                     case middle:
