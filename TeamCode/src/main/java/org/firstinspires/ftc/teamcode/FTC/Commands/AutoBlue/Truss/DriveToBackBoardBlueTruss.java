@@ -55,7 +55,7 @@ public class DriveToBackBoardBlueTruss extends CommandBase {
         //Pose2d intermediary = new Pose2d(10 * inToMm, 36 * inToMm);
         Pose2d intermediary = new Pose2d(-30.0 * inToMm, 36 * inToMm);
         Pose2d camPos = new Pose2d(10 * inToMm, 0);
-        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(1000, 7000), new Pose2d(-2000, -600), pos == TeamPropPosition.left ? -180 : 180);
+        SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(1000, 4000), new Pose2d(-1500, -600), pos == TeamPropPosition.left ? -180 : 180);
         //SimpleTrajectory baseToInter = new SimpleTrajectory(startPose, intermediary, new Pose2d(-870, 1625), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         //SimpleTrajectory camToInter = new SimpleTrajectory(camPos, intermediary, new Pose2d(0, 0), new Pose2d(0, 0), pos == TeamPropPosition.right ? 180 : -180);
         SimpleTrajectory interToEnd = null;

@@ -95,7 +95,7 @@ public class AutoRedTruss extends LinearOpMode {
         intake.pixelPassCount = 2;
         CommandScheduler.getInstance().schedule(
             new SequentialCommandGroup(
-// =================================================================================================
+                new WaitCommand(13000),// =================================================================================================
                 // go to spike strip and place
 // =================================================================================================
                 new ParallelCommandGroup(
@@ -137,46 +137,48 @@ public class AutoRedTruss extends LinearOpMode {
                 // drop pixel (2+1)
 // =================================================================================================
                 new GoToHeight(lift, claw, 3),
+                new InstantCommand(Robot::cacheLiftValues),
+
                 new RamBoard(),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
                 new WaitCommand(500),
                 new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
                 new WaitCommand(400),
                 new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN),
-                new WaitCommand(500),
+                new WaitCommand(500)
 
 // =================================================================================================
                 // cycle to stack
 // =================================================================================================
-                new DriveFromBoardToStackRed(last, 1000),
+//                new DriveFromBoardToStackRed(last, 1000),
 
 // =================================================================================================
                 // intake from stack
 // =================================================================================================
-                new IntakePixelFromStack(2, 2000, 3, -0.7),
-                new ParallelCommandGroup(
-                    new DriveToBackBoardRedTruss(last, 1),
-                    // clean up intake
-                    new SequentialCommandGroup(
-                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
-                        new WaitCommand(500),
-                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
-                    // prep lift
-                    new SequentialCommandGroup(
-                        new WaitCommand(2_500),
-                        new GoToHeight(lift, claw, 2))),
+//                new IntakePixelFromStack(2, 2000, 3, -0.7),
+//                new ParallelCommandGroup(
+//                    new DriveToBackBoardRedTruss(last, 1),
+//                    // clean up intake
+//                    new SequentialCommandGroup(
+//                        new InstantCommand(() -> Robot.intakeSubsystem.setPower(1)),
+//                        new WaitCommand(500),
+//                        new InstantCommand(() -> Robot.intakeSubsystem.raise(0))),
+//                    // prep lift
+//                    new SequentialCommandGroup(
+//                        new WaitCommand(2_500),
+//                        new GoToHeight(lift, claw, 2))),
 
 // =================================================================================================
                 // return to board for 2+3
 // =================================================================================================
-                new GoToHeight(lift, claw, 4),
-                new InstantCommand(Robot::cacheLiftValues),
-                new RamBoard(),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
-                new WaitCommand(250),
-                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
-                new WaitCommand(500),
-                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
+//                new GoToHeight(lift, claw, 4),
+//                new InstantCommand(Robot::cacheLiftValues),
+//                new RamBoard(),
+//                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPENONE),
+//                new WaitCommand(250),
+//                new InstantCommand(() -> Robot.clawSubsystem.setWrist(ClawSubsystem.zero.wrist + 0.083333 + 0.02)),
+//                new WaitCommand(500),
+//                new UpdateClaw(Robot.clawSubsystem, ClawSubsystem.ClawState.OPEN)
             )
         );
 
